@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Balance Payments For Magento 2
+ * https://www.getbalance.com/
+ *
+ * @category Balance
+ * @package  Balancepay_Balancepay
+ * @author   Developer: Pniel Cohen
+ * @author   Company: Girit-Interactive (https://www.girit-tech.com/)
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <virtualType name="BalancepayConfigProvider" type="Balancepay\Balancepay\Model\ConfigProvider">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">Balancepay\Balancepay\Model\BalancepayMethod::METHOD_CODE</argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Checkout\Model\CompositeConfigProvider">
+        <arguments>
+            <argument name="configProviders" xsi:type="array">
+                <item name="balancepay_balancepay_config_provider" xsi:type="object">BalancepayConfigProvider</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Payment\Model\CcGenericConfigProvider">
+        <arguments>
+            <argument name="methodCodes" xsi:type="array">
+                <item name="balancepay" xsi:type="const">Balancepay\Balancepay\Model\BalancepayMethod::METHOD_CODE</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

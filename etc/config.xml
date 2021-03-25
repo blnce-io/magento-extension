@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Balance Payments For Magento 2
+ * https://www.getbalance.com/
+ *
+ * @category Balance
+ * @package  Balancepay_Balancepay
+ * @author   Developer: Pniel Cohen
+ * @author   Company: Girit-Interactive (https://www.girit-tech.com/)
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <payment>
+            <balancepay>
+                <title>Balance Payments</title>
+                <mode>live</mode>
+                <allowed_payment_methods>creditCard,bank,payWithTerms,invoice</allowed_payment_methods>
+                <debug>0</debug>
+                <payment_action>Magento\Payment\Model\MethodInterface::ACTION_ORDER</payment_action>
+                <model>Balancepay\Balancepay\Model\BalancepayMethod</model>
+            </balancepay>
+        </payment>
+    </default>
+</config>

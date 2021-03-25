@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Balance Payments For Magento 2
+ * https://www.getbalance.com/
+ *
+ * @category Balance
+ * @package  Balancepay_Balancepay
+ * @author   Developer: Pniel Cohen
+ * @author   Company: Girit-Interactive (https://www.girit-tech.com/)
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
+    <router id="standard">
+        <route id="balancepay" frontName="balancepay">
+            <module name="Balancepay_Balancepay"/>
+        </route>
+    </router>
+</config>
