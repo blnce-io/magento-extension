@@ -39,6 +39,6 @@ abstract class AbstractApi
      */
     protected function amountFormat($amount)
     {
-        return (string) number_format((float)$amount, 2);
+        return (string) number_format((float)$amount, 2, '.', '');
     }
 }
