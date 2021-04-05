@@ -110,7 +110,7 @@ class Checkout extends AbstractRequest
               'totalTax' => $this->amountFormat($quoteTotals->getBaseTaxAmount()),
               'totalPrice' => $this->amountFormat($quoteTotals->getBaseGrandTotal()),
               'totalShipping' => $this->amountFormat($quoteTotals->getBaseShippingAmount()),
-              'totalDiscount' => $this->amountFormat(abs($quoteTotals->getBaseDiscountAmount())),
+              'totalDiscount' => abs($this->amountFormat($quoteTotals->getBaseDiscountAmount())),
               'billingAddress' => $this->getBillingAddressParams($quote),
               'requiresShipping' => $requiresShipping ? true : false,
               'allowedPaymentMethods' => $this->_balancepayConfig->getAllowedPaymentMethods(),

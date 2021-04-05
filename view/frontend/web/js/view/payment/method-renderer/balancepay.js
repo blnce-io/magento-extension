@@ -129,6 +129,14 @@ define(
                 return true;
             },
 
+            getCustomerEmail: function() {
+                if (quote.guestEmail) {
+                    return quote.guestEmail;
+                } else {
+                    return customerData.email;
+                }
+            },
+
             openCheckout: function(checkoutToken) {
                 window.blnceCheckout
                     .create({
@@ -188,6 +196,9 @@ define(
                 $.ajax({
                     url: self.getBalanceCheckoutTokenUrl(),
                     method: 'get',
+                    data: {
+                        email: self.getCustomerEmail()
+                    },
                     cache: false
                 }).always(function(res) {
                     if (res && !res.error && res.token) {
