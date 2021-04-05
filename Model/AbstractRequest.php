@@ -32,6 +32,11 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     protected $_responseFactory;
 
     /**
+     * @var string|null
+     */
+    protected $_fallbackEmail;
+
+    /**
      * Object constructor.
      *
      * @param Config          $balancepayConfig
@@ -96,6 +101,26 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     protected function getParams()
     {
         return [];
+    }
+
+    /**
+     * @method setFallbackEmail
+     * @param  string|null           $email
+     * @return AbstractRequest
+     */
+    public function setFallbackEmail($email = null)
+    {
+        $this->_fallbackEmail = $email;
+        return $this;
+    }
+
+    /**
+     * @method getFallbackEmail
+     * @param  string|null           $email
+     */
+    public function getFallbackEmail()
+    {
+        return $this->_fallbackEmail;
     }
 
     /**
@@ -164,7 +189,7 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
 
         if (($billing = $quote->getBillingAddress()) !== null) {
             $params = [
-                'email' => $billing->getEmail(),
+                'email' => $billing->getEmail() ?: ($quote->getCustomerEmail() ?: $this->getFallbackEmail()),
                 'firstName' => $billing->getFirstname(),
                 'lastName' => $billing->getLastname(),
                 'businessName' => $billing->getCompany(),
@@ -263,7 +288,7 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
                 'carrierIdentifier' => $rate->getCarrier(),
                 'deliveryCategory' => $rate->getCarrierTitle(),
                 'comments' => '-',
-                'price' => $rate->getPrice(),
+                'price' => $this->amountFormat($rate->getPrice()),
             ];
         }
 

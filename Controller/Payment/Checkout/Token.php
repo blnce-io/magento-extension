@@ -80,10 +80,18 @@ class Token extends Action
         $resBody = [];
 
         try {
+            $params = $this->getRequest()->getParams();
+            if (isset($params['email']) && $params['email']) {
+                $this->checkoutSession->setBalanceCustomerEmail($params['email']);
+            }
             $this->checkoutSession->unsBalanceCheckoutToken();
+
+            $params = $this->getRequest()->getParams();
+            $fallbackEmail = (isset($params['email']) && $params['email']) ? $params['email'] : null;
 
             $token = $this->requestFactory
                 ->create(RequestFactory::CHECKOUT_REQUEST_METHOD)
+                ->setFallbackEmail($fallbackEmail)
                 ->process()
                 ->getToken();
 
