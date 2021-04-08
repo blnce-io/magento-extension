@@ -16,7 +16,7 @@ use Balancepay\Balancepay\Model\AbstractRequest;
 use Balancepay\Balancepay\Model\Config;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Balancepay\Balancepay\Model\Response\Factory as ResponseFactory;
-use Magento\Checkout\Model\Session\Proxy as CheckoutSession;
+use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Quote\Model\Cart\CartTotalRepository;
 
 /**
