@@ -12,7 +12,7 @@
 namespace Balancepay\Balancepay\Model;
 
 use Balancepay\Balancepay\Model\Config as BalancepayConfig;
-use Magento\Checkout\Model\Session\Proxy as CheckoutSession;
+use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Directory\Helper\Data as DirectoryHelper;
 use Magento\Framework\Api\AttributeValueFactory;
 use Magento\Framework\Api\ExtensionAttributesFactory;

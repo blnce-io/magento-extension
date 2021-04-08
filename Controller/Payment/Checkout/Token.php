@@ -13,7 +13,7 @@ namespace Balancepay\Balancepay\Controller\Payment\Checkout;
 
 use Balancepay\Balancepay\Model\Config as BalancepayConfig;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
-use Magento\Checkout\Model\Session\Proxy as CheckoutSession;
+use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\Controller\Result\JsonFactory;
