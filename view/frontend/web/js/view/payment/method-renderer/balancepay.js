@@ -53,7 +53,8 @@ define(
                 balanceSdkUrl: '',
                 balanceIframeUrl: '',
                 balanceCheckoutTokenUrl: '',
-                balancelogoImageUrl: ''
+                balancelogoImageUrl: '',
+                balanceIsAuth: false
             },
 
             initObservable: function() {
@@ -122,6 +123,10 @@ define(
                 return window.checkoutConfig.payment[self.getCode()].balancelogoImageUrl;
             },
 
+            getBalanceIsAuth: function() {
+                return window.checkoutConfig.payment[self.getCode()].balanceIsAuth;
+            },
+
             /**
              * @return {Boolean}
              */
@@ -146,6 +151,7 @@ define(
                         type: 'checkout',
                         hideBackOnFirstScreen: false,
                         logoURL: self.getBalancelogoImageUrl(),
+                        isAuth: self.getBalanceIsAuth(),
 
                         onComplete: () => {
                             self.getPlaceOrderDeferredObject()
