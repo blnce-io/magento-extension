@@ -24,13 +24,6 @@
                     <label>Title</label>
                     <config_path>payment/balancepay/title</config_path>
                 </field>
-                <field id="logo_image" translate="label" type="image" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Logo Image</label>
-                    <backend_model>Magento\Config\Model\Config\Backend\Image</backend_model>
-                    <config_path>payment/balancepay/logo_image</config_path>
-                    <upload_dir config="system/filesystem/media" scope_info="1">balancepay</upload_dir>
-                    <base_url type="media" scope_info="1">balancepay</base_url>
-                </field>
                 <field id="mode" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                     <label>Mode</label>
                     <source_model>Balancepay\Balancepay\Model\Adminhtml\Source\Mode</source_model>
@@ -54,36 +47,48 @@
                         <field id="mode">sandbox</field>
                     </depends>
                 </field>
-                <field id="allowed_payment_methods" translate="label" type="multiselect" sortOrder="35" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                <field id="logo_image" translate="label" type="image" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Logo Image</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Image</backend_model>
+                    <config_path>payment/balancepay/logo_image</config_path>
+                    <upload_dir config="system/filesystem/media" scope_info="1">balancepay</upload_dir>
+                    <base_url type="media" scope_info="1">balancepay</base_url>
+                </field>
+                <field id="is_auth" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Use Auth/Capture (isAuth)</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <config_path>payment/balancepay/is_auth</config_path>
+                </field>
+                <field id="allowed_payment_methods" translate="label" type="multiselect" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                     <label>Allowed Payment Methods</label>
                     <comment>Payment methods that should be displayed on the Balance payment popup.</comment>
                     <source_model>Balancepay\Balancepay\Model\Adminhtml\Source\AllowedPaymentMethods</source_model>
                     <config_path>payment/balancepay/allowed_payment_methods</config_path>
                 </field>
-                <field id="allowspecific" translate="label" type="allowspecific" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                <field id="allowspecific" translate="label" type="allowspecific" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                     <label>Payment from Applicable Countries</label>
                     <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
                     <config_path>payment/balancepay/allowspecific</config_path>
                 </field>
-                <field id="specificcountry" translate="label" type="multiselect" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="specificcountry" translate="label" type="multiselect" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Payment from Specific Countries</label>
                     <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
                     <config_path>payment/balancepay/specificcountry</config_path>
                 </field>
-                <field id="min_order_total" translate="label" type="text" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="min_order_total" translate="label" type="text" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Minimum Order Total</label>
                     <config_path>payment/balancepay/min_order_total</config_path>
                 </field>
-                <field id="max_order_total" translate="label" type="text" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="max_order_total" translate="label" type="text" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Maximum Order Total</label>
                     <config_path>payment/balancepay/max_order_total</config_path>
                 </field>
-                <field id="sort_order" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="sort_order" translate="label" type="text" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Sort Order</label>
                     <frontend_class>validate-number</frontend_class>
                     <config_path>payment/balancepay/sort_order</config_path>
                 </field>
-                <field id="debug" translate="label" type="select" sortOrder="110" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                <field id="debug" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
                     <label>Debug</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <config_path>payment/balancepay/debug</config_path>
