@@ -17,6 +17,8 @@ use Magento\Framework\Module\ModuleListInterface;
 
 class ModuleVersion extends Field
 {
+    const MODULE_NAME = 'Balancepay_Balancepay';
+
     /**
      * @var ModuleListInterface
      */
