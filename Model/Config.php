@@ -197,6 +197,19 @@ class Config
     }
 
     /**
+     * @method getIsAuth
+     *
+     * @param string $scope Scope.
+     * @param int    $storeId Store ID.
+     *
+     * @return bool
+     */
+    public function getIsAuth($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
+    {
+        return (bool)$this->getConfigValue('is_auth', $scope, $storeId);
+    }
+
+    /**
      * @method getLogoImageUrl
      *
      * @param string $scope Scope.
