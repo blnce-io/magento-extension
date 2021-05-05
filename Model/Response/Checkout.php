@@ -24,6 +24,11 @@ class Checkout extends AbstractResponse
     protected $_token;
 
     /**
+     * @var string|null
+     */
+    protected $_transactionId;
+
+    /**
      * @return AbstractResponse
      * @throws \Magento\Framework\Exception\LocalizedException
      */
@@ -33,6 +38,7 @@ class Checkout extends AbstractResponse
 
         $body = $this->getBody();
         $this->_token = $body['token'];
+        $this->_transactionId = isset($body['id']) ? $body['id'] : null;
 
         return $this;
     }
@@ -42,6 +48,9 @@ class Checkout extends AbstractResponse
      */
     protected function getRequiredResponseDataKeys()
     {
+        if ($this->_balancepayConfig->getIsAuth()) {
+            return ['token', 'id'];
+        }
         return ['token'];
     }
 
@@ -51,5 +60,13 @@ class Checkout extends AbstractResponse
     public function getToken()
     {
         return $this->_token;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getTransactionId()
+    {
+        return $this->_transactionId;
     }
 }
