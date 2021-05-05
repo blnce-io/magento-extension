@@ -57,6 +57,9 @@ class Info extends \Magento\Payment\Block\Info
             if (($checkoutToken = $info->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHECKOUT_TOKEN))) {
                 $data[(string)__('Balance Checkout Token')] = $checkoutToken;
             }
+            if (($transationId = $info->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHECKOUT_TRANSACTION_ID))) {
+                $data[(string)__('Balance Transaction ID')] = $transationId;
+            }
             if (($chargeId = $info->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID))) {
                 $data[(string)__('Balance Charge ID')] = $chargeId;
             }

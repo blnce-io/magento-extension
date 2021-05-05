@@ -12,11 +12,13 @@
 namespace Balancepay\Balancepay\Model;
 
 use Balancepay\Balancepay\Model\Config as BalancepayConfig;
+use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Directory\Helper\Data as DirectoryHelper;
 use Magento\Framework\Api\AttributeValueFactory;
 use Magento\Framework\Api\ExtensionAttributesFactory;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
@@ -46,7 +48,9 @@ class BalancepayMethod extends AbstractMethod
     const MODE_LIVE = 'live';
 
     const BALANCEPAY_CHECKOUT_TOKEN = 'balancepay_checkout_token';
+    const BALANCEPAY_CHECKOUT_TRANSACTION_ID = 'balancepay_checkout_transaction_id';
     const BALANCEPAY_CHARGE_ID = 'balancepay_charge_id';
+    const BALANCEPAY_IS_AUTH_CHECKOUT = 'balancepay_is_auth_checkout';
 
     /**
      * Gateway code
@@ -79,7 +83,7 @@ class BalancepayMethod extends AbstractMethod
      *
      * @var bool
      */
-    protected $_canAuthorize = false;
+    protected $_canAuthorize = true;
 
     /**
      * Gateway Method feature.
@@ -93,7 +97,7 @@ class BalancepayMethod extends AbstractMethod
      *
      * @var bool
      */
-    protected $_canCapturePartial = false;
+    protected $_canCapturePartial = true;
 
     /**
      * Gateway Method feature.
@@ -114,7 +118,7 @@ class BalancepayMethod extends AbstractMethod
      *
      * @var bool
      */
-    protected $_canVoid = false;
+    protected $_canVoid = true;
 
     /**
      * Payment Method feature
@@ -148,6 +152,16 @@ class BalancepayMethod extends AbstractMethod
     protected $balancepayConfig;
 
     /**
+     * @var RequestFactory
+     */
+    private $requestFactory;
+
+    /**
+     * @var RequestInterface
+     */
+    private $request;
+
+    /**
      * @method __construct
      * @param  Context                    $context
      * @param  Registry                   $registry
@@ -162,6 +176,8 @@ class BalancepayMethod extends AbstractMethod
      * @param  DirectoryHelper            $directory
      * @param  CheckoutSession            $checkoutSession
      * @param  BalancepayConfig           $balancepayConfig
+     * @param  RequestFactory             $requestFactory
+     * @param  RequestInterface           $request
      */
     public function __construct(
         Context $context,
@@ -176,7 +192,9 @@ class BalancepayMethod extends AbstractMethod
         array $data = [],
         DirectoryHelper $directory = null,
         CheckoutSession $checkoutSession,
-        BalancepayConfig $balancepayConfig
+        BalancepayConfig $balancepayConfig,
+        RequestFactory $requestFactory,
+        RequestInterface $request
     ) {
         parent::__construct(
             $context,
@@ -194,6 +212,8 @@ class BalancepayMethod extends AbstractMethod
 
         $this->checkoutSession = $checkoutSession;
         $this->balancepayConfig = $balancepayConfig;
+        $this->requestFactory = $requestFactory;
+        $this->request = $request;
     }
 
     /**
@@ -247,6 +267,9 @@ class BalancepayMethod extends AbstractMethod
      */
     public function getConfigPaymentAction()
     {
+        if ($this->balancepayConfig->getIsAuth()) {
+            return \Magento\Payment\Model\MethodInterface::ACTION_AUTHORIZE;
+        }
         return \Magento\Payment\Model\MethodInterface::ACTION_ORDER;
     }
 
@@ -267,6 +290,124 @@ class BalancepayMethod extends AbstractMethod
 
         $payment->setAdditionalInformation(self::BALANCEPAY_CHECKOUT_TOKEN, $this->checkoutSession->getBalanceCheckoutToken());
         $payment->setIsTransactionPending(true);
+
+        return $this;
+    }
+
+    /**
+     * Authorize payment method.
+     *
+     * @param InfoInterface $payment
+     * @param float         $amount
+     *
+     * @return Gateway
+     * @throws \Magento\Framework\Exception\LocalizedException
+     *
+     * @api
+     */
+    public function authorize(InfoInterface $payment, $amount)
+    {
+        parent::authorize($payment, $amount);
+
+        $payment->setAdditionalInformation(self::BALANCEPAY_CHECKOUT_TOKEN, $this->checkoutSession->getBalanceCheckoutToken());
+        $payment->setAdditionalInformation(self::BALANCEPAY_CHECKOUT_TRANSACTION_ID, $this->checkoutSession->getBalanceCheckoutTransactionId());
+        $payment->setAdditionalInformation(self::BALANCEPAY_IS_AUTH_CHECKOUT, 1);
+
+        return $this;
+    }
+
+    /**
+     * Capture payment method.
+     *
+     * @param InfoInterface $payment
+     * @param float         $amount
+     *
+     * @return Gateway
+     * @throws \Magento\Framework\Exception\LocalizedException
+     *
+     * @api
+     */
+    public function capture(InfoInterface $payment, $amount)
+    {
+        parent::capture($payment, $amount);
+
+        if ($payment->getAdditionalInformation(self::BALANCEPAY_IS_AUTH_CHECKOUT)) {
+            $invoiceData = $this->request->getParam('invoice', []);
+            $invoiceItems = isset($invoiceData['items']) ? $invoiceData['items'] : [];
+            $orderItems = $payment->getOrder()->getItems();
+            $balanceVendorId = null;
+
+            foreach ($orderItems as $item) {
+                $_balanceVendorId = (string) $item->getProduct()->getData('balancepay_vendor_id');
+                if ($item->getProductType() === 'configurable' && $item->getHasChildren()) {
+                    foreach ($item->getChildrenItems() as $child) {
+                        $child->getProduct()->load($child->getProductId());
+                        if (!$_balanceVendorId) {
+                            $_balanceVendorId = (string) $child->getProduct()->getData('balancepay_vendor_id');
+                        }
+                        continue;
+                    }
+                }
+                if ($_balanceVendorId) {
+                    if ($balanceVendorId && $balanceVendorId !== $_balanceVendorId) {
+                        throw new LocalizedException(
+                            __('Invoicing items from different Balance vendors on one invoice is not allowed. Please cleate a separate invoice for each')
+                        );
+                    }
+                    $balanceVendorId = $_balanceVendorId;
+                }
+            }
+
+            $this->requestFactory
+                ->create(RequestFactory::CAPTURE_REQUEST_METHOD)
+                ->setPayment($payment)
+                ->setAmount($amount)
+                ->setBalanceVendorId($balanceVendorId)
+                ->process();
+        }
+
+        return $this;
+    }
+
+    /**
+     * Cancel payment method.
+     *
+     * @param InfoInterface $payment
+     *
+     * @return Gateway
+     * @throws \Magento\Framework\Exception\LocalizedException
+     *
+     * @api
+     */
+    public function cancel(InfoInterface $payment)
+    {
+        parent::cancel($payment);
+
+        $this->void($payment);
+
+        return $this;
+    }
+
+    /**
+     * Refund payment method.
+     *
+     * @param InfoInterface $payment
+     *
+     * @return Gateway
+     * @throws \Magento\Framework\Exception\LocalizedException
+     *
+     * @api
+     */
+    public function void(InfoInterface $payment)
+    {
+        parent::void($payment);
+
+        if ($payment->getAdditionalInformation(self::BALANCEPAY_IS_AUTH_CHECKOUT)) {
+            $this->requestFactory
+                ->create(RequestFactory::CLOSE_REQUEST_METHOD)
+                ->setPayment($payment)
+                ->process();
+        }
 
         return $this;
     }

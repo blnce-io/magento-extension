@@ -131,20 +131,27 @@ class Charged extends Action implements CsrfAwareActionInterface
                 throw new \Exception("No matching order!");
             }
 
+            $orderPayment = $order->getPayment();
+
             //Process if needed:
-            if (!$order->getPayment()->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID)) {
-                if (round((float)$order->getBaseGrandTotal()) !== round($amount)) {
-                    $order->getPayment()->setIsFraudDetected(true)->save();
+            if (\strpos($orderPayment->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID), $chargeId) === false) {
+                if (!$orderPayment->getAdditionalInformation(self::BALANCEPAY_IS_AUTH_CHECKOUT) && round((float)$order->getBaseGrandTotal()) !== round($amount)) {
+                    $orderPayment->setIsFraudDetected(true)->save();
                     $order->setStatus(Order::STATUS_FRAUD)->save();
                     throw new \Exception("The charged amount doesn't match the order total!");
                 }
 
-                $order->getPayment()
+                $orderPayment
+                    ->setTransactionId($orderPayment->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHECKOUT_TRANSACTION_ID))
                     ->setIsTransactionPending(false)
                     ->setIsTransactionClosed(true)
-                    ->setAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID, $chargeId)
-                    ->capture(null)
-                    ->save();
+                    ->setAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID, $orderPayment->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID, $chargeId) . " \n" . $chargeId);
+
+                if (!$orderPayment->getAdditionalInformation(self::BALANCEPAY_IS_AUTH_CHECKOUT)) {
+                    $orderPayment->capture(null);
+                }
+
+                $orderPayment->save();
                 $order->save();
             } elseif ($chargeId !== (string) $order->getPayment()->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID)) {
                 throw new \Exception("Charge ID mismatch!");
