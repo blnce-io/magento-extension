@@ -336,7 +336,6 @@ class BalancepayMethod extends AbstractMethod
             $invoiceItems = isset($invoiceData['items']) ? $invoiceData['items'] : [];
             $orderItems = $payment->getOrder()->getItems();
             $balanceVendorId = null;
-            $noVendorIdItemsCount = 0;
 
             foreach ($orderItems as $item) {
                 $_balanceVendorId = (string) $item->getProduct()->getData('balancepay_vendor_id');
@@ -349,11 +348,8 @@ class BalancepayMethod extends AbstractMethod
                         continue;
                     }
                 }
-                if (!$_balanceVendorId) {
-                    $noVendorIdItemsCount++;
-                }
-                if ($balanceVendorId) {
-                    if ($balanceVendorId !== $_balanceVendorId) {
+                if ($_balanceVendorId) {
+                    if ($balanceVendorId && $balanceVendorId !== $_balanceVendorId) {
                         throw new LocalizedException(
                             __('Invoicing items from different Balance vendors on one invoice is not allowed. Please cleate a separate invoice for each')
                         );
