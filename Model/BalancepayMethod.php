@@ -118,7 +118,7 @@ class BalancepayMethod extends AbstractMethod
      *
      * @var bool
      */
-    protected $_canVoid = false;
+    protected $_canVoid = true;
 
     /**
      * Payment Method feature
@@ -331,10 +331,7 @@ class BalancepayMethod extends AbstractMethod
     {
         parent::capture($payment, $amount);
 
-        if (
-            $payment->getAdditionalInformation(self::BALANCEPAY_IS_AUTH_CHECKOUT) &&
-            $payment->getAdditionalInformation(self::BALANCEPAY_CHECKOUT_TRANSACTION_ID)
-        ) {
+        if ($payment->getAdditionalInformation(self::BALANCEPAY_IS_AUTH_CHECKOUT)) {
             $invoiceData = $this->request->getParam('invoice', []);
             $invoiceItems = isset($invoiceData['items']) ? $invoiceData['items'] : [];
             $orderItems = $payment->getOrder()->getItems();
@@ -365,11 +362,54 @@ class BalancepayMethod extends AbstractMethod
                 }
             }
 
-            $result = $this->requestFactory
+            $this->requestFactory
                 ->create(RequestFactory::CAPTURE_REQUEST_METHOD)
                 ->setPayment($payment)
                 ->setAmount($amount)
                 ->setBalanceVendorId($balanceVendorId)
+                ->process();
+        }
+
+        return $this;
+    }
+
+    /**
+     * Cancel payment method.
+     *
+     * @param InfoInterface $payment
+     *
+     * @return Gateway
+     * @throws \Magento\Framework\Exception\LocalizedException
+     *
+     * @api
+     */
+    public function cancel(InfoInterface $payment)
+    {
+        parent::cancel($payment);
+
+        $this->void($payment);
+
+        return $this;
+    }
+
+    /**
+     * Refund payment method.
+     *
+     * @param InfoInterface $payment
+     *
+     * @return Gateway
+     * @throws \Magento\Framework\Exception\LocalizedException
+     *
+     * @api
+     */
+    public function void(InfoInterface $payment)
+    {
+        parent::void($payment);
+
+        if ($payment->getAdditionalInformation(self::BALANCEPAY_IS_AUTH_CHECKOUT)) {
+            $this->requestFactory
+                ->create(RequestFactory::CLOSE_REQUEST_METHOD)
+                ->setPayment($payment)
                 ->process();
         }
 

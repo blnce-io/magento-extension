@@ -26,6 +26,7 @@ class Factory
      * Response handlers.
      */
     const CAPTURE_RESPONSE_HANDLER = 'capture';
+    const CLOSE_RESPONSE_HANDLER = 'close';
     const CHECKOUT_RESPONSE_HANDLER = 'checkout';
     const WEBHOOKS_KEYS_RESPONSE_HANDLER = 'webhooks/keys';
     const WEBHOOKS_RESPONSE_HANDLER = 'webhooks';
@@ -37,6 +38,7 @@ class Factory
      */
     private $invokableClasses = [
         self::CAPTURE_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Capture::class,
+        self::CLOSE_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Close::class,
         self::CHECKOUT_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Checkout::class,
         self::WEBHOOKS_KEYS_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\WebhooksKeys::class,
         self::WEBHOOKS_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Webhooks::class,
