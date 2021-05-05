@@ -20,20 +20,10 @@ use Balancepay\Balancepay\Model\Response\Factory as ResponseFactory;
 use Magento\Sales\Model\Order\Payment as OrderPayment;
 
 /**
- * Balancepay capture request model.
+ * Balancepay close request model.
  */
-class Capture extends AbstractRequest
+class Close extends AbstractRequest
 {
-    /**
-     * @var int|float|null
-     */
-    protected $_amount;
-
-    /**
-     * @var mixed
-     */
-    protected $_balanceVendorId;
-
     /**
      * @var OrderPayment
      */
@@ -56,46 +46,6 @@ class Capture extends AbstractRequest
             $curl,
             $responseFactory
         );
-    }
-
-    /**
-     * @method setAmount
-     * @param  int|float $amount
-     * @return Capture $this
-     */
-    public function setAmount($amount)
-    {
-        $this->_amount = $amount;
-        return $this;
-    }
-
-    /**
-     * @method getAmount
-     * @return int|float|null
-     */
-    public function getAmount()
-    {
-        return $this->_amount;
-    }
-
-    /**
-     * @method setBalanceVendorId
-     * @param  mixed $balanceVendorId
-     * @return Capture $this
-     */
-    public function setBalanceVendorId($balanceVendorId)
-    {
-        $this->_balanceVendorId = $balanceVendorId;
-        return $this;
-    }
-
-    /**
-     * @method getBalanceVendorId
-     * @return mixed
-     */
-    public function getBalanceVendorId()
-    {
-        return $this->_balanceVendorId;
     }
 
     /**
@@ -140,7 +90,7 @@ class Capture extends AbstractRequest
      */
     protected function getRequestMethod()
     {
-        return RequestFactory::CAPTURE_REQUEST_METHOD;
+        return RequestFactory::CLOSE_REQUEST_METHOD;
     }
 
     /**
@@ -150,7 +100,7 @@ class Capture extends AbstractRequest
      */
     protected function getResponseHandlerType()
     {
-        return ResponseFactory::CAPTURE_RESPONSE_HANDLER;
+        return ResponseFactory::CLOSE_RESPONSE_HANDLER;
     }
 
     /**
@@ -160,15 +110,6 @@ class Capture extends AbstractRequest
      */
     protected function getParams()
     {
-        $params = [
-            "captureAmount" => (float) $this->_amount
-        ];
-        if ($this->_balanceVendorId) {
-            $params["vendorId"] = $this->_balanceVendorId;
-        }
-        return array_replace_recursive(
-            parent::getParams(),
-            $params
-        );
+        return parent::getParams();
     }
 }
