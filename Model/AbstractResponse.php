@@ -105,7 +105,6 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
     protected function getErrorReason()
     {
         $body = $this->getBody();
-        print_r($body);
         if (is_array($body) && isset($body['message']) && !empty($body['message'])) {
             return implode(". \n", (array)$body['message']);
         }
@@ -166,7 +165,7 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
     {
         if ($this->_body === null) {
             $body = $this->_curl->getBody();
-            $this->_body = json_decode($body, 1);
+            $this->_body = (array) json_decode($body, 1);
             if ($body && !$this->_body) {
                 parse_str($body, $this->_body);
             }

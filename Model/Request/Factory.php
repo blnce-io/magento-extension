@@ -24,6 +24,7 @@ class Factory
     /**
      * Request methods.
      */
+    const CAPTURE_REQUEST_METHOD = 'capture';
     const CHECKOUT_REQUEST_METHOD = 'checkout';
     const WEBHOOKS_KEYS_REQUEST_METHOD = 'webhooks/keys';
     const WEBHOOKS_REQUEST_METHOD = 'webhooks';
@@ -34,6 +35,7 @@ class Factory
      * @var array
      */
     private $invokableClasses = [
+        self::CAPTURE_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Capture::class,
         self::CHECKOUT_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Checkout::class,
         self::WEBHOOKS_KEYS_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\WebhooksKeys::class,
         self::WEBHOOKS_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Webhooks::class,
