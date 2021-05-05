@@ -135,7 +135,7 @@ class Charged extends Action implements CsrfAwareActionInterface
 
             //Process if needed:
             if (\strpos($orderPayment->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID), $chargeId) === false) {
-                if (round((float)$order->getBaseGrandTotal()) !== round($amount)) {
+                if (!$orderPayment->getAdditionalInformation(self::BALANCEPAY_IS_AUTH_CHECKOUT) && round((float)$order->getBaseGrandTotal()) !== round($amount)) {
                     $orderPayment->setIsFraudDetected(true)->save();
                     $order->setStatus(Order::STATUS_FRAUD)->save();
                     throw new \Exception("The charged amount doesn't match the order total!");
