@@ -183,28 +183,6 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
      *
      * @return array
      */
-    protected function getBuyerParams(Quote $quote)
-    {
-        $params = [];
-
-        if (($billing = $quote->getBillingAddress()) !== null) {
-            $params = [
-                'email' => $billing->getEmail() ?: ($quote->getCustomerEmail() ?: $this->getFallbackEmail()),
-                'firstName' => $billing->getFirstname(),
-                'lastName' => $billing->getLastname(),
-                'businessName' => $billing->getCompany(),
-                'phone' => $billing->getTelephone(),
-            ];
-        }
-
-        return $params;
-    }
-
-    /**
-     * @param Quote $quote
-     *
-     * @return array
-     */
     protected function getLineItemsParams(Quote $quote)
     {
         $params = [];
@@ -236,6 +214,7 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
                 'variationId' => $variationId,
                 'itemType' => $quoteItem->getIsVirtual() ? 'VIRTUAL' : 'PHYSICAL',
                 'price' => $price,
+                'tax' => $quoteItem->getBaseTaxAmount(),
             ];
 
             if ($balanceVendorId) {
@@ -258,12 +237,42 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
         $params = [];
 
         if (($billing = $quote->getBillingAddress()) !== null) {
+            $address = (array) $billing->getStreet();
             $params = [
-              'streetAddress1' => is_array($billing->getStreet()) ? implode(' ', $billing->getStreet()) : '',
-              'countryCode' => $billing->getCountryId(),
-              'state' => (string) $billing->getRegion(),
-              'city' => $billing->getCity(),
-              'zipCode' => $billing->getPostcode(),
+                'firstName' => $billing->getFirstname(),
+                'lastName' => $billing->getLastname(),
+                'addressLine1' => (string) array_shift($address),
+                'addressLine2' => (string) implode(' ', $address),
+                'zipCode' => $billing->getPostcode(),
+                'countryCode' => $billing->getCountryId(),
+                'state' => (string) $billing->getRegion(),
+                'city' => $billing->getCity(),
+            ];
+        }
+
+        return $params;
+    }
+
+    /**
+     * @param Quote $quote
+     *
+     * @return array
+     */
+    protected function getShippingAddressParams(Quote $quote)
+    {
+        $params = [];
+
+        if (($shipping = $quote->getShippingAddress()) !== null) {
+            $address = (array) $shipping->getStreet();
+            $params = [
+                'firstName' => $shipping->getFirstname(),
+                'lastName' => $shipping->getLastname(),
+                'addressLine1' => (string) array_shift($address),
+                'addressLine2' => (string) implode(' ', $address),
+                'zipCode' => $shipping->getPostcode(),
+                'countryCode' => $shipping->getCountryId(),
+                'state' => (string) $shipping->getRegion(),
+                'city' => $shipping->getCity(),
             ];
         }
 

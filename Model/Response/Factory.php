@@ -28,6 +28,7 @@ class Factory
     const CAPTURE_RESPONSE_HANDLER = 'capture';
     const CLOSE_RESPONSE_HANDLER = 'close';
     const CHECKOUT_RESPONSE_HANDLER = 'checkout';
+    const TRANSACTIONS_RESPONSE_HANDLER = 'transactions';
     const WEBHOOKS_KEYS_RESPONSE_HANDLER = 'webhooks/keys';
     const WEBHOOKS_RESPONSE_HANDLER = 'webhooks';
 
@@ -37,10 +38,11 @@ class Factory
      * @var array
      */
     private $invokableClasses = [
-        self::CAPTURE_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Capture::class,
-        self::CLOSE_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Close::class,
+        self::CAPTURE_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Transactions\Capture::class,
+        self::CLOSE_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Transactions\Close::class,
         self::CHECKOUT_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Checkout::class,
-        self::WEBHOOKS_KEYS_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\WebhooksKeys::class,
+        self::TRANSACTIONS_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Transactions::class,
+        self::WEBHOOKS_KEYS_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Webhooks\Keys::class,
         self::WEBHOOKS_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Webhooks::class,
     ];
 

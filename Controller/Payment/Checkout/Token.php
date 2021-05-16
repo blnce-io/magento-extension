@@ -90,7 +90,7 @@ class Token extends Action
             $fallbackEmail = (isset($params['email']) && $params['email']) ? $params['email'] : null;
 
             $result = $this->requestFactory
-                ->create(RequestFactory::CHECKOUT_REQUEST_METHOD)
+                ->create(RequestFactory::TRANSACTIONS_REQUEST_METHOD)
                 ->setFallbackEmail($fallbackEmail)
                 ->process();
 

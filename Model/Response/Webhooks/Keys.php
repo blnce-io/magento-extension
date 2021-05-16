@@ -9,7 +9,7 @@
  * @author   Company: Girit-Interactive (https://www.girit-tech.com/)
  */
 
-namespace Balancepay\Balancepay\Model\Response;
+namespace Balancepay\Balancepay\Model\Response\Webhooks;
 
 use Balancepay\Balancepay\Model\AbstractResponse;
 use Magento\Store\Model\ScopeInterface;
@@ -17,7 +17,7 @@ use Magento\Store\Model\ScopeInterface;
 /**
  * Balancepay webhooks/keys response model.
  */
-class WebhooksKeys extends AbstractResponse
+class Keys extends AbstractResponse
 {
     /**
      * @var string

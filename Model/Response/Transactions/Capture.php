@@ -9,12 +9,12 @@
  * @author   Company: Girit-Interactive (https://www.girit-tech.com/)
  */
 
-namespace Balancepay\Balancepay\Model\Response;
+namespace Balancepay\Balancepay\Model\Response\Transactions;
 
 use Balancepay\Balancepay\Model\AbstractResponse;
 
 /**
- * Balancepay capture response model.
+ * Balancepay transactions/capture response model.
  */
 class Capture extends AbstractResponse
 {
