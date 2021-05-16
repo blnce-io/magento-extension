@@ -27,6 +27,7 @@ class Factory
     const CAPTURE_REQUEST_METHOD = 'capture';
     const CLOSE_REQUEST_METHOD = 'close';
     const CHECKOUT_REQUEST_METHOD = 'checkout';
+    const TRANSACTIONS_REQUEST_METHOD = 'transactions';
     const WEBHOOKS_KEYS_REQUEST_METHOD = 'webhooks/keys';
     const WEBHOOKS_REQUEST_METHOD = 'webhooks';
 
@@ -36,10 +37,11 @@ class Factory
      * @var array
      */
     private $invokableClasses = [
-        self::CAPTURE_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Capture::class,
-        self::CLOSE_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Close::class,
+        self::CAPTURE_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Transactions\Capture::class,
+        self::CLOSE_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Transactions\Close::class,
         self::CHECKOUT_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Checkout::class,
-        self::WEBHOOKS_KEYS_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\WebhooksKeys::class,
+        self::TRANSACTIONS_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Transactions::class,
+        self::WEBHOOKS_KEYS_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Webhooks\Keys::class,
         self::WEBHOOKS_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Webhooks::class,
     ];
 

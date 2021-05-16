@@ -35,10 +35,10 @@ abstract class AbstractApi
     /**
      * @method amountFormat
      * @param  float|int              $amount
-     * @return string
+     * @return float
      */
     protected function amountFormat($amount)
     {
-        return (string) number_format((float)$amount, 2, '.', '');
+        return (float) number_format((float)$amount, 2, '.', '');
     }
 }
