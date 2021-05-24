@@ -119,7 +119,7 @@ class Charged extends Action implements CsrfAwareActionInterface
             $ordersCollection = $this->orderCollectionFactory->create();
             $ordersCollection->getSelect()->join(
                 ['sop' => $ordersCollection->getTable('sales_order_payment')],
-                "main_table.entity_id = sop.entity_id AND sop.method = '" . BalancepayMethod::METHOD_CODE . "'",
+                "main_table.entity_id = sop.parent_id AND sop.method = '" . BalancepayMethod::METHOD_CODE . "'",
                 []
             );
             $ordersCollection->addAttributeToFilter('sop.additional_information', ['like' => '%' . $checkoutToken . '%']);
@@ -135,7 +135,7 @@ class Charged extends Action implements CsrfAwareActionInterface
 
             //Process if needed:
             if (\strpos($orderPayment->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID), $chargeId) === false) {
-                if (!$orderPayment->getAdditionalInformation(self::BALANCEPAY_IS_AUTH_CHECKOUT) && round((float)$order->getBaseGrandTotal()) !== round($amount)) {
+                if (!$orderPayment->getAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_AUTH_CHECKOUT) && round((float)$order->getBaseGrandTotal()) !== round($amount)) {
                     $orderPayment->setIsFraudDetected(true)->save();
                     $order->setStatus(Order::STATUS_FRAUD)->save();
                     throw new \Exception("The charged amount doesn't match the order total!");
@@ -147,7 +147,7 @@ class Charged extends Action implements CsrfAwareActionInterface
                     ->setIsTransactionClosed(true)
                     ->setAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID, $orderPayment->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID, $chargeId) . " \n" . $chargeId);
 
-                if (!$orderPayment->getAdditionalInformation(self::BALANCEPAY_IS_AUTH_CHECKOUT)) {
+                if (!$orderPayment->getAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_AUTH_CHECKOUT)) {
                     $orderPayment->capture(null);
                 }
 
