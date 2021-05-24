@@ -7,7 +7,7 @@
  * @package  Balancepay_Balancepay
  * @author   Developer: Pniel Cohen
  * @author   Company: Girit-Interactive (https://www.girit-tech.com/)
- * @deprecated v1.2.0
+ * @deprecated v1.2.1
  */
 
 namespace Balancepay\Balancepay\Model\Response;
