@@ -9,7 +9,7 @@
  * @author   Company: Girit-Interactive (https://www.girit-tech.com/)
  */
 
-namespace Balancepay\Balancepay\Model\Request;
+namespace Balancepay\Balancepay\Model\Request\Transactions;
 
 use Balancepay\Balancepay\Lib\Http\Client\Curl;
 use Balancepay\Balancepay\Model\AbstractRequest;
@@ -20,7 +20,7 @@ use Balancepay\Balancepay\Model\Response\Factory as ResponseFactory;
 use Magento\Sales\Model\Order\Payment as OrderPayment;
 
 /**
- * Balancepay capture request model.
+ * Balancepay transactions/capture request model.
  */
 class Capture extends AbstractRequest
 {

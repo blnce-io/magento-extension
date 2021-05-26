@@ -9,7 +9,7 @@
  * @author   Company: Girit-Interactive (https://www.girit-tech.com/)
  */
 
-namespace Balancepay\Balancepay\Model\Request;
+namespace Balancepay\Balancepay\Model\Request\Webhooks;
 
 use Balancepay\Balancepay\Model\AbstractRequest;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
@@ -18,7 +18,7 @@ use Balancepay\Balancepay\Model\Response\Factory as ResponseFactory;
 /**
  * Balancepay webhooks/keys request model.
  */
-class WebhooksKeys extends AbstractRequest
+class Keys extends AbstractRequest
 {
     /**
      * @return string

@@ -14,6 +14,7 @@ namespace Balancepay\Balancepay\Model;
 use Magento\Config\Model\ResourceModel\Config as ResourceConfig;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
+use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Framework\UrlInterface;
 use Magento\Quote\Model\Quote;
 use Magento\Store\Model\ScopeInterface;
@@ -69,6 +70,11 @@ class Config
     private $urlBuilder;
 
     /**
+     * @var DateTime
+     */
+    private $dateTime;
+
+    /**
      * @method __construct
      * @param  ScopeConfigInterface  $scopeConfig
      * @param  ResourceConfig        $resourceConfig
@@ -76,6 +82,7 @@ class Config
      * @param  EncryptorInterface    $encryptor
      * @param  LoggerInterface       $logger
      * @param  UrlInterface          $urlBuilder
+     * @param  DateTime              $dateTime
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
@@ -83,7 +90,8 @@ class Config
         StoreManagerInterface $storeManager,
         EncryptorInterface $encryptor,
         LoggerInterface $logger,
-        UrlInterface $urlBuilder
+        UrlInterface $urlBuilder,
+        DateTime $dateTime
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->resourceConfig = $resourceConfig;
@@ -91,6 +99,7 @@ class Config
         $this->encryptor = $encryptor;
         $this->logger = $logger;
         $this->urlBuilder = $urlBuilder;
+        $this->dateTime = $dateTime;
     }
 
     /**
@@ -119,6 +128,14 @@ class Config
     public function getUrlBuilder()
     {
         return $this->urlBuilder;
+    }
+
+    /**
+     * Return GMT Date
+     */
+    public function getGmtDate()
+    {
+        return $this->dateTime->gmtDate();
     }
 
     /**
