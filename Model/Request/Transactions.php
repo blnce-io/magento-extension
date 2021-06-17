@@ -104,11 +104,7 @@ class Transactions extends AbstractRequest
                 "planType" => "invoice",
                 "chargeDate" => date('Y-m-d', strtotime($this->_balancepayConfig->getGmtDate())),
             ],
-            'lines' => [[
-                'shippingPrice' => $this->amountFormat($quoteTotals->getBaseShippingAmount()),
-                'tax' => $this->amountFormat($quoteTotals->getBaseTaxAmount()),
-                'lineItems' => $this->getLineItemsParams($quote),
-            ]],
+            'lines' => $this->getLinesParams($quote, $quoteTotals->getBaseShippingAmount()),
             'shippingLines' => $this->getShippingLinesParams($quote),
             'totalDiscount' => abs($this->amountFormat($quoteTotals->getBaseDiscountAmount())),
             'billingAddress' => $this->getBillingAddressParams($quote),
