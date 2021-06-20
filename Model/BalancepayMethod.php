@@ -219,6 +219,21 @@ class BalancepayMethod extends AbstractMethod
     }
 
     /**
+     * Check whether payment method can be used
+     *
+     * @param \Magento\Quote\Api\Data\CartInterface|null $quote
+     * @return bool
+     * @deprecated 100.2.0
+     */
+    public function isAvailable(\Magento\Quote\Api\Data\CartInterface $quote = null)
+    {
+        if ($quote && $quote->isMultipleShippingAddresses()) {
+            return false;
+        }
+        return parent::isAvailable($quote);
+    }
+
+    /**
      * Assign data.
      *
      * @param DataObject $data Data object.
