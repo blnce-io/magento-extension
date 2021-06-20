@@ -51,6 +51,8 @@ class BalancepayMethod extends AbstractMethod
     const BALANCEPAY_CHECKOUT_TRANSACTION_ID = 'balancepay_checkout_transaction_id';
     const BALANCEPAY_CHARGE_ID = 'balancepay_charge_id';
     const BALANCEPAY_IS_AUTH_CHECKOUT = 'balancepay_is_auth_checkout';
+    const BALANCEPAY_IS_FINANCED = 'balancepay_is_financed';
+    const BALANCEPAY_SELECTED_PAYMENT_METHOD= 'balancepay_selected_payment_method';
 
     /**
      * Gateway code

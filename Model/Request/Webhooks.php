@@ -23,14 +23,14 @@ class Webhooks extends AbstractRequest
     /**
      * @var string
      */
-    protected $_topic = 'checkout/charged';
+    protected $_topic;
 
     /**
      * @param  string   $topic
      *
      * @return $this
      */
-    protected function setTopic($topic)
+    public function setTopic($topic)
     {
         $this->_topic = (string) $topic;
         return $this;
@@ -39,7 +39,7 @@ class Webhooks extends AbstractRequest
     /**
      * @return string
      */
-    protected function getTopic()
+    public function getTopic()
     {
         return $this->_topic;
     }

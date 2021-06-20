@@ -61,8 +61,12 @@ class Info extends \Magento\Payment\Block\Info
                 $data[(string)__('Balance Transaction ID')] = $transationId;
             }
             if (($chargeId = $info->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID))) {
+                $data[(string)__('Balance Is Charged')] = __('Yes');
                 $data[(string)__('Balance Charge ID')] = $chargeId;
+            } else {
+                $data[(string)__('Balance Is Charged')] = __('No');
             }
+            $data[(string)__('Balance Is Financed')] = (int) $info->getAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_FINANCED) ? __('Yes') : __('No');
         }
 
         return $transport->setData(array_merge($data, $transport->getData()));
