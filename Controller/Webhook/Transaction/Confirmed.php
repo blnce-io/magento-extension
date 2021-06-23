@@ -9,7 +9,7 @@
  * @author   Company: Girit-Interactive (https://www.girit-tech.com/)
  */
 
-namespace Balancepay\Balancepay\Controller\Webhook\Checkout;
+namespace Balancepay\Balancepay\Controller\Webhook\Transaction;
 
 use Balancepay\Balancepay\Model\BalancepayMethod;
 use Balancepay\Balancepay\Model\Config as BalancepayConfig;
@@ -137,7 +137,7 @@ class Confirmed extends Action implements CsrfAwareActionInterface
                 "order" => $order->getIncrementId()
             ];
         } catch (\Exception $e) {
-            $this->balancepayConfig->log('Webhook\Checkout\Charged::execute() [Exception: ' . $e->getMessage() . "]\n" . $e->getTraceAsString(), 'error');
+            $this->balancepayConfig->log('Webhook\Transaction\Confirmed::execute() [Exception: ' . $e->getMessage() . "]\n" . $e->getTraceAsString(), 'error');
             $resBody = [
                 "error" => 1,
                 "message" => $e->getMessage(),
