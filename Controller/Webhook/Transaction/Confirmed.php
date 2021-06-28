@@ -9,7 +9,7 @@
  * @author   Company: Girit-Interactive (https://www.girit-tech.com/)
  */
 
-namespace Balancepay\Balancepay\Controller\Webhook\Checkout;
+namespace Balancepay\Balancepay\Controller\Webhook\Transaction;
 
 use Balancepay\Balancepay\Model\BalancepayMethod;
 use Balancepay\Balancepay\Model\Config as BalancepayConfig;
@@ -25,12 +25,11 @@ use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\OrderFactory;
-use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 
 /**
- * Balancepay checkout/charged webhook.
+ * Balancepay transaction/confirmed webhook.
  */
-class Charged extends Action implements CsrfAwareActionInterface
+class Confirmed extends Action implements CsrfAwareActionInterface
 {
     /**
      * @var JsonFactory
@@ -64,7 +63,7 @@ class Charged extends Action implements CsrfAwareActionInterface
      * @param  BalancepayConfig       $balancepayConfig
      * @param  RequestFactory         $requestFactory
      * @param  Json                   $json
-     * @param  OrderCollectionFactory $orderCollectionFactory
+     * @param  OrderFactory           $orderFactory
      */
     public function __construct(
         Context $context,
@@ -98,7 +97,7 @@ class Charged extends Action implements CsrfAwareActionInterface
             $content = $this->getRequest()->getContent();
             $headers = $this->getRequest()->getHeaders()->toArray();
 
-            $this->balancepayConfig->log('Webhook\Checkout\Charged::execute() ', 'debug', [
+            $this->balancepayConfig->log('Webhook\Checkout\Confirmed::execute() ', 'debug', [
                 'content' => $content,
                 'headers' => $headers,
             ]);
@@ -113,8 +112,8 @@ class Charged extends Action implements CsrfAwareActionInterface
             $params = (array) $this->json->unserialize($content);
             $this->validateParams($params);
             $externalReferenceId = (string) $params['externalReferenceId'];
-            $chargeId = (string) $params['chargeId'];
-            $amount = (float) $params['amount'];
+            $isFinanced = $params['isFinanced'] ? 1 : 0;
+            $selectedPaymentMethod = (float) $params['selectedPaymentMethod'];
 
             //Load the order:
             $order = $this->orderFactory->create()->loadByIncrementId($externalReferenceId);
@@ -125,29 +124,12 @@ class Charged extends Action implements CsrfAwareActionInterface
 
             $orderPayment = $order->getPayment();
 
-            //Process if needed:
-            if (\strpos($orderPayment->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID), $chargeId) === false) {
-                if (!$orderPayment->getAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_AUTH_CHECKOUT) && round((float)$order->getBaseGrandTotal()) !== round($amount)) {
-                    $orderPayment->setIsFraudDetected(true)->save();
-                    $order->setStatus(Order::STATUS_FRAUD)->save();
-                    throw new \Exception("The charged amount doesn't match the order total!");
-                }
+            $orderPayment
+                ->setAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_FINANCED, $isFinanced)
+                ->setAdditionalInformation(BalancepayMethod::BALANCEPAY_SELECTED_PAYMENT_METHOD, $selectedPaymentMethod);
 
-                $orderPayment
-                    ->setTransactionId($orderPayment->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHECKOUT_TRANSACTION_ID))
-                    ->setIsTransactionPending(false)
-                    ->setIsTransactionClosed(true)
-                    ->setAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID, $orderPayment->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID, $chargeId) . " \n" . $chargeId);
-
-                if (!$orderPayment->getAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_AUTH_CHECKOUT)) {
-                    $orderPayment->capture(null);
-                }
-
-                $orderPayment->save();
-                $order->save();
-            } elseif ($chargeId !== (string) $order->getPayment()->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID)) {
-                throw new \Exception("Charge ID mismatch!");
-            }
+            $orderPayment->save();
+            $order->save();
 
             $resBody = [
                 "error" => 0,
@@ -155,7 +137,7 @@ class Charged extends Action implements CsrfAwareActionInterface
                 "order" => $order->getIncrementId()
             ];
         } catch (\Exception $e) {
-            $this->balancepayConfig->log('Webhook\Checkout\Charged::execute() [Exception: ' . $e->getMessage() . "]\n" . $e->getTraceAsString(), 'error');
+            $this->balancepayConfig->log('Webhook\Transaction\Confirmed::execute() [Exception: ' . $e->getMessage() . "]\n" . $e->getTraceAsString(), 'error');
             $resBody = [
                 "error" => 1,
                 "message" => $e->getMessage(),
@@ -176,7 +158,7 @@ class Charged extends Action implements CsrfAwareActionInterface
      */
     private function validateParams($params)
     {
-        $requiredKeys = ['externalReferenceId', 'chargeId', 'amount'];
+        $requiredKeys = ['externalReferenceId', 'isFinanced', 'selectedPaymentMethod'];
         $bodyKeys = array_keys($params);
 
         $diff = array_diff($requiredKeys, $bodyKeys);

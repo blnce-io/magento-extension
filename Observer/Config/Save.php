@@ -121,6 +121,12 @@ class Save implements ObserverInterface
 
                     $this->requestFactory
                         ->create(RequestFactory::WEBHOOKS_REQUEST_METHOD)
+                        ->setTopic('checkout/charged')
+                        ->process();
+
+                    $this->requestFactory
+                        ->create(RequestFactory::WEBHOOKS_REQUEST_METHOD)
+                        ->setTopic('transaction/confirmed')
                         ->process();
 
                     $this->appEmulation->stopEnvironmentEmulation();

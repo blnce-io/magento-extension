@@ -51,6 +51,8 @@ class BalancepayMethod extends AbstractMethod
     const BALANCEPAY_CHECKOUT_TRANSACTION_ID = 'balancepay_checkout_transaction_id';
     const BALANCEPAY_CHARGE_ID = 'balancepay_charge_id';
     const BALANCEPAY_IS_AUTH_CHECKOUT = 'balancepay_is_auth_checkout';
+    const BALANCEPAY_IS_FINANCED = 'balancepay_is_financed';
+    const BALANCEPAY_SELECTED_PAYMENT_METHOD= 'balancepay_selected_payment_method';
 
     /**
      * Gateway code
@@ -214,6 +216,21 @@ class BalancepayMethod extends AbstractMethod
         $this->balancepayConfig = $balancepayConfig;
         $this->requestFactory = $requestFactory;
         $this->request = $request;
+    }
+
+    /**
+     * Check whether payment method can be used
+     *
+     * @param \Magento\Quote\Api\Data\CartInterface|null $quote
+     * @return bool
+     * @deprecated 100.2.0
+     */
+    public function isAvailable(\Magento\Quote\Api\Data\CartInterface $quote = null)
+    {
+        if ($quote && $quote->isMultipleShippingAddresses()) {
+            return false;
+        }
+        return parent::isAvailable($quote);
     }
 
     /**

@@ -179,13 +179,15 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     }
 
     /**
-     * @param Quote $quote
+     * @param Quote     $quote
+     * @param int|float $totalShippingAmount
      *
      * @return array
      */
-    protected function getLineItemsParams(Quote $quote)
+    protected function getLinesParams(Quote $quote, $totalShippingAmount = 0)
     {
         $params = [];
+        $totalItemsQty = 0;
 
         foreach ($quote->getAllVisibleItems() as $quoteItem) {
             $price = $this->amountFormat($quoteItem->getBasePrice());
@@ -215,16 +217,39 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
                 'itemType' => $quoteItem->getIsVirtual() ? 'VIRTUAL' : 'PHYSICAL',
                 'price' => $price,
                 'tax' => $quoteItem->getBaseTaxAmount(),
+                'vendorId' => $balanceVendorId,
             ];
 
-            if ($balanceVendorId) {
-                $lineItem['vendorId'] = $balanceVendorId;
-            }
-
+            $totalItemsQty += $lineItem['quantity'];
             $params[] = $lineItem;
         }
 
-        return $params;
+        $itemShippingPrice = $totalItemsQty ? ($totalShippingAmount / $totalItemsQty) : 0;
+
+        $lines = [];
+
+        foreach ($params as $param) {
+            $balanceVendorId = $param['vendorId'] ?: 0;
+            unset($param['vendorId']);
+            if (!isset($lines[$balanceVendorId])) {
+                $lines[$balanceVendorId] = [
+                    "shippingPrice" => $itemShippingPrice * $lineItem['quantity'],
+                    "lineItems" => [$param],
+                ];
+                if ($balanceVendorId) {
+                    $lines[$balanceVendorId]['vendorId'] = $balanceVendorId;
+                }
+            } else {
+                $lines[$balanceVendorId]['shippingPrice'] += $itemShippingPrice * $lineItem['quantity'];
+                $lines[$balanceVendorId]['lineItems'][] = $param;
+            }
+        }
+
+        foreach ($lines as &$line) {
+            $line['shippingPrice'] = $this->amountFormat($line['shippingPrice']);
+        }
+
+        return array_values($lines);
     }
 
     /**
