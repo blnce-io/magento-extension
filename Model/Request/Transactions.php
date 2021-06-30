@@ -123,11 +123,13 @@ class Transactions extends AbstractRequest
     {
         $params = [];
 
-        if (($billing = $quote->getBillingAddress()) !== null) {
-            $params = [
-                'email' => $billing->getEmail() ?: ($quote->getCustomerEmail() ?: $this->getFallbackEmail()),
-            ];
+        if (($billing = $quote->getBillingAddress()) !== null && $billing->getEmail()) {
+            $params['email'] = $billing->getEmail();
+        } else {
+            $params['email'] = $quote->getCustomerEmail() ?: $this->getFallbackEmail();
         }
+
+        $params['isRegistered'] = $quote->getCustomerIsGuest() ? false : true;
 
         return $params;
     }
