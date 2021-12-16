@@ -28,12 +28,12 @@ class Config
 {
     const MODULE_NAME = 'Balancepay_Balancepay';
 
-    const BALANCEPAY_SDK_SANDBOX_URL = 'https://checkout-v2.sandbox.getbalance.com/blnceSDK.js'; //Sandbox
-    const BALANCEPAY_SDK_LIVE_URL = 'https://checkout-v2.getbalance.com/blnceSDK.js'; //Production
+    const BALANCEPAY_SDK_SANDBOX_URL = 'https://checkout.sandbox.getbalance.com/blnceSDK.js'; //Sandbox
+    const BALANCEPAY_SDK_LIVE_URL = 'https://checkout.getbalance.com/blnceSDK.js'; //Production
     const BALANCEPAY_API_SANDBOX_URL = 'https://sandbox.app.blnce.io/api/v1/'; //Sandbox
     const BALANCEPAY_API_LIVE_URL = 'https://app.blnce.io/api/v1/'; //Production
-    const BALANCEPAY_IFRAME_SANDBOX_URL = 'https://checkout-v2.sandbox.getbalance.com/checkout.html'; //Sandbox
-    const BALANCEPAY_IFRAME_LIVE_URL = 'https://checkout-v2.getbalance.com/checkout.html'; //Production
+    const BALANCEPAY_IFRAME_SANDBOX_URL = 'https://checkout.sandbox.getbalance.com/checkout.html'; //Sandbox
+    const BALANCEPAY_IFRAME_LIVE_URL = 'https://checkout.getbalance.com/checkout.html'; //Production
 
     /**
      * Scope config object.
