@@ -237,7 +237,7 @@ class Config
     public function getLogoImageUrl($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
         if (!($logoImage = $this->getConfigValue('logo_image', $scope, $storeId))) {
-            return null;
+            return '';
         }
         return $this->storeManager->getStore()
             ->getBaseUrl(UrlInterface::URL_TYPE_MEDIA) . 'balancepay/' . $logoImage;
