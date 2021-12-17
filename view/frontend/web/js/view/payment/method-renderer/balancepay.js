@@ -143,17 +143,19 @@ define(
             },
 
             openCheckout: function(checkoutToken) {
-                window.blnceCheckout
-                    .create({
+                window.balanceCheckout
+                    .init({
+                        isAuth: self.getBalanceIsAuth(),
+                        hideDueDate: false,
+                        allowedPaymentMethods: null,
+                        skipSuccessPage: false,
                         // The token that returned from the server API
                         checkoutToken,
                         url: self.getBalanceIframeUrl(),
                         type: 'checkout',
                         hideBackOnFirstScreen: false,
                         logoURL: self.getBalancelogoImageUrl(),
-                        isAuth: self.getBalanceIsAuth(),
-
-                        onComplete: () => {
+                        onSuccess: () => {
                             self.getPlaceOrderDeferredObject()
                                 .fail(
                                     function() {
@@ -174,13 +176,12 @@ define(
                             console.error('Balancepay callback error: ', err);
                         },
                         onClose: () => {
-                            window.blnceCheckout.destroy();
+                            window.balanceCheckout.destroy();
                             $('body').trigger('processStop');
                             self.isPlaceOrderActionAllowed(true);
                         },
-                    })
-                    // This element should exist on the dom
-                    .render('#blnce-checkout');
+                    });
+                    window.balanceCheckout.render(checkoutToken, '#balance-checkout');
             },
 
             placeOrder: function(data, event) {
