@@ -15,14 +15,13 @@ jobs:
       - name: Run commands on magento server
         uses: appleboy/ssh-action@master
         env:
-
+          APP_PATH: ${{ secrets.APP_PATH }}
+          BRANCH: ${{ github.event.inputs.branch }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASSWORD }}
-          envs: 
-            APP_PATH: ${{ secrets.APP_PATH }}
-            BRANCH: ${{ github.event.inputs.branch }}
+          envs: APP_PATH,BRANCH
           script: |
             cd $APP_PATH
             git pull
