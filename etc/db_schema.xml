@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="marketplace_userdata" resource="default" >
+        <column xsi:type="text" name="balance_vendor_id" nullable="true" comment="Balance Vendor Id"/>
+    </table>
+</schema>
