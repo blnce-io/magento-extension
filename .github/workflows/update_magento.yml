@@ -1,0 +1,37 @@
+name: Update Magento with feature branch
+
+on: 
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build and deploy to magento'
+        required: true
+
+jobs:
+  deploy_branch:
+    name: deploy branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run commands on magento server
+        uses: appleboy/ssh-action@master
+        env:
+
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          envs: 
+            APP_PATH: ${{ secrets.APP_PATH }}
+            BRANCH: ${{ github.event.inputs.branch }}
+          script: |
+            cd $APP_PATH
+            git pull
+            git checkout $BRANCH
+            php bin/magento maintenance:enable
+            php bin/magento setup:upgrade
+            php bin/magento setup:di:compile
+            php bin/magento setup:static-content:deploy -f
+            php bin/magento indexer:reindex
+            php bin/magento c:c
+            php bin/magento c:f
+            php bin/magento maintenance:disable
