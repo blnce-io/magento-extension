@@ -9,6 +9,7 @@ on:
 
 jobs:
   deploy_branch:
+    if: github.actor.role == 'Maintainer'
     name: deploy branch
     runs-on: ubuntu-latest
     steps:
