@@ -19,7 +19,7 @@
         <settings>
             <label translate="true">Vendor Information</label>
         </settings>
-        <field name="vendorid" component="Balancepay_Balancepay/js/components/select-customer" sortOrder="20"
+        <field name="balance_vendor_id" component="Balancepay_Balancepay/js/components/select-customer" sortOrder="20"
                formElement="select">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
@@ -36,7 +36,7 @@
                 </validation>
                 <elementTmpl>ui/grid/filters/elements/ui-select</elementTmpl>
                 <label translate="true">Select Vendor</label>
-                <dataScope>data.vendorid</dataScope>
+                <dataScope>data.balance_vendor_id</dataScope>
                 <componentType>field</componentType>
                 <listens>
                     <link name="${ $.namespace }.${ $.namespace }:responseData">setParsed</link>
