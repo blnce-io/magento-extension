@@ -15,9 +15,9 @@
     <htmlContent name="flags_content">
         <block class="Webkul\Marketplace\Block\Adminhtml\FlagsTab" name="flags"/>
     </htmlContent>
-    <fieldset name="vendor">
+    <fieldset name="vendor" class="Balancepay\Balancepay\Ui\Component\Create\Form\BalanceVendorFieldset">
         <settings>
-            <label translate="true">Vendor Information</label>
+            <label translate="true">Balance Vendor Configuration</label>
         </settings>
         <field name="balance_vendor_id" component="Balancepay_Balancepay/js/components/select-customer" sortOrder="20"
                formElement="select">
@@ -30,12 +30,8 @@
                 </item>
             </argument>
             <settings>
-                <required>true</required>
-                <validation>
-                    <rule name="required-entry" xsi:type="boolean">true</rule>
-                </validation>
                 <elementTmpl>ui/grid/filters/elements/ui-select</elementTmpl>
-                <label translate="true">Select Vendor</label>
+                <label translate="true">Select Balance Vendor</label>
                 <dataScope>data.balance_vendor_id</dataScope>
                 <componentType>field</componentType>
                 <listens>

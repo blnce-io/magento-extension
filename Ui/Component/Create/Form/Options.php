@@ -1,75 +1,39 @@
 <?php
 namespace Balancepay\Balancepay\Ui\Component\Create\Form;
 
-use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Magento\Framework\Data\OptionSourceInterface;
-use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory as CustomerCollectionFactory;
-use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Webkul\Marketplace\Model\ResourceModel\Seller\CollectionFactory as SellerCollection;
+use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 
 class Options implements OptionSourceInterface
 {
     /**
-     * @var \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory
+     * @var RequestFactory
      */
-    protected $customerCollectionFactory;
+    protected $requestFactory;
 
     /**
-     * @var RequestInterface
+     * @var SellerCollection
      */
-    protected $request;
+    protected $sellerCollectionFactory;
 
     /**
-     * @var array
-     */
-    protected $customerTree;
-
-    /**
-     * @param CustomerCollectionFactory $customerCollectionFactory
-     * @param RequestInterface $request
      * @param SellerCollection $sellerCollectionFactory
      * @param RequestFactory $requestFactory
-     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      */
     public function __construct(
-        CustomerCollectionFactory $customerCollectionFactory,
-        RequestInterface $request,
         SellerCollection $sellerCollectionFactory,
-        RequestFactory $requestFactory,
-        \Magento\Store\Model\StoreManagerInterface $storeManager
+        RequestFactory $requestFactory
     ) {
-        $this->customerCollectionFactory = $customerCollectionFactory;
-        $this->request = $request;
-        $this->_sellerCollectionFactory = $sellerCollectionFactory;
+        $this->sellerCollectionFactory = $sellerCollectionFactory;
         $this->requestFactory = $requestFactory;
-        $this->_storeManager = $storeManager;
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
     public function toOptionArray()
-    {
-        return $this->getCustomerTree();
-    }
-
-    /**
-     * Retrieve categories tree
-     *
-     * @return array
-     */
-    protected function getCustomerTree()
-    {
-       $loadVendor =  $this->loadByVendor();
-        return $loadVendor;
-    }
-    /**
-     * @param null $store
-     * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
-     */
-    public function loadByVendor($store = null)
     {
         $options = [];
         try {
@@ -77,18 +41,16 @@ class Options implements OptionSourceInterface
                 ->create(RequestFactory::VENDORS_REQUEST_METHOD)
                 ->setTopic('vendors')
                 ->process();
+
+            $model = $this->getAllSellerCollectionObj();
+            $vendorid = array_map(function($item){ return $item['balance_vendor_id']; }, $model->toArray(['balance_vendor_id'])['items']);
+            foreach ($response as $label => $value) {
+                if (!in_array($value['id'], $vendorid)) {
+                    $options[] = array('label' => $value['businessName'], 'value' => $value['id']);
+                }
+            }
         } catch (LocalizedException $e) {
             $this->messageManager->addErrorMessage($e->getMessage());
-        }
-        $model = $this->getAllSellerCollectionObj();
-        $vendorid = [];
-        foreach ($model as $value) {
-            $vendorid[] = $value->getVendorid();
-        }
-        foreach ($response as $label => $value) {
-            if (!in_array($value['id'], $vendorid)) {
-                $options[] = array('label' => $value['businessName'], 'value' => $value['id']);
-            }
         }
         return $options;
     }
@@ -98,31 +60,8 @@ class Options implements OptionSourceInterface
      */
     public function getAllSellerCollectionObj()
     {
-        $collection = $this->getSellerCollection();
-        $collection->addFieldToFilter('store_id', $this->getCurrentStoreId());
-        if (!$collection->getSize()) {
-            $collection = $this->getSellerCollection();
-            $collection->addFieldToFilter('store_id', 0);
-        }
-
+        $collection = $this->sellerCollectionFactory->create()->addFieldToSelect('balance_vendor_id')
+            ->addFieldToFilter('balance_vendor_id', ['neq' => '']);
         return $collection;
-    }
-
-    /**
-     * Get Seller Collection
-     *
-     * @return \Webkul\Marketplace\Model\ResourceModel\Seller\Collection
-     */
-    public function getSellerCollection()
-    {
-        return $this->_sellerCollectionFactory->create();
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getCurrentStoreId()
-    {
-        return $this->_storeManager->getStore()->getStoreId();
     }
 }

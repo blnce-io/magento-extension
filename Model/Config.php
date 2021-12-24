@@ -34,6 +34,8 @@ class Config
     const BALANCEPAY_API_LIVE_URL = 'https://app.blnce.io/api/v1/'; //Production
     const BALANCEPAY_IFRAME_SANDBOX_URL = 'https://checkout-v2.sandbox.getbalance.com/checkout.html'; //Sandbox
     const BALANCEPAY_IFRAME_LIVE_URL = 'https://checkout-v2.getbalance.com/checkout.html'; //Production
+    const BALANCEPAY_DASHBOARD_SANDBOX_URL = 'https://dashboard.sandbox.getbalance.com'; //Sandbox
+    const BALANCEPAY_DASHBOARD_LIVE_URL = 'https://dashboard.getbalance.com'; //Production
 
     /**
      * Scope config object.
@@ -343,6 +345,19 @@ class Config
     public function getBalanceIframeUrl($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
         return ($this->isSandboxMode($scope, $storeId) ? self::BALANCEPAY_IFRAME_SANDBOX_URL : self::BALANCEPAY_IFRAME_LIVE_URL);
+    }
+
+    /**
+     * @method getBalanceDashboardUrl
+     *
+     * @param string $scope Scope.
+     * @param int    $storeId Store ID.
+     *
+     * @return string
+     */
+    public function getBalanceDashboardUrl($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
+    {
+        return ($this->isSandboxMode($scope, $storeId) ? self::BALANCEPAY_DASHBOARD_SANDBOX_URL : self::BALANCEPAY_DASHBOARD_LIVE_URL);
     }
 
     /**

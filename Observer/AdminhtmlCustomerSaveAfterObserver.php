@@ -266,7 +266,6 @@ class AdminhtmlCustomerSaveAfterObserver implements ObserverInterface
                             $postData['logo_pic'] : $value->getLogoPic();
 
                     }
-                    $postData['balance_vendor_id'] = $postData['vendor']['data'] ? $postData['vendor']['data']['balance_vendor_id'] : '';
                     foreach ($sellerDefaultData as $key => $value) {
                         if (empty($postData[$key]) && $key != 'entity_id') {
                             $postData[$key] = $value;
@@ -279,9 +278,13 @@ class AdminhtmlCustomerSaveAfterObserver implements ObserverInterface
                             $postData['banner_pic'] : $value->getBannerPic();
                         $postData['logo_pic'] = $postData['logo_pic'] ?
                             $postData['logo_pic'] : $value->getLogoPic();
-                        $postData['balance_vendor_id'] = $postData['vendor']['data'] ? $postData['vendor']['data']['balance_vendor_id'] : '';
                     }
                 }
+
+                if (isset($postData['vendor']['data']['balance_vendor_id']) && $postData['vendor']['data']['balance_vendor_id'] !='') {
+                    $postData['balance_vendor_id'] = $postData['vendor']['data']['balance_vendor_id'];
+                }
+
                 $value = $this->mpSeller->create()->load($autoId);
                 $value->addData($postData);
                 $value->setIsSeller(1);
