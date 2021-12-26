@@ -1,7 +1,7 @@
 <?php
 namespace Balancepay\Balancepay\Block\Adminhtml\Edit\Balance;
 
-use \Magento\Backend\Block\Template;
+use Magento\Backend\Block\Template;
 use Balancepay\Balancepay\Model\Config;
 use Webkul\Marketplace\Model\SellerFactory;
 
@@ -24,7 +24,7 @@ class DashboardLink extends Template
      * @param array $data
      */
     public function __construct(
-        \Magento\Backend\Block\Template\Context $context,
+        Template\Context $context,
         SellerFactory $sellerModel,
         Config $balancepayConfig,
         array $data = []
