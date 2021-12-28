@@ -11,6 +11,7 @@
 
 namespace Balancepay\Balancepay\Model\Request\Transactions;
 
+use Balancepay\Balancepay\Helper\Data as HelperData;
 use Balancepay\Balancepay\Lib\Http\Client\Curl;
 use Balancepay\Balancepay\Model\AbstractRequest;
 use Balancepay\Balancepay\Model\BalancepayMethod;
@@ -40,21 +41,23 @@ class Capture extends AbstractRequest
     protected $_payment;
 
     /**
-     * AbstractGateway constructor.
-     *
-     * @param Config                $config
-     * @param Curl                  $curl
-     * @param ResponseFactory       $responseFactory
+     * Capture constructor.
+     * @param Config $balancepayConfig
+     * @param Curl $curl
+     * @param ResponseFactory $responseFactory
+     * @param HelperData $helper
      */
     public function __construct(
         Config $balancepayConfig,
         Curl $curl,
-        ResponseFactory $responseFactory
+        ResponseFactory $responseFactory,
+        HelperData $helper
     ) {
         parent::__construct(
             $balancepayConfig,
             $curl,
-            $responseFactory
+            $responseFactory,
+            $helper
         );
     }
 

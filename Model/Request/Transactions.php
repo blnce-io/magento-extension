@@ -11,6 +11,7 @@
 
 namespace Balancepay\Balancepay\Model\Request;
 
+use Balancepay\Balancepay\Helper\Data as HelperData;
 use Balancepay\Balancepay\Lib\Http\Client\Curl;
 use Balancepay\Balancepay\Model\AbstractRequest;
 use Balancepay\Balancepay\Model\Config;
@@ -36,25 +37,27 @@ class Transactions extends AbstractRequest
     protected $_cartTotalRepository;
 
     /**
-     * AbstractGateway constructor.
-     *
-     * @param Config                $config
-     * @param Curl                  $curl
-     * @param ResponseFactory       $responseFactory
-     * @param CheckoutSession       $checkoutSession
-     * @param CartTotalRepository   $cartTotalRepository
+     * Transactions constructor.
+     * @param Config $balancepayConfig
+     * @param Curl $curl
+     * @param ResponseFactory $responseFactory
+     * @param CheckoutSession $checkoutSession
+     * @param CartTotalRepository $cartTotalRepository
+     * @param HelperData $helper
      */
     public function __construct(
         Config $balancepayConfig,
         Curl $curl,
         ResponseFactory $responseFactory,
         CheckoutSession $checkoutSession,
-        CartTotalRepository $cartTotalRepository
+        CartTotalRepository $cartTotalRepository,
+        HelperData $helper
     ) {
         parent::__construct(
             $balancepayConfig,
             $curl,
-            $responseFactory
+            $responseFactory,
+            $helper
         );
 
         $this->_checkoutSession = $checkoutSession;
