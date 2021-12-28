@@ -1,6 +1,10 @@
-<?php $vendorIdAvailable = $block->isVendorIdSet(); ?>
+<?php
+    $vendorIdAvailable = $block->isVendorIdSet();
+    $vendorName = 'Balance Vendor Dashboard';
+?>
 
 <?php if ($vendorIdAvailable): ?>
+    <?php $vendorName = $block->getBalanceVendor(); ?>
     <div class="balancepay_link">
         <div class="admin__field _required">
             <div class="admin__field-label">
@@ -9,7 +13,7 @@
                 </label>
             </div>
             <div class="admin__field-control">
-                <a href="<?= $block->getBalancePayDashboardUrl(); ?>" target="_blank"><?php echo __("Balance Vendor Dashboard");?></a>
+                <a href="<?= $block->getBalancePayDashboardUrl(); ?>" target="_blank"><?php echo __($vendorName);?></a>
                 <a class="action action-edit-balance" href="javascript:void(0)" title="Edit Balance Vendor"></a>
             </div>
         </div>

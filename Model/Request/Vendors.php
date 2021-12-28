@@ -16,6 +16,11 @@ class Vendors extends AbstractRequest
     protected $_topic;
 
     /**
+     * @var string
+     */
+    protected $requestMethod;
+
+    /**
      * @param  string   $topic
      *
      * @return $this
@@ -35,22 +40,32 @@ class Vendors extends AbstractRequest
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @return string
-     */
-    protected function getRequestMethod()
-    {
-        return RequestFactory::VENDORS_REQUEST_METHOD;
-    }
-
-    /**
      * @return string
      * @throws PaymentException
      */
     protected function getCurlMethod()
     {
         return 'get';
+    }
+
+    /**
+     * @param string $requestMethod
+     * @return mixed|string
+     */
+    public function setRequestMethod($requestMethod)
+    {
+        $this->requestMethod = $requestMethod;
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @return string
+     */
+    public function getRequestMethod()
+    {
+        return $this->requestMethod;
     }
 
     /**

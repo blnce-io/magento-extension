@@ -39,6 +39,7 @@ class Options implements OptionSourceInterface
         try {
             $response = $this->requestFactory
                 ->create(RequestFactory::VENDORS_REQUEST_METHOD)
+                ->setRequestMethod('vendors')
                 ->setTopic('vendors')
                 ->process();
 
