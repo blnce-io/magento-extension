@@ -11,6 +11,7 @@
 
 namespace Balancepay\Balancepay\Model;
 
+use Balancepay\Balancepay\Helper\Data as HelperData;
 use Balancepay\Balancepay\Model\Config as BalancepayConfig;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Magento\Checkout\Model\Session as CheckoutSession;
@@ -52,7 +53,7 @@ class BalancepayMethod extends AbstractMethod
     const BALANCEPAY_CHARGE_ID = 'balancepay_charge_id';
     const BALANCEPAY_IS_AUTH_CHECKOUT = 'balancepay_is_auth_checkout';
     const BALANCEPAY_IS_FINANCED = 'balancepay_is_financed';
-    const BALANCEPAY_SELECTED_PAYMENT_METHOD= 'balancepay_selected_payment_method';
+    const BALANCEPAY_SELECTED_PAYMENT_METHOD = 'balancepay_selected_payment_method';
 
     /**
      * Gateway code
@@ -165,21 +166,21 @@ class BalancepayMethod extends AbstractMethod
 
     /**
      * @method __construct
-     * @param  Context                    $context
-     * @param  Registry                   $registry
-     * @param  ExtensionAttributesFactory $extensionFactory
-     * @param  AttributeValueFactory      $customAttributeFactory
-     * @param  PaymentDataHelper          $paymentData
-     * @param  ScopeConfigInterface       $scopeConfig
-     * @param  PaymentMethodLogger        $logger
-     * @param  AbstractResource           $resource
-     * @param  AbstractDb                 $resourceCollection
-     * @param  array                      $data
-     * @param  DirectoryHelper            $directory
-     * @param  CheckoutSession            $checkoutSession
-     * @param  BalancepayConfig           $balancepayConfig
-     * @param  RequestFactory             $requestFactory
-     * @param  RequestInterface           $request
+     * @param Context $context
+     * @param Registry $registry
+     * @param ExtensionAttributesFactory $extensionFactory
+     * @param AttributeValueFactory $customAttributeFactory
+     * @param PaymentDataHelper $paymentData
+     * @param ScopeConfigInterface $scopeConfig
+     * @param PaymentMethodLogger $logger
+     * @param AbstractResource $resource
+     * @param AbstractDb $resourceCollection
+     * @param array $data
+     * @param DirectoryHelper $directory
+     * @param CheckoutSession $checkoutSession
+     * @param BalancepayConfig $balancepayConfig
+     * @param RequestFactory $requestFactory
+     * @param RequestInterface $request
      */
     public function __construct(
         Context $context,
@@ -197,7 +198,8 @@ class BalancepayMethod extends AbstractMethod
         BalancepayConfig $balancepayConfig,
         RequestFactory $requestFactory,
         RequestInterface $request
-    ) {
+    )
+    {
         parent::__construct(
             $context,
             $registry,
@@ -294,7 +296,7 @@ class BalancepayMethod extends AbstractMethod
      * Order payment method.
      *
      * @param InfoInterface $payment
-     * @param float         $amount
+     * @param float $amount
      *
      * @return Payment
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -315,7 +317,7 @@ class BalancepayMethod extends AbstractMethod
      * Authorize payment method.
      *
      * @param InfoInterface $payment
-     * @param float         $amount
+     * @param float $amount
      *
      * @return Gateway
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -337,7 +339,7 @@ class BalancepayMethod extends AbstractMethod
      * Capture payment method.
      *
      * @param InfoInterface $payment
-     * @param float         $amount
+     * @param float $amount
      *
      * @return Gateway
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -355,12 +357,16 @@ class BalancepayMethod extends AbstractMethod
             $balanceVendorId = null;
 
             foreach ($orderItems as $item) {
-                $_balanceVendorId = (string) $item->getProduct()->getData('balancepay_vendor_id');
+                $balanceVendorId = $helper->getBalanceVendors($item->getProductId());
+                if (empty($balanceVendorId)) {
+                    $balanceVendorId = $item->getBalancepayVendorId();
+                }
                 if ($item->getProductType() === 'configurable' && $item->getHasChildren()) {
                     foreach ($item->getChildrenItems() as $child) {
                         $child->getProduct()->load($child->getProductId());
-                        if (!$_balanceVendorId) {
-                            $_balanceVendorId = (string) $child->getProduct()->getData('balancepay_vendor_id');
+                        $balanceVendorId = $helper->getBalanceVendors($child->getProductId());
+                        if (!($balanceVendorId)) {
+                            $balanceVendorId = $child->getProduct()->getData('balancepay_vendor_id');
                         }
                         continue;
                     }

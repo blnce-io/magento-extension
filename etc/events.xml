@@ -14,4 +14,7 @@
     <event name="checkout_submit_all_after">
         <observer name="balancepay_checkout_submit_all_after" instance="Balancepay\Balancepay\Observer\Checkout\SubmitAllAfter"/>
     </event>
+    <event name="adminhtml_customer_save_after">
+        <observer name="balance_webkul_marketplace_adminhtml_customer_save_after_observer" instance="Balancepay\Balancepay\Observer\BalanceAdminhtmlCustomerSaveAfterObserver"/>
+    </event>
 </config>

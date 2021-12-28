@@ -31,6 +31,7 @@ class Factory
     const TRANSACTIONS_RESPONSE_HANDLER = 'transactions';
     const WEBHOOKS_KEYS_RESPONSE_HANDLER = 'webhooks/keys';
     const WEBHOOKS_RESPONSE_HANDLER = 'webhooks';
+    const VENDORS_RESPONSE_HANDLER = 'vendors';
 
     /**
      * Set of requests.
@@ -44,6 +45,7 @@ class Factory
         self::TRANSACTIONS_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Transactions::class,
         self::WEBHOOKS_KEYS_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Webhooks\Keys::class,
         self::WEBHOOKS_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Webhooks::class,
+        self::VENDORS_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Vendors::class,
     ];
 
     /**

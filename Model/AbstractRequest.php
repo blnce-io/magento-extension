@@ -15,6 +15,7 @@ use Balancepay\Balancepay\Lib\Http\Client\Curl;
 use Balancepay\Balancepay\Model\Response\Factory as ResponseFactory;
 use Magento\Framework\Exception\PaymentException;
 use Magento\Quote\Model\Quote;
+use Balancepay\Balancepay\Helper\Data as HelperData;
 
 /**
  * Balancepay abstract request model.
@@ -25,6 +26,11 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
      * @var Curl
      */
     protected $_curl;
+
+    /**
+     * @var HelperData
+     */
+    protected $helper;
 
     /**
      * @var ResponseInterface
@@ -39,21 +45,24 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     /**
      * Object constructor.
      *
-     * @param Config          $balancepayConfig
-     * @param Curl            $curl
+     * @param Config $balancepayConfig
+     * @param Curl $curl
      * @param ResponseFactory $responseFactory
      */
     public function __construct(
         Config $balancepayConfig,
         Curl $curl,
-        ResponseFactory $responseFactory
-    ) {
+        ResponseFactory $responseFactory,
+        HelperData $helper
+    )
+    {
         parent::__construct(
             $balancepayConfig
         );
 
         $this->_curl = $curl;
         $this->_responseFactory = $responseFactory;
+        $this->helper = $helper;
     }
 
     /**
@@ -105,7 +114,7 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
 
     /**
      * @method setFallbackEmail
-     * @param  string|null           $email
+     * @param string|null $email
      * @return AbstractRequest
      */
     public function setFallbackEmail($email = null)
@@ -116,7 +125,7 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
 
     /**
      * @method getFallbackEmail
-     * @param  string|null           $email
+     * @param string|null $email
      */
     public function getFallbackEmail()
     {
@@ -140,7 +149,6 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     {
         $endpoint = $this->getEndpoint();
         $params = $this->getParams();
-
         $headers = [
             'Content-Type' => 'application/json',
             'x-api-key' => $this->_balancepayConfig->getApiKey(),
@@ -179,7 +187,7 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     }
 
     /**
-     * @param Quote     $quote
+     * @param Quote $quote
      * @param int|float $totalShippingAmount
      *
      * @return array
@@ -196,12 +204,17 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
             }
             $variationId = $quoteItem->getProductId();
             $quoteItem->getProduct()->load($quoteItem->getProductId());
-            $balanceVendorId = $quoteItem->getProduct()->getData('balancepay_vendor_id');
+            $balanceVendorId = $this->helper->getBalanceVendors($variationId);
+            if (empty($balanceVendorId)) {
+                $balanceVendorId = $quoteItem->getBalancepayVendorId();
+            }
+
             if ($quoteItem->getProductType() === 'configurable' && $quoteItem->getHasChildren()) {
                 foreach ($quoteItem->getChildren() as $child) {
                     $variationId = $child->getProductId();
                     $child->getProduct()->load($child->getProductId());
-                    if (!$balanceVendorId) {
+                    $balanceVendorId = $this->helper->getBalanceVendors($variationId);
+                    if (!($balanceVendorId)) {
                         $balanceVendorId = $child->getProduct()->getData('balancepay_vendor_id');
                     }
                     continue;
@@ -262,15 +275,15 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
         $params = [];
 
         if (($billing = $quote->getBillingAddress()) !== null) {
-            $address = (array) $billing->getStreet();
+            $address = (array)$billing->getStreet();
             $params = [
                 'firstName' => $billing->getFirstname(),
                 'lastName' => $billing->getLastname(),
-                'addressLine1' => (string) array_shift($address),
-                'addressLine2' => (string) implode(' ', $address),
+                'addressLine1' => (string)array_shift($address),
+                'addressLine2' => (string)implode(' ', $address),
                 'zipCode' => $billing->getPostcode(),
                 'countryCode' => $billing->getCountryId(),
-                'state' => (string) $billing->getRegion(),
+                'state' => (string)$billing->getRegion(),
                 'city' => $billing->getCity(),
             ];
         }
@@ -288,15 +301,15 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
         $params = [];
 
         if (($shipping = $quote->getShippingAddress()) !== null) {
-            $address = (array) $shipping->getStreet();
+            $address = (array)$shipping->getStreet();
             $params = [
                 'firstName' => $shipping->getFirstname(),
                 'lastName' => $shipping->getLastname(),
-                'addressLine1' => (string) array_shift($address),
-                'addressLine2' => (string) implode(' ', $address),
+                'addressLine1' => (string)array_shift($address),
+                'addressLine2' => (string)implode(' ', $address),
                 'zipCode' => $shipping->getPostcode(),
                 'countryCode' => $shipping->getCountryId(),
-                'state' => (string) $shipping->getRegion(),
+                'state' => (string)$shipping->getRegion(),
                 'city' => $shipping->getCity(),
             ];
         }
