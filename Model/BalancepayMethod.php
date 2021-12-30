@@ -358,16 +358,10 @@ class BalancepayMethod extends AbstractMethod
 
             foreach ($orderItems as $item) {
                 $balanceVendorId = $helper->getBalanceVendors($item->getProductId());
-                if (empty($balanceVendorId)) {
-                    $balanceVendorId = $item->getBalancepayVendorId();
-                }
                 if ($item->getProductType() === 'configurable' && $item->getHasChildren()) {
                     foreach ($item->getChildrenItems() as $child) {
                         $child->getProduct()->load($child->getProductId());
                         $balanceVendorId = $helper->getBalanceVendors($child->getProductId());
-                        if (!($balanceVendorId)) {
-                            $balanceVendorId = $child->getProduct()->getData('balancepay_vendor_id');
-                        }
                         continue;
                     }
                 }

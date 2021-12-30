@@ -195,16 +195,10 @@ class Checkout extends AbstractRequest
             $balanceVendorId = $quoteItem->getProduct()->getData('balancepay_vendor_id');
             if ($quoteItem->getProductType() === 'configurable' && $quoteItem->getHasChildren()) {
                 $balanceVendorId = $helper->getBalanceVendors($quoteItem->getProductId());
-                if (empty($balanceVendorId)) {
-                    $balanceVendorId = $quoteItem->getBalancepayVendorId();
-                }
                 foreach ($quoteItem->getChildren() as $child) {
                     $variationId = $child->getProductId();
                     $child->getProduct()->load($child->getProductId());
                     $balanceVendorId = $helper->getBalanceVendors($child->getProductId());
-                    if (!$balanceVendorId) {
-                        $balanceVendorId = $child->getProduct()->getData('balancepay_vendor_id');
-                    }
                     continue;
                 }
             }

@@ -203,20 +203,15 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
                 continue;
             }
             $variationId = $quoteItem->getProductId();
+
             $quoteItem->getProduct()->load($quoteItem->getProductId());
             $balanceVendorId = $this->helper->getBalanceVendors($variationId);
-            if (empty($balanceVendorId)) {
-                $balanceVendorId = $quoteItem->getBalancepayVendorId();
-            }
 
             if ($quoteItem->getProductType() === 'configurable' && $quoteItem->getHasChildren()) {
                 foreach ($quoteItem->getChildren() as $child) {
                     $variationId = $child->getProductId();
                     $child->getProduct()->load($child->getProductId());
                     $balanceVendorId = $this->helper->getBalanceVendors($variationId);
-                    if (!($balanceVendorId)) {
-                        $balanceVendorId = $child->getProduct()->getData('balancepay_vendor_id');
-                    }
                     continue;
                 }
             }

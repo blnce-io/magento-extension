@@ -4,6 +4,8 @@ namespace Balancepay\Balancepay\Helper;
 use \Webkul\Marketplace\Helper\Data as WebkulHelper;
 use \Webkul\Marketplace\Model\SellerFactory;
 use \Webkul\Marketplace\Model\ResourceModel\Product\CollectionFactory;
+use Balancepay\Balancepay\Model\ResourceModel\BalancepayProduct\CollectionFactory as MpProductCollection;
+
 /**
  * Class Data
  * @package Balancepay\Balancepay\Helper
@@ -19,10 +21,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function __construct(
         WebkulHelper $data,
         SellerFactory $sellerFactory,
+        MpProductCollection $mpProductCollectionFactory,
         CollectionFactory $collectionFactory)
     {
         $this->data = $data;
         $this->sellerFactory = $sellerFactory;
+        $this->_mpProductCollectionFactory = $mpProductCollectionFactory;
         $this->collectionFactory = $collectionFactory;
     }
 
@@ -59,6 +63,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function getBalanceVendors($productId = '')
     {
+        $balanceVendorId = '';
         $transactionColl = $this->collectionFactory->create()
             ->addFieldToFilter(
                 'mageproduct_id',
@@ -66,6 +71,22 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             );
         $sellerId = $transactionColl->getFirstItem()->getSellerId();
         $balanceVendorId = $this->getVendorId($sellerId);
+        if (empty($balanceVendorId)) {
+            $balanceVendorId = $this->getSellerIdByProductId($productId);
+        }
         return $balanceVendorId;
+    }
+
+    /**
+     * Return the seller Id by product id.
+     *
+     * @return int||null
+     */
+    public function getSellerIdByProductId($productId = '')
+    {
+        $collection = $this->_mpProductCollectionFactory->create();
+        $collection->addFieldToFilter('product_id', $productId);
+        $sellerId = $collection->getFirstItem()->getVendorId();
+        return $sellerId;
     }
 }
