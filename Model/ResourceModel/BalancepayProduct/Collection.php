@@ -7,6 +7,11 @@ use Balancepay\Balancepay\Model\ResourceModel\BalancepayProduct as BalancepayPro
 
 class Collection extends AbstractCollection
 {
+    /**
+     * Construct function
+     *
+     * @return void
+     */
     protected function _construct()
     {
         $this->_init(BalancepayProductModel::class, BalancepayProductResourceModel::class);

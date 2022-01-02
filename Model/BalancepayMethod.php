@@ -40,20 +40,47 @@ class BalancepayMethod extends AbstractMethod
     /**
      * Method code const.
      */
-    const METHOD_CODE = 'balancepay';
+    public const METHOD_CODE = 'balancepay';
 
     /**
-     * Modes.
+     * Mode Sandbox
      */
-    const MODE_SANDBOX = 'sandbox';
-    const MODE_LIVE = 'live';
+    public const MODE_SANDBOX = 'sandbox';
 
-    const BALANCEPAY_CHECKOUT_TOKEN = 'balancepay_checkout_token';
-    const BALANCEPAY_CHECKOUT_TRANSACTION_ID = 'balancepay_checkout_transaction_id';
-    const BALANCEPAY_CHARGE_ID = 'balancepay_charge_id';
-    const BALANCEPAY_IS_AUTH_CHECKOUT = 'balancepay_is_auth_checkout';
-    const BALANCEPAY_IS_FINANCED = 'balancepay_is_financed';
-    const BALANCEPAY_SELECTED_PAYMENT_METHOD = 'balancepay_selected_payment_method';
+    /**
+     * Mode Live
+     */
+    public const MODE_LIVE = 'live';
+
+    /**
+     * Balancepay Checkout Token
+     */
+    public const BALANCEPAY_CHECKOUT_TOKEN = 'balancepay_checkout_token';
+
+    /**
+     * Balancepay Checkout Transaction Id
+     */
+    public const BALANCEPAY_CHECKOUT_TRANSACTION_ID = 'balancepay_checkout_transaction_id';
+
+    /**
+     * Balancepay Charge id
+     */
+    public const BALANCEPAY_CHARGE_ID = 'balancepay_charge_id';
+
+    /**
+     * Balancepay Is Auth Checkout
+     */
+    public const BALANCEPAY_IS_AUTH_CHECKOUT = 'balancepay_is_auth_checkout';
+
+    /**
+     * Balancepay Is Financed
+     */
+    public const BALANCEPAY_IS_FINANCED = 'balancepay_is_financed';
+
+    /**
+     * Balancepay selected payment method
+     */
+    public const BALANCEPAY_SELECTED_PAYMENT_METHOD = 'balancepay_selected_payment_method';
 
     /**
      * Gateway code
@@ -165,7 +192,6 @@ class BalancepayMethod extends AbstractMethod
     private $request;
 
     /**
-     * @method __construct
      * @param Context $context
      * @param Registry $registry
      * @param ExtensionAttributesFactory $extensionFactory
@@ -173,14 +199,14 @@ class BalancepayMethod extends AbstractMethod
      * @param PaymentDataHelper $paymentData
      * @param ScopeConfigInterface $scopeConfig
      * @param PaymentMethodLogger $logger
-     * @param AbstractResource $resource
-     * @param AbstractDb $resourceCollection
-     * @param array $data
-     * @param DirectoryHelper $directory
+     * @param AbstractResource|null $resource
+     * @param AbstractDb|null $resourceCollection
+     * @param DirectoryHelper|null $directory
      * @param CheckoutSession $checkoutSession
-     * @param BalancepayConfig $balancepayConfig
+     * @param Config $balancepayConfig
      * @param RequestFactory $requestFactory
      * @param RequestInterface $request
+     * @param array $data
      */
     public function __construct(
         Context $context,
@@ -192,14 +218,13 @@ class BalancepayMethod extends AbstractMethod
         PaymentMethodLogger $logger,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
-        array $data = [],
         DirectoryHelper $directory = null,
         CheckoutSession $checkoutSession,
         BalancepayConfig $balancepayConfig,
         RequestFactory $requestFactory,
-        RequestInterface $request
-    )
-    {
+        RequestInterface $request,
+        array $data = []
+    ) {
         parent::__construct(
             $context,
             $registry,
@@ -306,8 +331,10 @@ class BalancepayMethod extends AbstractMethod
     public function order(InfoInterface $payment, $amount)
     {
         parent::order($payment, $amount);
-
-        $payment->setAdditionalInformation(self::BALANCEPAY_CHECKOUT_TOKEN, $this->checkoutSession->getBalanceCheckoutToken());
+        $payment->setAdditionalInformation(
+            self::BALANCEPAY_CHECKOUT_TOKEN,
+            $this->checkoutSession->getBalanceCheckoutToken()
+        );
         $payment->setIsTransactionPending(true);
 
         return $this;
@@ -327,9 +354,14 @@ class BalancepayMethod extends AbstractMethod
     public function authorize(InfoInterface $payment, $amount)
     {
         parent::authorize($payment, $amount);
-
-        $payment->setAdditionalInformation(self::BALANCEPAY_CHECKOUT_TOKEN, $this->checkoutSession->getBalanceCheckoutToken());
-        $payment->setAdditionalInformation(self::BALANCEPAY_CHECKOUT_TRANSACTION_ID, $this->checkoutSession->getBalanceCheckoutTransactionId());
+        $payment->setAdditionalInformation(
+            self::BALANCEPAY_CHECKOUT_TOKEN,
+            $this->checkoutSession->getBalanceCheckoutToken()
+        );
+        $payment->setAdditionalInformation(
+            self::BALANCEPAY_CHECKOUT_TRANSACTION_ID,
+            $this->checkoutSession->getBalanceCheckoutTransactionId()
+        );
         $payment->setAdditionalInformation(self::BALANCEPAY_IS_AUTH_CHECKOUT, 1);
 
         return $this;
@@ -368,7 +400,8 @@ class BalancepayMethod extends AbstractMethod
                 if ($_balanceVendorId) {
                     if ($balanceVendorId && $balanceVendorId !== $_balanceVendorId) {
                         throw new LocalizedException(
-                            __('Invoicing items from different Balance vendors on one invoice is not allowed. Please cleate a separate invoice for each')
+                            __('Invoicing items from different Balance vendors on one invoice
+                            is not allowed. Please cleate a separate invoice for each')
                         );
                     }
                     $balanceVendorId = $_balanceVendorId;

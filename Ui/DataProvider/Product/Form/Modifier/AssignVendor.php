@@ -23,8 +23,13 @@ class AssignVendor extends AbstractModifier
     protected $helper;
 
     /**
+     * Constructor
+     *
      * @param \Magento\Framework\Registry $coreRegistry
+     * @param SellerCollection $sellerCollectionFactory
      * @param \Webkul\Marketplace\Helper\Data $helper
+     * @param MpProductCollection $mpProductCollectionFactory
+     * @param RequestFactory $requestFactory
      */
     public function __construct(
         \Magento\Framework\Registry $coreRegistry,
@@ -32,8 +37,7 @@ class AssignVendor extends AbstractModifier
         \Webkul\Marketplace\Helper\Data $helper,
         MpProductCollection $mpProductCollectionFactory,
         RequestFactory $requestFactory
-    )
-    {
+    ) {
         $this->coreRegistry = $coreRegistry;
         $this->sellerCollectionFactory = $sellerCollectionFactory;
         $this->helper = $helper;
@@ -41,11 +45,23 @@ class AssignVendor extends AbstractModifier
         $this->requestFactory = $requestFactory;
     }
 
+    /**
+     * Modify Data
+     *
+     * @param array $data
+     * @return array
+     */
     public function modifyData(array $data)
     {
         return $data;
     }
 
+    /**
+     * Modify Meta
+     *
+     * @param array $meta
+     * @return array
+     */
     public function modifyMeta(array $meta)
     {
         $meta = array_replace_recursive(
@@ -73,7 +89,8 @@ class AssignVendor extends AbstractModifier
     }
 
     /**
-     * getSellerField is used to show the field for assign vendor.
+     * GetSellerField
+     *
      * @return mixed
      */
     public function getSellerField()
@@ -98,7 +115,8 @@ class AssignVendor extends AbstractModifier
     }
 
     /**
-     * getProductSeller is used to get the vendor id by the product id
+     * GetProductSeller is used to get the vendor id by the product id
+     *
      * @return int||null
      */
     public function getProductSeller()
@@ -112,7 +130,8 @@ class AssignVendor extends AbstractModifier
     /**
      * Return the seller Id by product id.
      *
-     * @return int||null
+     * @param string $productId
+     * @return mixed
      */
     public function getSellerIdByProductId($productId = '')
     {
@@ -123,7 +142,10 @@ class AssignVendor extends AbstractModifier
     }
 
     /**
-     * @return mixed
+     * Get all seller collection
+     *
+     * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function getAllSellerCollectionObj()
     {
@@ -134,9 +156,9 @@ class AssignVendor extends AbstractModifier
             ->setTopic('vendors')
             ->process();
 
-        $options[] = array('label' => 'Select Balance Vendor', 'value' => '');
+        $options[] = ['label' => 'Select Balance Vendor', 'value' => ''];
         foreach ($response as $label => $value) {
-            $options[] = array('label' => $value['businessName'], 'value' => $value['id']);
+            $options[] = ['label' => $value['businessName'], 'value' => $value['id']];
         }
         return $options;
     }

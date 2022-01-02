@@ -46,8 +46,7 @@ class BalanceProductSaveAfterObserver implements ObserverInterface
         \Magento\Framework\Message\ManagerInterface $messageManager,
         MpProductFactory $mpProductFactory,
         MpHelper $mpHelper
-    )
-    {
+    ) {
         $this->_collectionFactory = $collectionFactory;
         $this->_date = $date;
         $this->messageManager = $messageManager;
@@ -80,9 +79,7 @@ class BalanceProductSaveAfterObserver implements ObserverInterface
                 $sellerId = $assginVendorData['vendor_id'];
             }
             if ($productCollection->getSize()) {
-                foreach ($productCollection as $product) {
-                    $product->setVendorId($sellerId)->save();
-                }
+                $productCollection->getFirstItem()->setData('vendor_id', $sellerId)->save();
             } else {
                 $mpProductModel = $this->mpProductFactory->create();
                 $mpProductModel->setProductId($productId);

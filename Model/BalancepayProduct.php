@@ -6,6 +6,11 @@ use Balancepay\Balancepay\Model\ResourceModel\BalancepayProduct as BalancepayPro
 
 class BalancepayProduct extends AbstractModel
 {
+    /**
+     * Construct function
+     *
+     * @return void
+     */
     protected function _construct()
     {
         $this->_init(BalancepayProductResourceModel::class);

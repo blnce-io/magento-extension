@@ -65,7 +65,7 @@ class Checkout extends AbstractRequest
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      *
      * @return string
      */
@@ -75,7 +75,7 @@ class Checkout extends AbstractRequest
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      *
      * @return string
      */
@@ -85,8 +85,10 @@ class Checkout extends AbstractRequest
     }
 
     /**
+     * Amount format
+     *
      * @method amountFormat
-     * @param  float|int              $amount
+     * @param  float|int $amount
      * @return string
      */
     protected function amountFormat($amount)
@@ -133,8 +135,9 @@ class Checkout extends AbstractRequest
     }
 
     /**
-     * @param Quote $quote
+     * Get Buyer parameters
      *
+     * @param Quote $quote
      * @return array
      */
     protected function getBuyerParams(Quote $quote)
@@ -155,8 +158,9 @@ class Checkout extends AbstractRequest
     }
 
     /**
-     * @param Quote $quote
+     * Get Billing address parameters
      *
+     * @param Quote $quote
      * @return array
      */
     protected function getBillingAddressParams(Quote $quote)
@@ -177,8 +181,9 @@ class Checkout extends AbstractRequest
     }
 
     /**
-     * @param Quote $quote
+     * Get Line Items parameters
      *
+     * @param Quote $quote
      * @return array
      */
     protected function getLineItemsParams(Quote $quote)

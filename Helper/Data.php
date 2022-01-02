@@ -6,24 +6,20 @@ use \Webkul\Marketplace\Model\SellerFactory;
 use \Webkul\Marketplace\Model\ResourceModel\Product\CollectionFactory;
 use Balancepay\Balancepay\Model\ResourceModel\BalancepayProduct\CollectionFactory as MpProductCollection;
 
-/**
- * Class Data
- * @package Balancepay\Balancepay\Helper
- */
 class Data extends \Magento\Framework\App\Helper\AbstractHelper
 {
-
     /**
      * @param WebkulHelper $data
      * @param SellerFactory $sellerFactory
+     * @param MpProductCollection $mpProductCollectionFactory
      * @param CollectionFactory $collectionFactory
      */
     public function __construct(
         WebkulHelper $data,
         SellerFactory $sellerFactory,
         MpProductCollection $mpProductCollectionFactory,
-        CollectionFactory $collectionFactory)
-    {
+        CollectionFactory $collectionFactory
+    ) {
         $this->data = $data;
         $this->sellerFactory = $sellerFactory;
         $this->_mpProductCollectionFactory = $mpProductCollectionFactory;
@@ -31,7 +27,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * @param $sellerId
+     * Get Vendor Id
+     *
+     * @param int $sellerId
      * @return string
      */
     public function getVendorId($sellerId)
@@ -58,6 +56,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
+     * Get balance Vendors
+     *
      * @param string $productId
      * @return string
      */
@@ -80,7 +80,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * Return the seller Id by product id.
      *
-     * @return int||null
+     * @param string $productId
+     * @return mixed
      */
     public function getSellerIdByProductId($productId = '')
     {

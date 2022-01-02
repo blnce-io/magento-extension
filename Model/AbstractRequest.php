@@ -8,7 +8,6 @@
  * @author   Developer: Pniel Cohen
  * @author   Company: Girit-Interactive (https://www.girit-tech.com/)
  */
-
 namespace Balancepay\Balancepay\Model;
 
 use Balancepay\Balancepay\Lib\Http\Client\Curl;
@@ -43,19 +42,17 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     protected $_fallbackEmail;
 
     /**
-     * Object constructor.
-     *
      * @param Config $balancepayConfig
      * @param Curl $curl
      * @param ResponseFactory $responseFactory
+     * @param HelperData $helper
      */
     public function __construct(
         Config $balancepayConfig,
         Curl $curl,
         ResponseFactory $responseFactory,
         HelperData $helper
-    )
-    {
+    ) {
         parent::__construct(
             $balancepayConfig
         );
@@ -66,6 +63,8 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     }
 
     /**
+     * Process Request
+     *
      * @return AbstractResponse
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws PaymentException
@@ -104,6 +103,8 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     abstract protected function getResponseHandlerType();
 
     /**
+     * Get Parameters
+     *
      * @return array
      * @throws PaymentException
      */
@@ -113,6 +114,8 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     }
 
     /**
+     * Set Fallback Email
+     *
      * @method setFallbackEmail
      * @param string|null $email
      * @return AbstractRequest
@@ -124,6 +127,8 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     }
 
     /**
+     * Get Fallback email
+     *
      * @method getFallbackEmail
      * @param string|null $email
      */
@@ -133,6 +138,8 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     }
 
     /**
+     * Get Curl Method
+     *
      * @return string
      * @throws PaymentException
      */
@@ -142,6 +149,8 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     }
 
     /**
+     * Send Request
+     *
      * @return AbstractRequest
      * @throws \Magento\Framework\Exception\LocalizedException
      */
@@ -187,6 +196,8 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     }
 
     /**
+     * Get Lines Parameters
+     *
      * @param Quote $quote
      * @param int|float $totalShippingAmount
      *
@@ -261,8 +272,9 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     }
 
     /**
-     * @param Quote $quote
+     * Get Billing address parameters
      *
+     * @param Quote $quote
      * @return array
      */
     protected function getBillingAddressParams(Quote $quote)
@@ -287,8 +299,9 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     }
 
     /**
-     * @param Quote $quote
+     * Get Shipping Address parameters
      *
+     * @param Quote $quote
      * @return array
      */
     protected function getShippingAddressParams(Quote $quote)
@@ -313,16 +326,15 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     }
 
     /**
-     * @param Quote $quote
+     * Get Shipping lines parameters
      *
+     * @param Quote $quote
      * @return array
      */
     protected function getShippingLinesParams(Quote $quote)
     {
         $params = [];
-
-        if (
-            ($shipping = $quote->getShippingAddress()) !== null &&
+        if (($shipping = $quote->getShippingAddress()) !== null &&
             ($rate = $shipping->getShippingRatesCollection()->getFirstItem()) !== null
         ) {
             $params = [
