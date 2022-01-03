@@ -2,17 +2,12 @@
 namespace Balancepay\Balancepay\Observer;
 
 use Magento\Framework\Event\ObserverInterface;
-use Webkul\Marketplace\Model\ResourceModel\Product\CollectionFactory;
+use Magento\Framework\Message\ManagerInterface;
+use Magento\Framework\Stdlib\DateTime\DateTime;
 use Balancepay\Balancepay\Model\BalancepayProductFactory as MpProductFactory;
-use Webkul\Marketplace\Helper\Data as MpHelper;
 
 class BalanceProductSaveAfterObserver implements ObserverInterface
 {
-    /**
-     * @var CollectionFactory
-     */
-    protected $_collectionFactory;
-
     /**
      * @var \Magento\Framework\Stdlib\DateTime\DateTime
      */
@@ -29,29 +24,20 @@ class BalanceProductSaveAfterObserver implements ObserverInterface
     protected $mpProductFactory;
 
     /**
-     * @var MpHelper
-     */
-    protected $mpHelper;
-
-    /**
      * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
      * @param CollectionFactory $collectionFactory
      * @param \Magento\Framework\Message\ManagerInterface $messageManager
      * @param MpProductFactory $mpProductFactory
-     * @param MpHelper $mpHelper
      */
     public function __construct(
-        \Magento\Framework\Stdlib\DateTime\DateTime $date,
+        DateTime $date,
         CollectionFactory $collectionFactory,
-        \Magento\Framework\Message\ManagerInterface $messageManager,
-        MpProductFactory $mpProductFactory,
-        MpHelper $mpHelper
+        ManagerInterface $messageManager,
+        MpProductFactory $mpProductFactory
     ) {
-        $this->_collectionFactory = $collectionFactory;
         $this->_date = $date;
         $this->messageManager = $messageManager;
         $this->mpProductFactory = $mpProductFactory;
-        $this->mpHelper = $mpHelper;
     }
 
     /**
@@ -65,7 +51,6 @@ class BalanceProductSaveAfterObserver implements ObserverInterface
             $product = $observer->getProduct();
             $assginVendorData = $product->getAssignVendor();
             $productId = $observer->getProduct()->getId();
-
             $productCollection = $this->mpProductFactory->create()
                 ->getCollection()
                 ->addFieldToFilter(
@@ -77,21 +62,18 @@ class BalanceProductSaveAfterObserver implements ObserverInterface
                 $assginVendorData['vendor_id'] != ''
             ) {
                 $sellerId = $assginVendorData['vendor_id'];
-            }
-            if ($productCollection->getSize()) {
-                $productCollection->getFirstItem()->setData('vendor_id', $sellerId)->save();
-            } else {
-                $mpProductModel = $this->mpProductFactory->create();
-                $mpProductModel->setProductId($productId);
-                $mpProductModel->setVendorId($sellerId);
-                $mpProductModel->setCreatedAt($this->_date->gmtDate());
-                $mpProductModel->setUpdatedAt($this->_date->gmtDate());
-                $mpProductModel->save();
+                if ($productCollection->getSize()) {
+                    $productCollection->getFirstItem()->setData('vendor_id', $sellerId)->save();
+                } else {
+                    $mpProductModel = $this->mpProductFactory->create();
+                    $mpProductModel->setProductId($productId);
+                    $mpProductModel->setVendorId($sellerId);
+                    $mpProductModel->setCreatedAt($this->_date->gmtDate());
+                    $mpProductModel->setUpdatedAt($this->_date->gmtDate());
+                    $mpProductModel->save();
+                }
             }
         } catch (\Exception $e) {
-            $this->mpHelper->logDataInLogger(
-                "Observer_CatalogProductSaveAfterObserver execute : " . $e->getMessage()
-            );
             $this->messageManager->addError($e->getMessage());
         }
     }

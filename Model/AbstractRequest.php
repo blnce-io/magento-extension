@@ -8,10 +8,14 @@
  * @author   Developer: Pniel Cohen
  * @author   Company: Girit-Interactive (https://www.girit-tech.com/)
  */
+
 namespace Balancepay\Balancepay\Model;
 
 use Balancepay\Balancepay\Lib\Http\Client\Curl;
 use Balancepay\Balancepay\Model\Response\Factory as ResponseFactory;
+use Magento\Customer\Api\AccountManagementInterface;
+use Magento\Directory\Model\Region;
+use Magento\Directory\Model\RegionFactory;
 use Magento\Framework\Exception\PaymentException;
 use Magento\Quote\Model\Quote;
 use Balancepay\Balancepay\Helper\Data as HelperData;
@@ -46,12 +50,16 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
      * @param Curl $curl
      * @param ResponseFactory $responseFactory
      * @param HelperData $helper
+     * @param AccountManagementInterface $accountManagement
+     * @param RegionFactory $region
      */
     public function __construct(
         Config $balancepayConfig,
         Curl $curl,
         ResponseFactory $responseFactory,
-        HelperData $helper
+        HelperData $helper,
+        AccountManagementInterface $accountManagement,
+        RegionFactory $region
     ) {
         parent::__construct(
             $balancepayConfig
@@ -60,6 +68,8 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
         $this->_curl = $curl;
         $this->_responseFactory = $responseFactory;
         $this->helper = $helper;
+        $this->accountManagement = $accountManagement;
+        $this->region = $region;
     }
 
     /**
@@ -200,7 +210,6 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
      *
      * @param Quote $quote
      * @param int|float $totalShippingAmount
-     *
      * @return array
      */
     protected function getLinesParams(Quote $quote, $totalShippingAmount = 0)
@@ -282,7 +291,14 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
         $params = [];
 
         if (($billing = $quote->getBillingAddress()) !== null) {
+            $RegionName = $billing->getRegion();
             $address = (array)$billing->getStreet();
+            if (empty($address[0])) {
+                $billing = $this->accountManagement->getDefaultBillingAddress($quote->getCustomerId());
+                $address = (array)$billing->getStreet();
+                $region = $this->region->create()->load($billing->getRegionId());
+                $RegionName = $region->getName() ?? '';
+            }
             $params = [
                 'firstName' => $billing->getFirstname(),
                 'lastName' => $billing->getLastname(),
@@ -290,7 +306,7 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
                 'addressLine2' => (string)implode(' ', $address),
                 'zipCode' => $billing->getPostcode(),
                 'countryCode' => $billing->getCountryId(),
-                'state' => (string)$billing->getRegion(),
+                'state' => (string)$RegionName,
                 'city' => $billing->getCity(),
             ];
         }
@@ -307,9 +323,15 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     protected function getShippingAddressParams(Quote $quote)
     {
         $params = [];
-
         if (($shipping = $quote->getShippingAddress()) !== null) {
+            $RegionName = $shipping->getRegion();
             $address = (array)$shipping->getStreet();
+            if (empty($address[0])) {
+                $shipping = $this->accountManagement->getDefaultShippingAddress($quote->getCustomerId());
+                $address = (array)$shipping->getStreet();
+                $region = $this->region->create()->load($shipping->getRegionId());
+                $RegionName = $region->getName() ?? '';
+            }
             $params = [
                 'firstName' => $shipping->getFirstname(),
                 'lastName' => $shipping->getLastname(),
@@ -317,7 +339,7 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
                 'addressLine2' => (string)implode(' ', $address),
                 'zipCode' => $shipping->getPostcode(),
                 'countryCode' => $shipping->getCountryId(),
-                'state' => (string)$shipping->getRegion(),
+                'state' => (string)$RegionName,
                 'city' => $shipping->getCity(),
             ];
         }
@@ -334,6 +356,7 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     protected function getShippingLinesParams(Quote $quote)
     {
         $params = [];
+
         if (($shipping = $quote->getShippingAddress()) !== null &&
             ($rate = $shipping->getShippingRatesCollection()->getFirstItem()) !== null
         ) {
