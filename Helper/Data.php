@@ -1,12 +1,13 @@
 <?php
 namespace Balancepay\Balancepay\Helper;
 
+use \Magento\Framework\App\Helper\AbstractHelper;
 use \Webkul\Marketplace\Helper\Data as WebkulHelper;
 use \Webkul\Marketplace\Model\SellerFactory;
 use \Webkul\Marketplace\Model\ResourceModel\Product\CollectionFactory;
 use Balancepay\Balancepay\Model\ResourceModel\BalancepayProduct\CollectionFactory as MpProductCollection;
 
-class Data extends \Magento\Framework\App\Helper\AbstractHelper
+class Data extends AbstractHelper
 {
     /**
      * @param WebkulHelper $data

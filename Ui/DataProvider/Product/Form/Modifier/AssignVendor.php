@@ -1,6 +1,7 @@
 <?php
 namespace Balancepay\Balancepay\Ui\DataProvider\Product\Form\Modifier;
 
+use \Magento\Framework\Registry;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Magento\Catalog\Ui\DataProvider\Product\Form\Modifier\AbstractModifier;
 use Magento\Ui\Component\Form\Fieldset;
@@ -9,6 +10,7 @@ use Magento\Ui\Component\Form\Element\Select;
 use Magento\Ui\Component\Form\Element\DataType\Text;
 use Balancepay\Balancepay\Model\ResourceModel\BalancepayProduct\CollectionFactory as MpProductCollection;
 use Webkul\Marketplace\Model\ResourceModel\Seller\CollectionFactory as SellerCollection;
+use \Webkul\Marketplace\Helper\Data as HelperData;
 
 class AssignVendor extends AbstractModifier
 {
@@ -18,23 +20,21 @@ class AssignVendor extends AbstractModifier
     protected $coreRegistry;
 
     /**
-     * @var \Webkul\Marketplace\Helper\Data
+     * @var HelperData
      */
     protected $helper;
 
     /**
-     * Constructor
-     *
-     * @param \Magento\Framework\Registry $coreRegistry
+     * @param Registry $coreRegistry
      * @param SellerCollection $sellerCollectionFactory
-     * @param \Webkul\Marketplace\Helper\Data $helper
+     * @param HelperData $helper
      * @param MpProductCollection $mpProductCollectionFactory
      * @param RequestFactory $requestFactory
      */
     public function __construct(
-        \Magento\Framework\Registry $coreRegistry,
+        Registry $coreRegistry,
         SellerCollection $sellerCollectionFactory,
-        \Webkul\Marketplace\Helper\Data $helper,
+        HelperData $helper,
         MpProductCollection $mpProductCollectionFactory,
         RequestFactory $requestFactory
     ) {

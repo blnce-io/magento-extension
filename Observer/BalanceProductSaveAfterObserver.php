@@ -24,14 +24,12 @@ class BalanceProductSaveAfterObserver implements ObserverInterface
     protected $mpProductFactory;
 
     /**
-     * @param \Magento\Framework\Stdlib\DateTime\DateTime $date
-     * @param CollectionFactory $collectionFactory
-     * @param \Magento\Framework\Message\ManagerInterface $messageManager
+     * @param DateTime $date
+     * @param ManagerInterface $messageManager
      * @param MpProductFactory $mpProductFactory
      */
     public function __construct(
         DateTime $date,
-        CollectionFactory $collectionFactory,
         ManagerInterface $messageManager,
         MpProductFactory $mpProductFactory
     ) {
