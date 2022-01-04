@@ -231,7 +231,9 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
                 foreach ($quoteItem->getChildren() as $child) {
                     $variationId = $child->getProductId();
                     $child->getProduct()->load($child->getProductId());
-                    $balanceVendorId = $this->helper->getBalanceVendors($variationId);
+                    if (!$balanceVendorId) {
+                        $balanceVendorId = $this->helper->getBalanceVendors($variationId);
+                    }
                     continue;
                 }
             }

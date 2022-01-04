@@ -1,27 +1,23 @@
 <?php
 namespace Balancepay\Balancepay\Helper;
 
-use \Magento\Framework\App\Helper\AbstractHelper;
-use \Webkul\Marketplace\Helper\Data as WebkulHelper;
 use \Webkul\Marketplace\Model\SellerFactory;
 use \Webkul\Marketplace\Model\ResourceModel\Product\CollectionFactory;
 use Balancepay\Balancepay\Model\ResourceModel\BalancepayProduct\CollectionFactory as MpProductCollection;
+use \Magento\Framework\App\Helper\AbstractHelper;
 
 class Data extends AbstractHelper
 {
     /**
-     * @param WebkulHelper $data
      * @param SellerFactory $sellerFactory
      * @param MpProductCollection $mpProductCollectionFactory
      * @param CollectionFactory $collectionFactory
      */
     public function __construct(
-        WebkulHelper $data,
         SellerFactory $sellerFactory,
         MpProductCollection $mpProductCollectionFactory,
         CollectionFactory $collectionFactory
     ) {
-        $this->data = $data;
         $this->sellerFactory = $sellerFactory;
         $this->_mpProductCollectionFactory = $mpProductCollectionFactory;
         $this->collectionFactory = $collectionFactory;
@@ -36,22 +32,13 @@ class Data extends AbstractHelper
     public function getVendorId($sellerId)
     {
         $balancepay_vendor_id = '';
-        $storeId = $this->data->getCurrentStoreId();
         $collection = $this->sellerFactory->create()
             ->getCollection()
+            ->addFieldToSelect('balance_vendor_id')
             ->addFieldToFilter('is_seller', \Webkul\Marketplace\Model\Seller::STATUS_ENABLED)
-            ->addFieldToFilter(
-                ['store_id', 'store_id'],
-                [
-                    ['eq' => $storeId],
-                    ['eq' => 0]
-                ]
-            )
-            ->addFieldToFilter('seller_id', $sellerId);
-        if (count($collection) > 0) {
-            foreach ($collection as $sellerData) {
-                $balancepay_vendor_id = $sellerData->getBalanceVendorId();
-            }
+            ->addFieldToFilter('seller_id', $sellerId)->getFirstItem()->getData();
+        if (!empty($collection['balance_vendor_id'])) {
+            return $collection['balance_vendor_id'];
         }
         return $balancepay_vendor_id;
     }
