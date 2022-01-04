@@ -18,6 +18,8 @@ use Balancepay\Balancepay\Model\BalancepayMethod;
 use Balancepay\Balancepay\Model\Config;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Balancepay\Balancepay\Model\Response\Factory as ResponseFactory;
+use Magento\Customer\Api\AccountManagementInterface;
+use Magento\Directory\Model\RegionFactory;
 use Magento\Sales\Model\Order\Payment as OrderPayment;
 
 /**
@@ -41,13 +43,17 @@ class Close extends AbstractRequest
         Config $balancepayConfig,
         Curl $curl,
         ResponseFactory $responseFactory,
-        HelperData $helper
+        HelperData $helper,
+        AccountManagementInterface $accountManagement,
+        RegionFactory $region
     ) {
         parent::__construct(
             $balancepayConfig,
             $curl,
             $responseFactory,
-            $helper
+            $helper,
+            $accountManagement,
+            $region
         );
     }
 

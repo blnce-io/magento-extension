@@ -18,6 +18,8 @@ use Balancepay\Balancepay\Model\Config;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Balancepay\Balancepay\Model\Response\Factory as ResponseFactory;
 use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Customer\Api\AccountManagementInterface;
+use Magento\Directory\Model\RegionFactory;
 use Magento\Quote\Model\Cart\CartTotalRepository;
 use Magento\Quote\Model\Quote;
 
@@ -51,13 +53,17 @@ class Transactions extends AbstractRequest
         ResponseFactory $responseFactory,
         CheckoutSession $checkoutSession,
         CartTotalRepository $cartTotalRepository,
-        HelperData $helper
+        HelperData $helper,
+        AccountManagementInterface $accountManagement,
+        RegionFactory $region
     ) {
         parent::__construct(
             $balancepayConfig,
             $curl,
             $responseFactory,
-            $helper
+            $helper,
+            $accountManagement,
+            $region
         );
 
         $this->_checkoutSession = $checkoutSession;
@@ -99,20 +105,20 @@ class Transactions extends AbstractRequest
         return array_replace_recursive(
             parent::getParams(),
             [
-            'currency' => $quote->getBaseCurrencyCode(),
-            'externalReferenceId' => $this->_balancepayConfig->getReservedOrderId($quote),
-            'notes' => $this->_balancepayConfig->getReservedOrderId($quote),
-            'buyer' => $this->getBuyerParams($quote),
-            "plan" => [
-                "planType" => "invoice",
-                "chargeDate" => date('Y-m-d', strtotime($this->_balancepayConfig->getGmtDate())),
-            ],
-            'lines' => $this->getLinesParams($quote, $quoteTotals->getBaseShippingAmount()),
-            'shippingLines' => $this->getShippingLinesParams($quote),
-            'totalDiscount' => abs($this->amountFormat($quoteTotals->getBaseDiscountAmount())),
-            'billingAddress' => $this->getBillingAddressParams($quote),
-            'shippingAddress' => $this->getShippingAddressParams($quote),
-            'allowedPaymentMethods' => $this->_balancepayConfig->getAllowedPaymentMethods(),
+                'currency' => $quote->getBaseCurrencyCode(),
+                'externalReferenceId' => $this->_balancepayConfig->getReservedOrderId($quote),
+                'notes' => $this->_balancepayConfig->getReservedOrderId($quote),
+                'buyer' => $this->getBuyerParams($quote),
+                "plan" => [
+                    "planType" => "invoice",
+                    "chargeDate" => date('Y-m-d', strtotime($this->_balancepayConfig->getGmtDate())),
+                ],
+                'lines' => $this->getLinesParams($quote, $quoteTotals->getBaseShippingAmount()),
+                'shippingLines' => $this->getShippingLinesParams($quote),
+                'totalDiscount' => abs($this->amountFormat($quoteTotals->getBaseDiscountAmount())),
+                'billingAddress' => $this->getBillingAddressParams($quote),
+                'shippingAddress' => $this->getShippingAddressParams($quote),
+                'allowedPaymentMethods' => $this->_balancepayConfig->getAllowedPaymentMethods(),
             ]
         );
     }

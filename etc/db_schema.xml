@@ -3,4 +3,18 @@
     <table name="marketplace_userdata" resource="default" >
         <column xsi:type="text" name="balance_vendor_id" nullable="true" comment="Balance Vendor Id"/>
     </table>
+    <table name="balancepay_product" resource="default" engine="innodb" comment="Balancepay Product Table">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" padding="10" identity="true" comment="Entity Id"/>
+        <column xsi:type="int" name="product_id" unsigned="true" nullable="false" default="0" identity="false" padding="10" comment="Product Id"/>
+        <column xsi:type="text" name="vendor_id" unsigned="true" nullable="false" default="0" identity="false" padding="10" comment="Vendor Id"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" comment="Creation Time"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="false" comment="Update Time"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" table="balancepay_product" column="product_id" referenceTable="catalog_product_entity" referenceColumn="entity_id" onDelete="CASCADE"/>
+        <index indexType="btree">
+            <column name="product_id"/>
+        </index>
+    </table>
 </schema>

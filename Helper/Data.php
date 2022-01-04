@@ -1,33 +1,36 @@
 <?php
 namespace Balancepay\Balancepay\Helper;
 
+use \Magento\Framework\App\Helper\AbstractHelper;
 use \Webkul\Marketplace\Helper\Data as WebkulHelper;
 use \Webkul\Marketplace\Model\SellerFactory;
 use \Webkul\Marketplace\Model\ResourceModel\Product\CollectionFactory;
-/**
- * Class Data
- * @package Balancepay\Balancepay\Helper
- */
-class Data extends \Magento\Framework\App\Helper\AbstractHelper
-{
+use Balancepay\Balancepay\Model\ResourceModel\BalancepayProduct\CollectionFactory as MpProductCollection;
 
+class Data extends AbstractHelper
+{
     /**
      * @param WebkulHelper $data
      * @param SellerFactory $sellerFactory
+     * @param MpProductCollection $mpProductCollectionFactory
      * @param CollectionFactory $collectionFactory
      */
     public function __construct(
         WebkulHelper $data,
         SellerFactory $sellerFactory,
-        CollectionFactory $collectionFactory)
-    {
+        MpProductCollection $mpProductCollectionFactory,
+        CollectionFactory $collectionFactory
+    ) {
         $this->data = $data;
         $this->sellerFactory = $sellerFactory;
+        $this->_mpProductCollectionFactory = $mpProductCollectionFactory;
         $this->collectionFactory = $collectionFactory;
     }
 
     /**
-     * @param $sellerId
+     * Get Vendor Id
+     *
+     * @param int $sellerId
      * @return string
      */
     public function getVendorId($sellerId)
@@ -54,11 +57,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
+     * Get balance Vendors
+     *
      * @param string $productId
      * @return string
      */
     public function getBalanceVendors($productId = '')
     {
+        $balanceVendorId = '';
         $transactionColl = $this->collectionFactory->create()
             ->addFieldToFilter(
                 'mageproduct_id',
@@ -66,6 +72,23 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             );
         $sellerId = $transactionColl->getFirstItem()->getSellerId();
         $balanceVendorId = $this->getVendorId($sellerId);
+        if (empty($balanceVendorId)) {
+            $balanceVendorId = $this->getSellerIdByProductId($productId);
+        }
         return $balanceVendorId;
+    }
+
+    /**
+     * Return the seller Id by product id.
+     *
+     * @param string $productId
+     * @return mixed
+     */
+    public function getSellerIdByProductId($productId = '')
+    {
+        $collection = $this->_mpProductCollectionFactory->create();
+        $collection->addFieldToFilter('product_id', $productId);
+        $sellerId = $collection->getFirstItem()->getVendorId();
+        return $sellerId;
     }
 }

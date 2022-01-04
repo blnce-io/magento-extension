@@ -18,6 +18,8 @@ use Balancepay\Balancepay\Model\Config;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Balancepay\Balancepay\Model\Response\Factory as ResponseFactory;
 use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Customer\Api\AccountManagementInterface;
+use Magento\Directory\Model\RegionFactory;
 use Magento\Quote\Model\Cart\CartTotalRepository;
 use Magento\Quote\Model\Quote;
 
@@ -37,13 +39,14 @@ class Checkout extends AbstractRequest
     protected $_cartTotalRepository;
 
     /**
-     * Checkout constructor.
      * @param Config $balancepayConfig
      * @param Curl $curl
      * @param ResponseFactory $responseFactory
      * @param CheckoutSession $checkoutSession
      * @param CartTotalRepository $cartTotalRepository
      * @param HelperData $helper
+     * @param AccountManagementInterface $accountManagement
+     * @param RegionFactory $region
      */
     public function __construct(
         Config $balancepayConfig,
@@ -51,21 +54,24 @@ class Checkout extends AbstractRequest
         ResponseFactory $responseFactory,
         CheckoutSession $checkoutSession,
         CartTotalRepository $cartTotalRepository,
-        HelperData $helper
+        HelperData $helper,
+        AccountManagementInterface $accountManagement,
+        RegionFactory $region
     ) {
         parent::__construct(
             $balancepayConfig,
             $curl,
             $responseFactory,
-            $helper
+            $helper,
+            $accountManagement,
+            $region
         );
-
         $this->_checkoutSession = $checkoutSession;
         $this->_cartTotalRepository = $cartTotalRepository;
     }
 
     /**
-     * {@inheritdoc}
+     * Get Request Method
      *
      * @return string
      */
@@ -75,7 +81,7 @@ class Checkout extends AbstractRequest
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      *
      * @return string
      */
@@ -85,8 +91,10 @@ class Checkout extends AbstractRequest
     }
 
     /**
+     * Amount Format
+     *
      * @method amountFormat
-     * @param  float|int              $amount
+     * @param  float|int $amount
      * @return string
      */
     protected function amountFormat($amount)
@@ -109,32 +117,33 @@ class Checkout extends AbstractRequest
         return array_replace_recursive(
             parent::getParams(),
             [
-              'currency' => $quote->getBaseCurrencyCode(),
-              'cartToken' => $this->_balancepayConfig->getReservedOrderId($quote),
-              'buyer' => $this->getBuyerParams($quote),
-              'transactions' => [[
-                  'seller' => '',
-                  'totalLineItems' => $this->amountFormat($quoteTotals->getBaseSubtotal()),
-                  'shippingPrice' => $this->amountFormat($quoteTotals->getBaseShippingAmount()),
-                  'tax' => $this->amountFormat($quoteTotals->getBaseTaxAmount()),
-                  'lineItems' => $this->getLineItemsParams($quote),
-              ]],
-              'shippingLines' => $this->getShippingLinesParams($quote),
-              'totalLineItems' => $this->amountFormat($quoteTotals->getBaseSubtotal()),
-              'totalTax' => $this->amountFormat($quoteTotals->getBaseTaxAmount()),
-              'totalPrice' => $this->amountFormat($quoteTotals->getBaseGrandTotal()),
-              'totalShipping' => $this->amountFormat($quoteTotals->getBaseShippingAmount()),
-              'totalDiscount' => abs($this->amountFormat($quoteTotals->getBaseDiscountAmount())),
-              'billingAddress' => $this->getBillingAddressParams($quote),
-              'requiresShipping' => $requiresShipping ? true : false,
-              'allowedPaymentMethods' => $this->_balancepayConfig->getAllowedPaymentMethods(),
+                'currency' => $quote->getBaseCurrencyCode(),
+                'cartToken' => $this->_balancepayConfig->getReservedOrderId($quote),
+                'buyer' => $this->getBuyerParams($quote),
+                'transactions' => [[
+                    'seller' => '',
+                    'totalLineItems' => $this->amountFormat($quoteTotals->getBaseSubtotal()),
+                    'shippingPrice' => $this->amountFormat($quoteTotals->getBaseShippingAmount()),
+                    'tax' => $this->amountFormat($quoteTotals->getBaseTaxAmount()),
+                    'lineItems' => $this->getLineItemsParams($quote),
+                ]],
+                'shippingLines' => $this->getShippingLinesParams($quote),
+                'totalLineItems' => $this->amountFormat($quoteTotals->getBaseSubtotal()),
+                'totalTax' => $this->amountFormat($quoteTotals->getBaseTaxAmount()),
+                'totalPrice' => $this->amountFormat($quoteTotals->getBaseGrandTotal()),
+                'totalShipping' => $this->amountFormat($quoteTotals->getBaseShippingAmount()),
+                'totalDiscount' => abs($this->amountFormat($quoteTotals->getBaseDiscountAmount())),
+                'billingAddress' => $this->getBillingAddressParams($quote),
+                'requiresShipping' => $requiresShipping ? true : false,
+                'allowedPaymentMethods' => $this->_balancepayConfig->getAllowedPaymentMethods(),
             ]
         );
     }
 
     /**
-     * @param Quote $quote
+     * Get Buyer Params
      *
+     * @param Quote $quote
      * @return array
      */
     protected function getBuyerParams(Quote $quote)
@@ -155,8 +164,9 @@ class Checkout extends AbstractRequest
     }
 
     /**
-     * @param Quote $quote
+     * Get Billing Address Params
      *
+     * @param Quote $quote
      * @return array
      */
     protected function getBillingAddressParams(Quote $quote)
@@ -165,11 +175,11 @@ class Checkout extends AbstractRequest
 
         if (($billing = $quote->getBillingAddress()) !== null) {
             $params = [
-              'streetAddress1' => is_array($billing->getStreet()) ? implode(' ', $billing->getStreet()) : '',
-              'countryCode' => $billing->getCountryId(),
-              'state' => (string) $billing->getRegion(),
-              'city' => $billing->getCity(),
-              'zipCode' => $billing->getPostcode(),
+                'streetAddress1' => is_array($billing->getStreet()) ? implode(' ', $billing->getStreet()) : '',
+                'countryCode' => $billing->getCountryId(),
+                'state' => (string) $billing->getRegion(),
+                'city' => $billing->getCity(),
+                'zipCode' => $billing->getPostcode(),
             ];
         }
 
@@ -177,8 +187,9 @@ class Checkout extends AbstractRequest
     }
 
     /**
-     * @param Quote $quote
+     * Get Line Items Params
      *
+     * @param Quote $quote
      * @return array
      */
     protected function getLineItemsParams(Quote $quote)
@@ -195,16 +206,10 @@ class Checkout extends AbstractRequest
             $balanceVendorId = $quoteItem->getProduct()->getData('balancepay_vendor_id');
             if ($quoteItem->getProductType() === 'configurable' && $quoteItem->getHasChildren()) {
                 $balanceVendorId = $helper->getBalanceVendors($quoteItem->getProductId());
-                if (empty($balanceVendorId)) {
-                    $balanceVendorId = $quoteItem->getBalancepayVendorId();
-                }
                 foreach ($quoteItem->getChildren() as $child) {
                     $variationId = $child->getProductId();
                     $child->getProduct()->load($child->getProductId());
                     $balanceVendorId = $helper->getBalanceVendors($child->getProductId());
-                    if (!$balanceVendorId) {
-                        $balanceVendorId = $child->getProduct()->getData('balancepay_vendor_id');
-                    }
                     continue;
                 }
             }
