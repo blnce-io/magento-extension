@@ -39,6 +39,12 @@ class Checkout extends AbstractRequest
     protected $_cartTotalRepository;
 
     /**
+     * @var HelperData
+     */
+    protected $helper;
+
+    /**
+     * Checkout constructor.
      * @param Config $balancepayConfig
      * @param Curl $curl
      * @param ResponseFactory $responseFactory
@@ -68,6 +74,7 @@ class Checkout extends AbstractRequest
         );
         $this->_checkoutSession = $checkoutSession;
         $this->_cartTotalRepository = $cartTotalRepository;
+        $this->helper = $helper;
     }
 
     /**
@@ -203,13 +210,14 @@ class Checkout extends AbstractRequest
             }
             $variationId = $quoteItem->getProductId();
             $quoteItem->getProduct()->load($quoteItem->getProductId());
-            $balanceVendorId = $quoteItem->getProduct()->getData('balancepay_vendor_id');
+            $balanceVendorId = $this->helper->getBalanceVendors($variationId);
             if ($quoteItem->getProductType() === 'configurable' && $quoteItem->getHasChildren()) {
-                $balanceVendorId = $helper->getBalanceVendors($quoteItem->getProductId());
                 foreach ($quoteItem->getChildren() as $child) {
                     $variationId = $child->getProductId();
                     $child->getProduct()->load($child->getProductId());
-                    $balanceVendorId = $helper->getBalanceVendors($child->getProductId());
+                    if (!$balanceVendorId) {
+                        $balanceVendorId = $this->helper->getBalanceVendors($child->getProductId());
+                    }
                     continue;
                 }
             }

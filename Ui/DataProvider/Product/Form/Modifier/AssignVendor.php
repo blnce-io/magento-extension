@@ -9,8 +9,6 @@ use Magento\Ui\Component\Form\Field;
 use Magento\Ui\Component\Form\Element\Select;
 use Magento\Ui\Component\Form\Element\DataType\Text;
 use Balancepay\Balancepay\Model\ResourceModel\BalancepayProduct\CollectionFactory as MpProductCollection;
-use Webkul\Marketplace\Model\ResourceModel\Seller\CollectionFactory as SellerCollection;
-use \Webkul\Marketplace\Helper\Data as HelperData;
 
 class AssignVendor extends AbstractModifier
 {
@@ -20,27 +18,16 @@ class AssignVendor extends AbstractModifier
     protected $coreRegistry;
 
     /**
-     * @var HelperData
-     */
-    protected $helper;
-
-    /**
      * @param Registry $coreRegistry
-     * @param SellerCollection $sellerCollectionFactory
-     * @param HelperData $helper
      * @param MpProductCollection $mpProductCollectionFactory
      * @param RequestFactory $requestFactory
      */
     public function __construct(
         Registry $coreRegistry,
-        SellerCollection $sellerCollectionFactory,
-        HelperData $helper,
         MpProductCollection $mpProductCollectionFactory,
         RequestFactory $requestFactory
     ) {
         $this->coreRegistry = $coreRegistry;
-        $this->sellerCollectionFactory = $sellerCollectionFactory;
-        $this->helper = $helper;
         $this->_mpProductCollectionFactory = $mpProductCollectionFactory;
         $this->requestFactory = $requestFactory;
     }

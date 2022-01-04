@@ -192,6 +192,11 @@ class BalancepayMethod extends AbstractMethod
     private $request;
 
     /**
+     * @var HelperData
+     */
+    protected $helper;
+
+    /**
      * @param Context $context
      * @param Registry $registry
      * @param ExtensionAttributesFactory $extensionFactory
@@ -206,6 +211,7 @@ class BalancepayMethod extends AbstractMethod
      * @param Config $balancepayConfig
      * @param RequestFactory $requestFactory
      * @param RequestInterface $request
+     * @param HelperData $helper
      * @param array $data
      */
     public function __construct(
@@ -223,6 +229,7 @@ class BalancepayMethod extends AbstractMethod
         BalancepayConfig $balancepayConfig,
         RequestFactory $requestFactory,
         RequestInterface $request,
+        HelperData $helper,
         array $data = []
     ) {
         parent::__construct(
@@ -243,6 +250,7 @@ class BalancepayMethod extends AbstractMethod
         $this->balancepayConfig = $balancepayConfig;
         $this->requestFactory = $requestFactory;
         $this->request = $request;
+        $this->helper = $helper;
     }
 
     /**
@@ -389,11 +397,13 @@ class BalancepayMethod extends AbstractMethod
             $balanceVendorId = null;
 
             foreach ($orderItems as $item) {
-                $balanceVendorId = $helper->getBalanceVendors($item->getProductId());
+                $_balanceVendorId = $this->helper->getBalanceVendors($item->getProductId());
                 if ($item->getProductType() === 'configurable' && $item->getHasChildren()) {
                     foreach ($item->getChildrenItems() as $child) {
                         $child->getProduct()->load($child->getProductId());
-                        $balanceVendorId = $helper->getBalanceVendors($child->getProductId());
+                        if (!$_balanceVendorId) {
+                            $_balanceVendorId = $this->helper->getBalanceVendors($child->getProductId());
+                        }
                         continue;
                     }
                 }
