@@ -3,6 +3,7 @@ namespace Balancepay\Balancepay\Ui\DataProvider\Product\Form\Modifier;
 
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Magento\Catalog\Ui\DataProvider\Product\Form\Modifier\AbstractModifier;
+use Magento\Framework\Registry;
 use Magento\Ui\Component\Form\Fieldset;
 use Magento\Ui\Component\Form\Field;
 use Magento\Ui\Component\Form\Element\Select;
@@ -12,17 +13,17 @@ use Balancepay\Balancepay\Model\ResourceModel\BalancepayProduct\CollectionFactor
 class AssignVendor extends AbstractModifier
 {
     /**
-     * @var \Magento\Framework\Registry
+     * @var Registry
      */
     protected $coreRegistry;
 
     /**
-     * @param \Magento\Framework\Registry $coreRegistry
+     * @param Registry $coreRegistry
      * @param MpProductCollection $mpProductCollectionFactory
      * @param RequestFactory $requestFactory
      */
     public function __construct(
-        \Magento\Framework\Registry $coreRegistry,
+        Registry $coreRegistry,
         MpProductCollection $mpProductCollectionFactory,
         RequestFactory $requestFactory
     ) {
