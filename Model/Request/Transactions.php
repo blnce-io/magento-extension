@@ -11,12 +11,15 @@
 
 namespace Balancepay\Balancepay\Model\Request;
 
+use Balancepay\Balancepay\Helper\Data as HelperData;
 use Balancepay\Balancepay\Lib\Http\Client\Curl;
 use Balancepay\Balancepay\Model\AbstractRequest;
 use Balancepay\Balancepay\Model\Config;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Balancepay\Balancepay\Model\Response\Factory as ResponseFactory;
 use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Customer\Api\AccountManagementInterface;
+use Magento\Directory\Model\RegionFactory;
 use Magento\Quote\Model\Cart\CartTotalRepository;
 use Magento\Quote\Model\Quote;
 
@@ -36,25 +39,32 @@ class Transactions extends AbstractRequest
     protected $_cartTotalRepository;
 
     /**
-     * AbstractGateway constructor.
-     *
-     * @param Config                $config
-     * @param Curl                  $curl
-     * @param ResponseFactory       $responseFactory
-     * @param CheckoutSession       $checkoutSession
-     * @param CartTotalRepository   $cartTotalRepository
+     * @param Config $balancepayConfig
+     * @param Curl $curl
+     * @param ResponseFactory $responseFactory
+     * @param CheckoutSession $checkoutSession
+     * @param CartTotalRepository $cartTotalRepository
+     * @param HelperData $helper
+     * @param AccountManagementInterface $accountManagement
+     * @param RegionFactory $region
      */
     public function __construct(
         Config $balancepayConfig,
         Curl $curl,
         ResponseFactory $responseFactory,
         CheckoutSession $checkoutSession,
-        CartTotalRepository $cartTotalRepository
+        CartTotalRepository $cartTotalRepository,
+        HelperData $helper,
+        AccountManagementInterface $accountManagement,
+        RegionFactory $region
     ) {
         parent::__construct(
             $balancepayConfig,
             $curl,
-            $responseFactory
+            $helper,
+            $responseFactory,
+            $accountManagement,
+            $region
         );
 
         $this->_checkoutSession = $checkoutSession;
@@ -62,7 +72,7 @@ class Transactions extends AbstractRequest
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      *
      * @return string
      */
@@ -72,7 +82,7 @@ class Transactions extends AbstractRequest
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      *
      * @return string
      */
@@ -115,8 +125,9 @@ class Transactions extends AbstractRequest
     }
 
     /**
-     * @param Quote $quote
+     * Get Buyer params
      *
+     * @param Quote $quote
      * @return array
      */
     protected function getBuyerParams(Quote $quote)

@@ -25,12 +25,13 @@ class Factory
     /**
      * Response handlers.
      */
-    const CAPTURE_RESPONSE_HANDLER = 'capture';
-    const CLOSE_RESPONSE_HANDLER = 'close';
-    const CHECKOUT_RESPONSE_HANDLER = 'checkout';
-    const TRANSACTIONS_RESPONSE_HANDLER = 'transactions';
-    const WEBHOOKS_KEYS_RESPONSE_HANDLER = 'webhooks/keys';
-    const WEBHOOKS_RESPONSE_HANDLER = 'webhooks';
+    public const CAPTURE_RESPONSE_HANDLER = 'capture';
+    public const CLOSE_RESPONSE_HANDLER = 'close';
+    public const CHECKOUT_RESPONSE_HANDLER = 'checkout';
+    public const TRANSACTIONS_RESPONSE_HANDLER = 'transactions';
+    public const WEBHOOKS_KEYS_RESPONSE_HANDLER = 'webhooks/keys';
+    public const WEBHOOKS_RESPONSE_HANDLER = 'webhooks';
+    public const VENDORS_RESPONSE_HANDLER = 'vendors';
 
     /**
      * Set of requests.
@@ -44,6 +45,7 @@ class Factory
         self::TRANSACTIONS_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Transactions::class,
         self::WEBHOOKS_KEYS_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Webhooks\Keys::class,
         self::WEBHOOKS_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Webhooks::class,
+        self::VENDORS_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Vendors::class,
     ];
 
     /**
@@ -64,12 +66,10 @@ class Factory
     }
 
     /**
-     * Create response model.
+     * Create
      *
-     * @param string            $type
-     * @param Curl|null         $curl
-     * @param OrderPayment|null $payment
-     *
+     * @param string $type
+     * @param Curl|null $curl
      * @return ResponseInterface
      * @throws LocalizedException
      */

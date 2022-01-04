@@ -24,12 +24,13 @@ class Factory
     /**
      * Request methods.
      */
-    const CAPTURE_REQUEST_METHOD = 'capture';
-    const CLOSE_REQUEST_METHOD = 'close';
-    const CHECKOUT_REQUEST_METHOD = 'checkout';
-    const TRANSACTIONS_REQUEST_METHOD = 'transactions';
-    const WEBHOOKS_KEYS_REQUEST_METHOD = 'webhooks/keys';
-    const WEBHOOKS_REQUEST_METHOD = 'webhooks';
+    public const CAPTURE_REQUEST_METHOD = 'capture';
+    public const CLOSE_REQUEST_METHOD = 'close';
+    public const CHECKOUT_REQUEST_METHOD = 'checkout';
+    public const TRANSACTIONS_REQUEST_METHOD = 'transactions';
+    public const WEBHOOKS_KEYS_REQUEST_METHOD = 'webhooks/keys';
+    public const WEBHOOKS_REQUEST_METHOD = 'webhooks';
+    public const VENDORS_REQUEST_METHOD = 'vendors';
 
     /**
      * Set of requests.
@@ -43,6 +44,7 @@ class Factory
         self::TRANSACTIONS_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Transactions::class,
         self::WEBHOOKS_KEYS_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Webhooks\Keys::class,
         self::WEBHOOKS_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Webhooks::class,
+        self::VENDORS_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Vendors::class,
     ];
 
     /**
@@ -85,6 +87,7 @@ class Factory
         $model = $this->objectManager->create($className);
 
         if (!$model instanceof RequestInterface) {
+
             throw new LocalizedException(
                 __(
                     '%1 doesn\'t implement \Balancepay\Balancepay\Model\RequestInterface',
