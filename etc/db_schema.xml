@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="balancepay_product" resource="default" engine="innodb" comment="Balancepay Product Table">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" padding="10" identity="true" comment="Entity Id"/>
+        <column xsi:type="int" name="product_id" unsigned="true" nullable="false" default="0" identity="false" padding="10" comment="Product Id"/>
+        <column xsi:type="text" name="vendor_id" nullable="false" comment="Vendor Id"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" comment="Creation Time"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="false" comment="Update Time"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FL_ALLOWED_SEVERITIES" table="balancepay_product" column="product_id" referenceTable="catalog_product_entity" referenceColumn="entity_id" onDelete="CASCADE"/>
+        <index referenceId="CATALOG_PRODUCT_ENTITY_PRODUCT_ID_BALANCEPAY_PRODUCT" indexType="btree">
+            <column name="product_id"/>
+        </index>
+    </table>
+</schema>

@@ -11,12 +11,15 @@
 
 namespace Balancepay\Balancepay\Model\Request\Transactions;
 
+use Balancepay\Balancepay\Helper\Data as HelperData;
 use Balancepay\Balancepay\Lib\Http\Client\Curl;
 use Balancepay\Balancepay\Model\AbstractRequest;
 use Balancepay\Balancepay\Model\BalancepayMethod;
 use Balancepay\Balancepay\Model\Config;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Balancepay\Balancepay\Model\Response\Factory as ResponseFactory;
+use Magento\Customer\Api\AccountManagementInterface;
+use Magento\Directory\Model\RegionFactory;
 use Magento\Sales\Model\Order\Payment as OrderPayment;
 
 /**
@@ -40,25 +43,8 @@ class Capture extends AbstractRequest
     protected $_payment;
 
     /**
-     * AbstractGateway constructor.
+     * Set amount
      *
-     * @param Config                $config
-     * @param Curl                  $curl
-     * @param ResponseFactory       $responseFactory
-     */
-    public function __construct(
-        Config $balancepayConfig,
-        Curl $curl,
-        ResponseFactory $responseFactory
-    ) {
-        parent::__construct(
-            $balancepayConfig,
-            $curl,
-            $responseFactory
-        );
-    }
-
-    /**
      * @method setAmount
      * @param  int|float $amount
      * @return Capture $this
@@ -70,6 +56,8 @@ class Capture extends AbstractRequest
     }
 
     /**
+     * Get Amount
+     *
      * @method getAmount
      * @return int|float|null
      */
@@ -79,6 +67,8 @@ class Capture extends AbstractRequest
     }
 
     /**
+     * Set Balance Vendor Id
+     *
      * @method setBalanceVendorId
      * @param  mixed $balanceVendorId
      * @return Capture $this
@@ -90,6 +80,8 @@ class Capture extends AbstractRequest
     }
 
     /**
+     * Get Balance Vendor Id
+     *
      * @method getBalanceVendorId
      * @return mixed
      */
@@ -99,6 +91,8 @@ class Capture extends AbstractRequest
     }
 
     /**
+     * Set payment
+     *
      * @method setPayment
      * @param  OrderPayment $payment
      * @return Capture $this
@@ -110,6 +104,8 @@ class Capture extends AbstractRequest
     }
 
     /**
+     * Get Payment
+     *
      * @method getPayment
      * @return OrderPayment|null
      */
@@ -134,7 +130,7 @@ class Capture extends AbstractRequest
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      *
      * @return string
      */
@@ -144,7 +140,7 @@ class Capture extends AbstractRequest
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      *
      * @return string
      */

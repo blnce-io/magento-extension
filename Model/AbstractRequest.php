@@ -13,8 +13,11 @@ namespace Balancepay\Balancepay\Model;
 
 use Balancepay\Balancepay\Lib\Http\Client\Curl;
 use Balancepay\Balancepay\Model\Response\Factory as ResponseFactory;
+use Magento\Customer\Api\AccountManagementInterface;
+use Magento\Directory\Model\RegionFactory;
 use Magento\Framework\Exception\PaymentException;
 use Magento\Quote\Model\Quote;
+use Balancepay\Balancepay\Helper\Data as HelperData;
 
 /**
  * Balancepay abstract request model.
@@ -27,6 +30,11 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     protected $_curl;
 
     /**
+     * @var HelperData
+     */
+    protected $helper;
+
+    /**
      * @var ResponseInterface
      */
     protected $_responseFactory;
@@ -37,26 +45,35 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     protected $_fallbackEmail;
 
     /**
-     * Object constructor.
-     *
-     * @param Config          $balancepayConfig
-     * @param Curl            $curl
+     * @param Config $balancepayConfig
+     * @param Curl $curl
+     * @param HelperData $helper
      * @param ResponseFactory $responseFactory
+     * @param AccountManagementInterface $accountManagement
+     * @param RegionFactory $region
      */
     public function __construct(
         Config $balancepayConfig,
         Curl $curl,
-        ResponseFactory $responseFactory
+        HelperData $helper,
+        ResponseFactory $responseFactory,
+        AccountManagementInterface $accountManagement,
+        RegionFactory $region
     ) {
         parent::__construct(
             $balancepayConfig
         );
 
         $this->_curl = $curl;
+        $this->helper = $helper;
         $this->_responseFactory = $responseFactory;
+        $this->accountManagement = $accountManagement;
+        $this->region = $region;
     }
 
     /**
+     * Process
+     *
      * @return AbstractResponse
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws PaymentException
@@ -95,6 +112,8 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     abstract protected function getResponseHandlerType();
 
     /**
+     * Get Parameters
+     *
      * @return array
      * @throws PaymentException
      */
@@ -104,8 +123,10 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     }
 
     /**
+     * Set Fallback email
+     *
      * @method setFallbackEmail
-     * @param  string|null           $email
+     * @param string|null $email
      * @return AbstractRequest
      */
     public function setFallbackEmail($email = null)
@@ -115,8 +136,10 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     }
 
     /**
+     * Get Fallback email
+     *
      * @method getFallbackEmail
-     * @param  string|null           $email
+     * @param string|null $email
      */
     public function getFallbackEmail()
     {
@@ -124,6 +147,8 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     }
 
     /**
+     * Get curl method
+     *
      * @return string
      * @throws PaymentException
      */
@@ -133,6 +158,8 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     }
 
     /**
+     * Send Request
+     *
      * @return AbstractRequest
      * @throws \Magento\Framework\Exception\LocalizedException
      */
@@ -179,9 +206,10 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     }
 
     /**
-     * @param Quote     $quote
-     * @param int|float $totalShippingAmount
+     * Get Lines params
      *
+     * @param Quote $quote
+     * @param int|float $totalShippingAmount
      * @return array
      */
     protected function getLinesParams(Quote $quote, $totalShippingAmount = 0)
@@ -196,13 +224,13 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
             }
             $variationId = $quoteItem->getProductId();
             $quoteItem->getProduct()->load($quoteItem->getProductId());
-            $balanceVendorId = $quoteItem->getProduct()->getData('balancepay_vendor_id');
+            $balanceVendorId = $this->helper->getBalanceVendors($variationId);
             if ($quoteItem->getProductType() === 'configurable' && $quoteItem->getHasChildren()) {
                 foreach ($quoteItem->getChildren() as $child) {
                     $variationId = $child->getProductId();
                     $child->getProduct()->load($child->getProductId());
                     if (!$balanceVendorId) {
-                        $balanceVendorId = $child->getProduct()->getData('balancepay_vendor_id');
+                        $balanceVendorId = $this->helper->getBalanceVendors($variationId);
                     }
                     continue;
                 }
@@ -244,17 +272,16 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
                 $lines[$balanceVendorId]['lineItems'][] = $param;
             }
         }
-
         foreach ($lines as &$line) {
             $line['shippingPrice'] = $this->amountFormat($line['shippingPrice']);
         }
-
         return array_values($lines);
     }
 
     /**
-     * @param Quote $quote
+     * Get Billing address params
      *
+     * @param Quote $quote
      * @return array
      */
     protected function getBillingAddressParams(Quote $quote)
@@ -262,15 +289,22 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
         $params = [];
 
         if (($billing = $quote->getBillingAddress()) !== null) {
-            $address = (array) $billing->getStreet();
+            $regionName = $billing->getRegion();
+            $address = (array)$billing->getStreet();
+            if (empty($address[0])) {
+                $billing = $this->accountManagement->getDefaultBillingAddress($quote->getCustomerId());
+                $address = (array)$billing->getStreet();
+                $region = $this->region->create()->load($billing->getRegionId());
+                $regionName = $region->getName() ?? '';
+            }
             $params = [
                 'firstName' => $billing->getFirstname(),
                 'lastName' => $billing->getLastname(),
-                'addressLine1' => (string) array_shift($address),
-                'addressLine2' => (string) implode(' ', $address),
+                'addressLine1' => (string)array_shift($address),
+                'addressLine2' => (string)implode(' ', $address),
                 'zipCode' => $billing->getPostcode(),
                 'countryCode' => $billing->getCountryId(),
-                'state' => (string) $billing->getRegion(),
+                'state' => (string)$regionName,
                 'city' => $billing->getCity(),
             ];
         }
@@ -279,43 +313,61 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     }
 
     /**
-     * @param Quote $quote
+     * Get shipping address params
      *
+     * @param Quote $quote
      * @return array
      */
     protected function getShippingAddressParams(Quote $quote)
     {
         $params = [];
-
         if (($shipping = $quote->getShippingAddress()) !== null) {
-            $address = (array) $shipping->getStreet();
+            $regionName = $shipping->getRegion();
+            $address = (array)$shipping->getStreet();
+            if (empty($address[0])) {
+                if ($quote->getCustomerId()) {
+                    $shipping = $this->accountManagement->getDefaultShippingAddress($quote->getCustomerId());
+                    $address = (array)$shipping->getStreet();
+                }
+                if (!empty($address[0])) {
+                    $address = (array)$shipping->getStreet() ?? '';
+                    $region = $this->region->create()->load($shipping->getRegionId());
+                    $regionName = $region->getName() ?? '';
+                } else {
+                    if (($billing = $quote->getBillingAddress()) !== null) {
+                        $address = (array)$billing->getStreet();
+                        $region = $this->region->create()->load($billing->getRegionId());
+                        $regionName = $region->getName() ?? '';
+                        $shipping = $billing;
+                    }
+                }
+            }
             $params = [
                 'firstName' => $shipping->getFirstname(),
                 'lastName' => $shipping->getLastname(),
-                'addressLine1' => (string) array_shift($address),
-                'addressLine2' => (string) implode(' ', $address),
+                'addressLine1' => (string)array_shift($address),
+                'addressLine2' => (string)implode(' ', $address),
                 'zipCode' => $shipping->getPostcode(),
                 'countryCode' => $shipping->getCountryId(),
-                'state' => (string) $shipping->getRegion(),
+                'state' => (string)$regionName,
                 'city' => $shipping->getCity(),
             ];
         }
-
         return $params;
     }
 
     /**
-     * @param Quote $quote
+     * Get shipping lines params
      *
+     * @param Quote $quote
      * @return array
      */
     protected function getShippingLinesParams(Quote $quote)
     {
         $params = [];
 
-        if (
-            ($shipping = $quote->getShippingAddress()) !== null &&
-            ($rate = $shipping->getShippingRatesCollection()->getFirstItem()) !== null
+        if (($shipping = $quote->getShippingAddress()) &&
+            ($rate = $shipping->getShippingRatesCollection()->getFirstItem())
         ) {
             $params = [
                 'title' => $shipping->getShippingDescription(),
