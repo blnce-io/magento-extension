@@ -289,13 +289,13 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
         $params = [];
 
         if (($billing = $quote->getBillingAddress()) !== null) {
-            $RegionName = $billing->getRegion();
+            $regionName = $billing->getRegion();
             $address = (array)$billing->getStreet();
             if (empty($address[0])) {
                 $billing = $this->accountManagement->getDefaultBillingAddress($quote->getCustomerId());
                 $address = (array)$billing->getStreet();
                 $region = $this->region->create()->load($billing->getRegionId());
-                $RegionName = $region->getName() ?? '';
+                $regionName = $region->getName() ?? '';
             }
             $params = [
                 'firstName' => $billing->getFirstname(),
@@ -304,7 +304,7 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
                 'addressLine2' => (string)implode(' ', $address),
                 'zipCode' => $billing->getPostcode(),
                 'countryCode' => $billing->getCountryId(),
-                'state' => (string)$RegionName,
+                'state' => (string)$regionName,
                 'city' => $billing->getCity(),
             ];
         }
@@ -322,7 +322,7 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     {
         $params = [];
         if (($shipping = $quote->getShippingAddress()) !== null) {
-            $RegionName = $shipping->getRegion();
+            $regionName = $shipping->getRegion();
             $address = (array)$shipping->getStreet();
             if (empty($address[0])) {
                 if ($quote->getCustomerId()) {
@@ -332,12 +332,12 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
                 if (!empty($address[0])) {
                     $address = (array)$shipping->getStreet() ?? '';
                     $region = $this->region->create()->load($shipping->getRegionId());
-                    $RegionName = $region->getName() ?? '';
+                    $regionName = $region->getName() ?? '';
                 } else {
                     if (($billing = $quote->getBillingAddress()) !== null) {
                         $address = (array)$billing->getStreet();
                         $region = $this->region->create()->load($billing->getRegionId());
-                        $RegionName = $region->getName() ?? '';
+                        $regionName = $region->getName() ?? '';
                         $shipping = $billing;
                     }
                 }
@@ -349,7 +349,7 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
                 'addressLine2' => (string)implode(' ', $address),
                 'zipCode' => $shipping->getPostcode(),
                 'countryCode' => $shipping->getCountryId(),
-                'state' => (string)$RegionName,
+                'state' => (string)$regionName,
                 'city' => $shipping->getCity(),
             ];
         }
