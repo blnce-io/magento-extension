@@ -325,14 +325,26 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
     protected function getShippingAddressParams(Quote $quote)
     {
         $params = [];
-        if (($shipping = $quote->getShippingAddress())) {
-            $regionName = $shipping->getRegion();
+        if (($shipping = $quote->getShippingAddress()) !== null) {
+            $RegionName = $shipping->getRegion();
             $address = (array)$shipping->getStreet();
             if (empty($address[0])) {
-                $shipping = $this->accountManagement->getDefaultShippingAddress($quote->getCustomerId());
-                $address = (array)$shipping->getStreet();
-                $region = $this->region->create()->load($shipping->getRegionId());
-                $regionName = $region->getName() ?? '';
+                if ($quote->getCustomerId()) {
+                    $shipping = $this->accountManagement->getDefaultShippingAddress($quote->getCustomerId());
+                    $address = (array)$shipping->getStreet();
+                }
+                if (!empty($address[0])) {
+                    $address = (array)$shipping->getStreet() ?? '';
+                    $region = $this->region->create()->load($shipping->getRegionId());
+                    $RegionName = $region->getName() ?? '';
+                } else {
+                    if (($billing = $quote->getBillingAddress()) !== null) {
+                        $address = (array)$billing->getStreet();
+                        $region = $this->region->create()->load($billing->getRegionId());
+                        $RegionName = $region->getName() ?? '';
+                        $shipping = $billing;
+                    }
+                }
             }
             $params = [
                 'firstName' => $shipping->getFirstname(),
@@ -341,11 +353,10 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
                 'addressLine2' => (string)implode(' ', $address),
                 'zipCode' => $shipping->getPostcode(),
                 'countryCode' => $shipping->getCountryId(),
-                'state' => (string)$regionName,
+                'state' => (string)$RegionName,
                 'city' => $shipping->getCity(),
             ];
         }
-
         return $params;
     }
 
