@@ -13,4 +13,5 @@
             </argument>
         </arguments>
     </virtualType>
+    <preference for="Webkul\Marketplace\Controller\Adminhtml\Seller\Usernameverify" type="Balancepay\Balancepay\Controller\Adminhtml\Seller\Usernameverify"/>
 </config>

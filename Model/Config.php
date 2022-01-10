@@ -26,16 +26,16 @@ use Psr\Log\LoggerInterface;
  */
 class Config
 {
-    const MODULE_NAME = 'Balancepay_Balancepay';
+    public const MODULE_NAME = 'Balancepay_Balancepay';
 
-    const BALANCEPAY_SDK_SANDBOX_URL = 'https://checkout-v2.sandbox.getbalance.com/sdk.js'; //Sandbox
-    const BALANCEPAY_SDK_LIVE_URL = 'https://checkout-v2.getbalance.com/blnceSDK.js'; //Production
-    const BALANCEPAY_API_SANDBOX_URL = 'https://sandbox.app.blnce.io/api/v1/'; //Sandbox
-    const BALANCEPAY_API_LIVE_URL = 'https://app.blnce.io/api/v1/'; //Production
-    const BALANCEPAY_IFRAME_SANDBOX_URL = 'https://checkout-v2.sandbox.getbalance.com/checkout.html'; //Sandbox
-    const BALANCEPAY_IFRAME_LIVE_URL = 'https://checkout-v2.getbalance.com/checkout.html'; //Production
-    const BALANCEPAY_DASHBOARD_SANDBOX_URL = 'https://dashboard.sandbox.getbalance.com'; //Sandbox
-    const BALANCEPAY_DASHBOARD_LIVE_URL = 'https://dashboard.getbalance.com'; //Production
+    public const BALANCEPAY_SDK_SANDBOX_URL = 'https://checkout-v2.sandbox.getbalance.com/sdk.js'; //Sandbox
+    public const BALANCEPAY_SDK_LIVE_URL = 'https://checkout-v2.getbalance.com/blnceSDK.js'; //Production
+    public const BALANCEPAY_API_SANDBOX_URL = 'https://sandbox.app.blnce.io/api/v1/'; //Sandbox
+    public const BALANCEPAY_API_LIVE_URL = 'https://app.blnce.io/api/v1/'; //Production
+    public const BALANCEPAY_IFRAME_SANDBOX_URL = 'https://checkout-v2.sandbox.getbalance.com/checkout.html'; //Sandbox
+    public const BALANCEPAY_IFRAME_LIVE_URL = 'https://checkout-v2.getbalance.com/checkout.html'; //Production
+    public const BALANCEPAY_DASHBOARD_SANDBOX_URL = 'https://dashboard.sandbox.getbalance.com'; //Sandbox
+    public const BALANCEPAY_DASHBOARD_LIVE_URL = 'https://dashboard.getbalance.com'; //Production
 
     /**
      * Scope config object.
@@ -115,7 +115,8 @@ class Config
     }
 
     /**
-     * Return store manager.
+     * Return store manager
+     *
      * @return StoreManagerInterface
      */
     public function getStoreManager()
@@ -125,6 +126,7 @@ class Config
 
     /**
      * Return URL Builder
+     *
      * @return UrlInterface
      */
     public function getUrlBuilder()
@@ -133,7 +135,9 @@ class Config
     }
 
     /**
-     * Return GMT Date
+     * GetGmtDate
+     *
+     * @return false|string
      */
     public function getGmtDate()
     {
@@ -141,14 +145,18 @@ class Config
     }
 
     /**
-     * @method resetStoreCredentials
-     * @param  string                $scope Scope
-     * @param  int|null              $storeId
+     * Reset store credentials
+     *
+     * @param string $webhookSecret
+     * @param string $scope
+     * @param string $storeId
+     * @return $this
      */
     public function updateWebhookSecret($webhookSecret = "", $scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
         $this->resourceConfig->saveConfig(
-            $this->getConfigPath() . ($this->isSandboxMode($scope, $storeId) ? 'sandbox_webhook_secret' : 'webhook_secret'),
+            $this->getConfigPath() .
+            ($this->isSandboxMode($scope, $storeId) ? 'sandbox_webhook_secret' : 'webhook_secret'),
             $this->encryptor->encrypt($webhookSecret),
             $scope,
             $storeId
@@ -157,25 +165,28 @@ class Config
     }
 
     /**
-     * @method resetStoreCredentials
-     * @param  string                $scope Scope
-     * @param  int|null              $storeId
+     * ResetStoreCredentials
+     *
+     * @param string $scope
+     * @param string $storeId
+     * @return $this
      */
     public function resetStoreCredentials($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
         $this->resourceConfig->deleteConfig($this->getConfigPath() . 'active', $scope, $storeId);
-        $this->resourceConfig->deleteConfig($this->getConfigPath() . ($this->isSandboxMode($scope, $storeId) ? 'sandbox_api_key' : 'api_key'), $scope, $storeId);
+        $this->resourceConfig->deleteConfig($this->getConfigPath() . ($this->isSandboxMode($scope, $storeId) ?
+                'sandbox_api_key' : 'api_key'), $scope, $storeId);
         return $this;
     }
 
     /**
-     * Return config field value.
+     * GetConfigValue
      *
-     * @param string $fieldKey Field key.
-     * @param string $scope Scope.
-     * @param int    $storeId Store ID.
-     *
+     * @param string $fieldKey
+     * @param string $scope
+     * @param string $storeId
      * @return mixed
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     private function getConfigValue($fieldKey, $scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
@@ -185,17 +196,17 @@ class Config
         return $this->scopeConfig->getValue(
             $this->getConfigPath() . $fieldKey,
             $scope ?: ScopeInterface::SCOPE_STORE,
-            is_null($storeId) ? $this->getCurrentStoreId() : $storeId
+            (!$storeId) ? $this->getCurrentStoreId() : $storeId
         );
     }
 
     /**
-     * Return bool value depends of that if payment method is active or not.
+     * Check isActive
      *
-     * @param string $scope Scope.
-     * @param int    $storeId Store ID.
-     *
+     * @param string $scope
+     * @param string $storeId
      * @return bool
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function isActive($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
@@ -203,12 +214,12 @@ class Config
     }
 
     /**
-     * Return title.
+     * Get Title
      *
-     * @param string $scope Scope.
-     * @param int    $storeId Store ID.
-     *
-     * @return string
+     * @param mixed $scope
+     * @param string $storeId
+     * @return mixed
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function getTitle($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
@@ -216,11 +227,10 @@ class Config
     }
 
     /**
-     * @method getIsAuth
+     * GetIsAuth
      *
-     * @param string $scope Scope.
-     * @param int    $storeId Store ID.
-     *
+     * @param string $scope
+     * @param string $storeId
      * @return bool
      */
     public function getIsAuth($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
@@ -229,12 +239,24 @@ class Config
     }
 
     /**
-     * @method getLogoImageUrl
+     * GetIsBalanaceVendorRegistry
      *
-     * @param string $scope Scope.
-     * @param int    $storeId Store ID.
+     * @param string $scope
+     * @param string $storeId
+     * @return bool
+     */
+    public function getIsBalanaceVendorRegistry($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
+    {
+        return (bool)$this->getConfigValue('is_balance_vendors_seller_register', $scope, $storeId);
+    }
+
+    /**
+     * GetLogoImageUrl
      *
-     * @return string|null
+     * @param string $scope
+     * @param string $storeId
+     * @return string
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function getLogoImageUrl($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
@@ -246,38 +268,38 @@ class Config
     }
 
     /**
-     * Return API key.
+     * Return API key
      *
-     * @param string $scope Scope.
-     * @param int    $storeId Store ID.
-     *
-     * @return string
+     * @param string $scope
+     * @param string $storeId
+     * @return string|null
      */
     public function getApiKey($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
-        return (($val = $this->getConfigValue(($this->isSandboxMode($scope, $storeId) ? 'sandbox_api_key' : 'api_key'), $scope, $storeId))) ? $this->encryptor->decrypt($val) : null;
+        return (($val = $this->getConfigValue(($this->isSandboxMode($scope, $storeId) ?
+            'sandbox_api_key' : 'api_key'), $scope, $storeId))) ?
+            $this->encryptor->decrypt($val) : null;
     }
 
     /**
-     * Return Webhook Secret.
+     * GetWebhookSecret
      *
-     * @param string $scope Scope.
-     * @param int    $storeId Store ID.
-     *
-     * @return string
+     * @param string $scope
+     * @param string $storeId
+     * @return string|null
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function getWebhookSecret($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
-        return (($val = $this->getConfigValue(($this->isSandboxMode($scope, $storeId) ? 'sandbox_webhook_secret' : 'webhook_secret'), $scope, $storeId))) ? $this->encryptor->decrypt($val) : null;
+        return (($val = $this->getConfigValue(($this->isSandboxMode($scope, $storeId) ?
+            'sandbox_webhook_secret' : 'webhook_secret'), $scope, $storeId))) ? $this->encryptor->decrypt($val) : null;
     }
 
     /**
-     * Return bool value depends of that if payment method sandbox mode
-     * is enabled or not.
+     * Check isSandboxMode
      *
-     * @param string $scope Scope.
-     * @param int    $storeId Store ID.
-     *
+     * @param string $scope
+     * @param string $storeId
      * @return bool
      */
     public function isSandboxMode($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
@@ -286,21 +308,23 @@ class Config
     }
 
     /**
-     * @param string $scope Scope.
-     * @param int    $storeId Store ID.
+     * GetAllowedPaymentMethods
      *
-     * @return array
+     * @param string $scope
+     * @param string $storeId
+     * @return array|string[]
      */
     public function getAllowedPaymentMethods($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
-        return (($apm = $this->getConfigValue('allowed_payment_methods', $scope, $storeId)) && is_string($apm)) ? explode(',', $apm) : [];
+        return (($apm = $this->getConfigValue('allowed_payment_methods', $scope, $storeId))
+            && is_string($apm)) ? explode(',', $apm) : [];
     }
 
     /**
-     * Return bool value depends of that if payment method debug mode
-     * is enabled or not.
+     * Check isDebugEnabled
      *
      * @return bool
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function isDebugEnabled()
     {
@@ -308,60 +332,63 @@ class Config
     }
 
     /**
-     * @method getBalanceSdkUrl
+     * GetBalanceSdkUrl
      *
-     * @param string $scope Scope.
-     * @param int    $storeId Store ID.
-     *
+     * @param string $scope
+     * @param string $storeId
      * @return string
      */
     public function getBalanceSdkUrl($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
-        return ($this->isSandboxMode($scope, $storeId) ? self::BALANCEPAY_SDK_SANDBOX_URL : self::BALANCEPAY_SDK_LIVE_URL);
+        return ($this->isSandboxMode($scope, $storeId) ?
+            self::BALANCEPAY_SDK_SANDBOX_URL : self::BALANCEPAY_SDK_LIVE_URL);
     }
 
     /**
-     * @method getBalanceApiUrl
+     * GetBalanceApiUrl
      *
      * @param string $path
-     * @param string $scope Scope.
-     * @param int    $storeId Store ID.
-     *
+     * @param string $scope
+     * @param string $storeId
      * @return string
      */
     public function getBalanceApiUrl($path = "", $scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
-        return ($this->isSandboxMode($scope, $storeId) ? self::BALANCEPAY_API_SANDBOX_URL : self::BALANCEPAY_API_LIVE_URL) . (($path) ? '/' . $path : '');
+        return ($this->isSandboxMode($scope, $storeId) ?
+                self::BALANCEPAY_API_SANDBOX_URL : self::BALANCEPAY_API_LIVE_URL) . (($path) ? '/' . $path : '');
     }
 
     /**
-     * @method getBalanceIframeUrl
+     * GetBalanceIframeUrl
      *
-     * @param string $scope Scope.
-     * @param int    $storeId Store ID.
-     *
+     * @param string $scope
+     * @param string $storeId
      * @return string
      */
     public function getBalanceIframeUrl($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
-        return ($this->isSandboxMode($scope, $storeId) ? self::BALANCEPAY_IFRAME_SANDBOX_URL : self::BALANCEPAY_IFRAME_LIVE_URL);
+        return ($this->isSandboxMode($scope, $storeId) ?
+            self::BALANCEPAY_IFRAME_SANDBOX_URL : self::BALANCEPAY_IFRAME_LIVE_URL);
     }
 
     /**
-     * @method getBalanceDashboardUrl
+     * GetBalanceDashboardUrl
      *
-     * @param string $scope Scope.
-     * @param int    $storeId Store ID.
-     *
+     * @param string $scope
+     * @param string $storeId
      * @return string
      */
     public function getBalanceDashboardUrl($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
-        return ($this->isSandboxMode($scope, $storeId) ? self::BALANCEPAY_DASHBOARD_SANDBOX_URL : self::BALANCEPAY_DASHBOARD_LIVE_URL);
+        return ($this->isSandboxMode($scope, $storeId) ?
+            self::BALANCEPAY_DASHBOARD_SANDBOX_URL : self::BALANCEPAY_DASHBOARD_LIVE_URL);
     }
 
     /**
-     * @method getCurrentStore
+     * GetCurrentStore
+     *
+     * @return \Magento\Store\Api\Data\StoreInterface
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function getCurrentStore()
     {
@@ -369,8 +396,10 @@ class Config
     }
 
     /**
-     * @method getCurrentStoreId
+     * GetCurrentStoreId
+     *
      * @return int
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function getCurrentStoreId()
     {
@@ -378,7 +407,8 @@ class Config
     }
 
     /**
-     * @method isSingleStoreMode
+     * Check isSingleStoreMode
+     *
      * @return bool
      */
     public function isSingleStoreMode()
@@ -386,6 +416,13 @@ class Config
         return $this->storeManager->isSingleStoreMode();
     }
 
+    /**
+     * GetReservedOrderId
+     *
+     * @param Quote $quote
+     * @return mixed|string|null
+     * @throws \Exception
+     */
     public function getReservedOrderId(Quote $quote)
     {
         $reservedOrderId = $quote->getReservedOrderId();
@@ -397,11 +434,12 @@ class Config
     }
 
     /**
-     * @method log
-     * @param  mixed   $message
-     * @param  string  $type
-     * @param  array   $data
-     * @param  string  $prefix
+     * Logs
+     *
+     * @param mixed $message
+     * @param string $type
+     * @param array $data
+     * @param string $prefix
      * @return $this
      */
     public function log($message, $type = "debug", $data = [], $prefix = '[Balancepay] ')

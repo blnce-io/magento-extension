@@ -397,24 +397,24 @@ class BalancepayMethod extends AbstractMethod
             $balanceVendorId = null;
 
             foreach ($orderItems as $item) {
-                $_balanceVendorId = $this->helper->getBalanceVendors($item->getProductId());
+                $_VendorIdBySellerProduct = $this->helper->getBalanceVendors($item->getProductId());
                 if ($item->getProductType() === 'configurable' && $item->getHasChildren()) {
                     foreach ($item->getChildrenItems() as $child) {
                         $child->getProduct()->load($child->getProductId());
-                        if (!$_balanceVendorId) {
-                            $_balanceVendorId = $this->helper->getBalanceVendors($child->getProductId());
+                        if (!$_VendorIdBySellerProduct) {
+                            $_VendorIdBySellerProduct = $this->helper->getBalanceVendors($child->getProductId());
                         }
                         continue;
                     }
                 }
-                if ($_balanceVendorId) {
-                    if ($balanceVendorId && $balanceVendorId !== $_balanceVendorId) {
+                if ($_VendorIdBySellerProduct) {
+                    if ($balanceVendorId && $balanceVendorId !== $_VendorIdBySellerProduct) {
                         throw new LocalizedException(
                             __('Invoicing items from different Balance vendors on one invoice
                             is not allowed. Please cleate a separate invoice for each')
                         );
                     }
-                    $balanceVendorId = $_balanceVendorId;
+                    $balanceVendorId = $_VendorIdBySellerProduct;
                 }
             }
 
