@@ -1,6 +1,7 @@
 <?php
 namespace Balancepay\Balancepay\Ui\DataProvider\Product\Form\Modifier;
 
+use Balancepay\Balancepay\Model\Config;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Magento\Catalog\Ui\DataProvider\Product\Form\Modifier\AbstractModifier;
 use Magento\Framework\Registry;
@@ -18,18 +19,26 @@ class AssignVendor extends AbstractModifier
     protected $coreRegistry;
 
     /**
+     * @var Config
+     */
+    private $balancepayConfig;
+
+    /**
      * @param Registry $coreRegistry
      * @param MpProductCollection $mpProductCollectionFactory
      * @param RequestFactory $requestFactory
+     * @param Config $balancepayConfig
      */
     public function __construct(
         Registry $coreRegistry,
         MpProductCollection $mpProductCollectionFactory,
-        RequestFactory $requestFactory
+        RequestFactory $requestFactory,
+        Config $balancepayConfig
     ) {
         $this->coreRegistry = $coreRegistry;
         $this->_mpProductCollectionFactory = $mpProductCollectionFactory;
         $this->requestFactory = $requestFactory;
+        $this->balancepayConfig = $balancepayConfig;
     }
 
     /**
@@ -51,27 +60,29 @@ class AssignVendor extends AbstractModifier
      */
     public function modifyMeta(array $meta)
     {
-        $meta = array_replace_recursive(
-            $meta,
-            [
-                'assign_vendor' => [
-                    'arguments' => [
-                        'data' => [
-                            'config' => [
-                                'label' => __('Assign Product to Vendor'),
-                                'componentType' => Fieldset::NAME,
-                                'dataScope' => 'data.product.assign_vendor',
-                                'collapsible' => false,
-                                'sortOrder' => 5,
+        if ($this->balancepayConfig->isActive()) {
+            $meta = array_replace_recursive(
+                $meta,
+                [
+                    'assign_vendor' => [
+                        'arguments' => [
+                            'data' => [
+                                'config' => [
+                                    'label' => __('Assign Product to Vendor'),
+                                    'componentType' => Fieldset::NAME,
+                                    'dataScope' => 'data.product.assign_vendor',
+                                    'collapsible' => false,
+                                    'sortOrder' => 5,
+                                ],
                             ],
                         ],
-                    ],
-                    'children' => [
-                        'assignseller_field' => $this->getSellerField()
-                    ],
+                        'children' => [
+                            'assignseller_field' => $this->getSellerField()
+                        ],
+                    ]
                 ]
-            ]
-        );
+            );
+        }
         return $meta;
     }
 
@@ -137,12 +148,15 @@ class AssignVendor extends AbstractModifier
     public function getAllSellerCollectionObj()
     {
         $options = [];
-        $response = $this->requestFactory
-            ->create(RequestFactory::VENDORS_REQUEST_METHOD)
-            ->setRequestMethod('vendors')
-            ->setTopic('vendors')
-            ->process();
-
+        try {
+            $response = $this->requestFactory
+                ->create(RequestFactory::VENDORS_REQUEST_METHOD)
+                ->setRequestMethod('vendors')
+                ->setTopic('vendors')
+                ->process();
+        } catch (\Exception $e) {
+            return $options;
+        }
         $options[] = ['label' => 'Select Balance Vendor', 'value' => ''];
         foreach ($response as $label => $value) {
             $options[] = ['label' => $value['businessName'], 'value' => $value['id']];
