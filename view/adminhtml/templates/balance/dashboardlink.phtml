@@ -5,6 +5,7 @@
 
 <?php if ($vendorIdAvailable): ?>
     <?php $vendorName = $block->getBalanceVendor(); ?>
+    <?php $balancePayStatus = $block->getBalancePayStatus(); ?>
     <div class="balancepay_link">
         <div class="admin__field _required">
             <div class="admin__field-label">
@@ -17,6 +18,18 @@
                 <a class="action action-edit-balance" href="javascript:void(0)" title="Edit Balance Vendor"></a>
             </div>
         </div>
+        <div class="admin__field _required">
+            <div class="admin__field-label">
+                <label>
+                    <span><?php echo __("Payouts:"); ?></span>
+                </label>
+            </div>
+            <div class="admin__field-control
+            <?php if (strtolower($balancePayStatus) == 'enabled')
+                    { echo  'enable'; } else { echo 'disable'; } ?>">
+                <?php echo $balancePayStatus; ?>
+            </div>
+        </div>
     </div>
 <?php endif; ?>
 
@@ -26,7 +39,6 @@
         ],
         function($) {
             "use strict";
-
             var vendorIdAvailable = '<?php echo $vendorIdAvailable; ?>';
             if (vendorIdAvailable) {
                 setTimeout(function () {
@@ -48,7 +60,27 @@
     }
     .balancepay_link .admin__field {
         margin-left: -30px;
+        clear:both;
     }
+
+    .balancepay_link .enable {
+        color: #fff;
+        background: #008000b0;
+        max-width: 80px;
+        padding: 0 0;
+        text-align: center;
+        font-weight: 700;
+    }
+    .balancepay_link .disable {
+        color: #fff;
+        background: #ea5323;
+        max-width: 80px;
+        padding: 0 0;
+        text-align: center;
+        font-weight: 700;
+    }
+
+
     .balancepay_link .admin__field-label,  .balancepay_link .admin__field-control {
         width: calc( (100%) * .25 - 30px );
         float: left;
