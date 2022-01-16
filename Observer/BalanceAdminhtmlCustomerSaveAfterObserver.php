@@ -63,13 +63,13 @@ class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         $customer = $observer->getCustomer();
-        $customerid = $customer->getId();
+        $customerId = $customer->getId();
         $postData = $observer->getRequest()->getPostValue();
 
         if (isset($postData['is_seller_add'])) {
             $this->createBalancePayVendor($postData['customer']['email']);
         }
-        if ($this->isSeller($customerid)) {
+        if ($this->isSeller($customerId)) {
             $vendorData = $postData['vendor']['data'] ?? [];
             if (!empty($vendorData)) {
                 if (isset($vendorData['balance_vendor_id']) && $vendorData['balance_vendor_id'] != '') {
@@ -78,7 +78,7 @@ class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
                 $this->connection->update(
                     $this->resource->getTableName('marketplace_userdata'),
                     $columnData,
-                    "`seller_id`= $customerid"
+                    "`seller_id`= $customerId"
                 );
             }
         }
@@ -88,17 +88,17 @@ class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
     /**
      * Check is seller
      *
-     * @param string $customerid
-     * @return int|mixed
+     * @param string $customerId
+     * @return bool
      */
-    public function isSeller($customerid = '')
+    public function isSeller($customerId = '')
     {
         $model = $this->collectionFactory->create()
-            ->addFieldToFilter('seller_id', $customerid)->getFirstItem()->getData();
+            ->addFieldToFilter('seller_id', $customerId)->getFirstItem()->getData();
         if (isset($model) && count($model) > 0) {
             return $model['is_seller'];
         }
-        return 0;
+        return false;
     }
 
     /**

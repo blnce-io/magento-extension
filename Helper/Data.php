@@ -1,6 +1,7 @@
 <?php
 namespace Balancepay\Balancepay\Helper;
 
+use Magento\Framework\Message\ManagerInterface;
 use \Webkul\Marketplace\Model\SellerFactory;
 use \Webkul\Marketplace\Model\ResourceModel\Product\CollectionFactory;
 use Balancepay\Balancepay\Model\ResourceModel\BalancepayProduct\CollectionFactory as MpProductCollection;
@@ -8,19 +9,30 @@ use \Magento\Framework\App\Helper\AbstractHelper;
 
 class Data extends AbstractHelper
 {
+
     /**
+     * @var \Magento\Framework\Message\ManagerInterface
+     */
+    protected $messageManager;
+
+    /**
+     * Data constructor.
+     *
      * @param SellerFactory $sellerFactory
      * @param MpProductCollection $mpProductCollectionFactory
      * @param CollectionFactory $collectionFactory
+     * @param ManagerInterface $messageManager
      */
     public function __construct(
         SellerFactory $sellerFactory,
         MpProductCollection $mpProductCollectionFactory,
-        CollectionFactory $collectionFactory
+        CollectionFactory $collectionFactory,
+        ManagerInterface $messageManager
     ) {
         $this->sellerFactory = $sellerFactory;
         $this->_mpProductCollectionFactory = $mpProductCollectionFactory;
         $this->collectionFactory = $collectionFactory;
+        $this->messageManager = $messageManager;
     }
 
     /**
@@ -49,19 +61,24 @@ class Data extends AbstractHelper
      * @param string $productId
      * @return string
      */
-    public function getBalanceVendors($productId = '')
+    public function getBalanceVendor($productId = '')
     {
         $balanceVendorId = '';
-        $transactionColl = $this->collectionFactory->create()
-            ->addFieldToFilter(
-                'mageproduct_id',
-                $productId
-            );
-        $sellerId = $transactionColl->getFirstItem()->getSellerId();
-        $balanceVendorId = $this->getVendorId($sellerId);
+        try {
+            $transactionColl = $this->collectionFactory->create()
+                ->addFieldToFilter(
+                    'mageproduct_id',
+                    $productId
+                );
+            $sellerId = $transactionColl->getFirstItem()->getSellerId();
+            $balanceVendorId = $this->getVendorId($sellerId);
+        } catch (\Exception $e) {
+            $this->messageManager->addError($e->getMessage());
+        }
         if (empty($balanceVendorId)) {
             $balanceVendorId = $this->getSellerIdByProductId($productId);
         }
+
         return $balanceVendorId;
     }
 
@@ -77,5 +94,22 @@ class Data extends AbstractHelper
         $collection->addFieldToFilter('product_id', $productId);
         $sellerId = $collection->getFirstItem()->getVendorId();
         return $sellerId;
+    }
+
+    /**
+     * Valid domain
+     *
+     * @param string $domainName
+     * @return bool
+     */
+    public function isValidDomain($domainName): bool
+    {
+        if (preg_match(
+            '/^(?!\-)(?:(?:[a-zA-Z\d][a-zA-Z\d\-]{0,61})?[a-zA-Z\d]\.){1,126}(?!\d+)[a-zA-Z\d]{1,63}$/',
+            $domainName
+        )) {
+            return true;
+        }
+        return false;
     }
 }
