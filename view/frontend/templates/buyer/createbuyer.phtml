@@ -1,0 +1,79 @@
+<?php
+if (!empty($block->getCustomerSessionId())) {
+    $buyerResponse = $block->getBuyerAmount($block->getCustomerSessionId());
+    if (!empty($buyerResponse) && $buyerResponse['qualificationStatus'] == 'completed'
+        && !empty($block->getCustomerSessionBuyerId())) { ?>
+        <div class="qualify credit-limit">
+            <a class="action primary" href="javascript:void(0)">
+                Credit Limit: <?= $buyerResponse['qualification']['creditLimit'] ?? 0.00; ?>
+            </a>
+        </div>
+        <?php
+    } else {
+        ?>
+        <div class="qualify net-terms-link">
+            <a class="action primary" href="#" id="click-me">Qualify for Net Terms</a>
+        </div>
+    <?php }
+} ?>
+<div id="popup-modal" style="display:none;">
+</div>
+
+<style>
+    .qualify {
+        display: inline-block;
+        float: right;
+        margin: 0 0 0 12px;
+    }
+</style>
+<script>
+    require(
+        [
+            'jquery',
+            'Magento_Ui/js/modal/modal'
+        ],
+        function (
+            $,
+            modal
+        ) {
+            var options = {
+                type: 'popup',
+                responsive: true,
+                innerScroll: true,
+                buttons: [{
+                    text: $.mage.__('Continue'),
+                    class: '',
+                    click: function () {
+                        this.closeModal();
+                        window.location.reload();
+                    }
+                }]
+            };
+
+
+            var customurl = "<?= $block->getUrl() . 'balancepay/buyer/qualify'?>";
+            var popup = modal(options, $('#popup-modal'));
+            $("#click-me").on('click', function () {
+                $.ajax({
+                    url: customurl,
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {},
+                    complete: function (response) {
+                        if (response.responseJSON != '' && response.responseJSON != 'undefined') {
+                            $("#popup-modal").modal("openModal");
+                            $("#popup-modal").append('<iframe width="100%" height="460px" src="' +
+                                response.responseJSON.qualificationLink
+                                + '" frameborder="0" allowfullscreen=""></iframe>');
+                        }
+                    },
+                    error: function (xhr, status, errorThrown) {
+                        console.log('Error happens. Try again.');
+                    }
+                });
+
+            });
+
+        }
+    );
+</script>

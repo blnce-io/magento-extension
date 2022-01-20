@@ -32,6 +32,7 @@ class Factory
     public const WEBHOOKS_KEYS_RESPONSE_HANDLER = 'webhooks/keys';
     public const WEBHOOKS_RESPONSE_HANDLER = 'webhooks';
     public const VENDORS_RESPONSE_HANDLER = 'vendors';
+    public const BUYERS_RESPONSE_HANDLER = 'buyers';
 
     /**
      * Set of requests.
@@ -46,6 +47,7 @@ class Factory
         self::WEBHOOKS_KEYS_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Webhooks\Keys::class,
         self::WEBHOOKS_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Webhooks::class,
         self::VENDORS_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Vendors::class,
+        self::BUYERS_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Buyers::class,
     ];
 
     /**
@@ -69,14 +71,12 @@ class Factory
      * Create
      *
      * @param string $type
-     * @param Curl|null $curl
+     * @param string $curl
      * @return ResponseInterface
      * @throws LocalizedException
      */
-    public function create(
-        $type,
-        $curl = null
-    ) {
+    public function create($type, $curl = null)
+    {
         $className = !empty($this->invokableClasses[$type])
             ? $this->invokableClasses[$type]
             : null;
