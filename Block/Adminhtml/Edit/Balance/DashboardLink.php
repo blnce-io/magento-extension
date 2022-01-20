@@ -22,6 +22,21 @@ class DashboardLink extends Template
     protected $requestFactory;
 
     /**
+     * @var SellerFactory
+     */
+    private $sellerModel;
+
+    /**
+     * @var Config
+     */
+    private $balancepayConfig;
+
+    /**
+     * @var SellerFactory
+     */
+    private $sellerFactory;
+
+    /**
      * DashboardLink constructor.
      * @param Template\Context $context
      * @param SellerFactory $sellerModel
@@ -56,7 +71,7 @@ class DashboardLink extends Template
     }
 
     /**
-     * Get Balance Pay Dashboard URL
+     * Get Balancepay dashboard URL
      *
      * @return string
      */
@@ -64,29 +79,32 @@ class DashboardLink extends Template
     {
         $vendorId = $this->getBalanceVendorId();
         $balancePayDashboardUrl = $this->balancepayConfig->getBalanceDashboardUrl();
-        return $balancePayDashboardUrl . '/vendors/' . $vendorId;
+        if ($vendorId) {
+            return $balancePayDashboardUrl . '/vendors/' . $vendorId;
+        }
+        return $balancePayDashboardUrl;
     }
 
     /**
      * Get balancepaystatus
      *
-     * @return string
+     * @return bool
      */
     public function getBalancePayStatus()
     {
         $customerId = $this->getRequest()->getParam('id');
-        $collection = $this->sellerModel->create()
+        $sellerCollection = $this->sellerModel->create()
             ->getCollection()
             ->addFieldToFilter('seller_id', $customerId)
             ->addFieldToFilter('is_seller', 1);
-        if (isset($collection) && count($collection) > 0) {
-            foreach ($collection as $col) {
-                if ($col->getPayouts()) {
-                    return 'Enabled';
+        if (isset($sellerCollection) && count($sellerCollection) > 0) {
+            foreach ($sellerCollection as $collection) {
+                if ($collection->getPayouts()) {
+                    return true;
                 }
             }
         }
-        return 'Disabled';
+        return false;
     }
 
     /**
@@ -111,11 +129,11 @@ class DashboardLink extends Template
 
             if (!empty($response['paymentData']['banks']) && !empty($response['sellerInfo']['address'])) {
                 if (!empty($collection['balance_vendor_id'])) {
-                    $collection->setPayouts(1);
+                    $collection->setPayouts(true);
                 }
             } else {
                 if (!empty($collection['balance_vendor_id'])) {
-                    $collection->setPayouts(0);
+                    $collection->setPayouts(false);
                 }
             }
             $collection->save();
@@ -130,22 +148,21 @@ class DashboardLink extends Template
     /**
      * Get Balance Vendor Id
      *
-     * @return int
+     * @return bool
      */
     public function getBalanceVendorId()
     {
-        $vendorId = 0;
         $customerId = $this->getRequest()->getParam('id');
         $collection = $this->sellerModel->create()
             ->getCollection()
             ->addFieldToFilter('seller_id', $customerId)
             ->addFieldToFilter('is_seller', 1);
 
-        foreach ($collection as $col) {
-            if ($col->getBalanceVendorId() != '') {
-                return $col->getBalanceVendorId();
+        foreach ($collection as $seller) {
+            if ($seller->getBalanceVendorId() != '') {
+                return $seller->getBalanceVendorId();
             }
         }
-        return $vendorId;
+        return false;
     }
 }

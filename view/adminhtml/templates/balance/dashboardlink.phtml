@@ -24,11 +24,11 @@
                     <span><?php echo __("Payouts:"); ?></span>
                 </label>
             </div>
-            <div class="admin__field-control
-            <?php if (strtolower($balancePayStatus) == 'enabled')
-                    { echo  'enable'; } else { echo 'disable'; } ?>">
-                <?php echo $balancePayStatus; ?>
-            </div>
+            <?php if ($balancePayStatus): ?>
+            <div class="admin__field-control enable"><?php echo __('Enabled'); ?></div>
+            <?php else: ?>
+            <div class="admin__field-control disable"><?php echo __('Disabled'); ?></div>
+            <?php endif; ?>
         </div>
     </div>
 <?php endif; ?>
