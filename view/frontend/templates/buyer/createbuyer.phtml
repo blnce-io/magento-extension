@@ -1,40 +1,62 @@
 <?php
 if (!empty($block->getCustomerSessionId())) {
     $buyerResponse = $block->getBuyerAmount($block->getCustomerSessionId());
-    if (!empty($buyerResponse) && $buyerResponse['qualificationStatus'] == 'completed'
-        && !empty($block->getCustomerSessionBuyerId())) { ?>
+    if (!empty($buyerResponse) && $buyerResponse['qualificationStatus'] == 'completed' && !empty($block->getCustomerSessionBuyerId())) { ?>
         <div class="qualify credit-limit">
-            <a class="action primary" href="javascript:void(0)">
-                Credit Limit: <?= $buyerResponse['qualification']['creditLimit'] ?? 0.00; ?>
-            </a>
+            <li><a class="action primary" href="javascript:void(0)">
+                Terms Limit: <?php echo $buyerResponse['qualification']['creditLimit'] ?? 0.00; ?>
+            </a></li>
         </div>
         <?php
     } else {
         ?>
         <div class="qualify net-terms-link">
-            <a class="action primary" href="#" id="click-me">Qualify for Net Terms</a>
+            <li> <a class="action primary" href="#" id="click-me">Qualify for Net Terms</a></li>
         </div>
     <?php }
 } ?>
-<div id="popup-modal" style="display:none;">
-</div>
 
+<div id="popup-modal" style="display:none;"></div>
 <style>
     .qualify {
         display: inline-block;
         float: right;
         margin: 0 0 0 12px;
     }
+
+    .credit-limit li a.action.primary {
+        background: transparent;
+        border: none;
+        font-weight: normal;
+        display: inline;
+        padding: 0 0;
+        cursor: unset;
+    }
+    .net-terms-link li a.action.primary {
+        margin: -5px 0 0px;
+    }
+
+    .modal-popup .modal-footer {
+        padding-bottom: 2rem !important;
+        padding-top: 2rem !important;
+    }
+
+    .modal-slide .modal-content {
+        padding: 0 1.6rem 1.6rem !important;
+    }
+
 </style>
 <script>
     require(
         [
             'jquery',
-            'Magento_Ui/js/modal/modal'
+            'Magento_Ui/js/modal/modal',
+            'Magento_Customer/js/customer-data'
         ],
         function (
             $,
-            modal
+            modal,
+            customerData
         ) {
             var options = {
                 type: 'popup',
@@ -49,31 +71,34 @@ if (!empty($block->getCustomerSessionId())) {
                     }
                 }]
             };
-
-
-            var customurl = "<?= $block->getUrl() . 'balancepay/buyer/qualify'?>";
-            var popup = modal(options, $('#popup-modal'));
+            var customurl = "<?php echo $block->getUrl() . 'balancepay/buyer/qualify'?>";
             $("#click-me").on('click', function () {
                 $.ajax({
                     url: customurl,
                     type: 'POST',
                     dataType: 'json',
                     data: {},
-                    complete: function (response) {
-                        if (response.responseJSON != '' && response.responseJSON != 'undefined') {
-                            $("#popup-modal").modal("openModal");
-                            $("#popup-modal").append('<iframe width="100%" height="460px" src="' +
-                                response.responseJSON.qualificationLink
-                                + '" frameborder="0" allowfullscreen=""></iframe>');
+                    success: function (response) {
+                        if (response && response.hasOwnProperty('qualificationLink') && response.qualificationLink) {
+                            $("#popup-modal").empty();
+                            $("#popup-modal").append('<iframe scrolling="no" width="100%" height="494px" src="' + response.qualificationLink + '" frameborder="0" allowfullscreen=""></iframe>');
+                            $('#popup-modal').modal(options).modal('openModal');
+                        } else {
+                            setTimeout(function() {
+                                customerData.set('messages', {
+                                    messages: [{
+                                        text: 'There was a problem generating a qualification link. Please contact the administrator.',
+                                        type: 'error'
+                                    }]
+                                });
+                            },1000);
                         }
                     },
                     error: function (xhr, status, errorThrown) {
                         console.log('Error happens. Try again.');
                     }
                 });
-
             });
-
         }
     );
 </script>

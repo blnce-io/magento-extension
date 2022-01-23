@@ -1,7 +1,11 @@
 <?xml version="1.0"?>
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
-    <referenceContainer name="header-wrapper">
-    <block class="Balancepay\Balancepay\Block\Createbuyer" ifconfig="payment/balancepay/active" name="create-buyer" as="create-buyer" after="minicart" template="Balancepay_Balancepay::buyer/createbuyer.phtml">
-    </block>
-    </referenceContainer>
+    <referenceBlock name="header.links">
+        <block class="Balancepay\Balancepay\Block\Createbuyer" ifconfig="payment/balancepay/active" name="buyer-header-link">
+            <arguments>
+                <argument name="label" xsi:type="string" translate="true">Buyer Link</argument>
+                <argument name="path" xsi:type="string" translate="true">Buyer Link</argument>
+            </arguments>
+        </block>
+    </referenceBlock>
 </page>
