@@ -1,4 +1,5 @@
 <?php
+
 namespace Balancepay\Balancepay\Block\Adminhtml\Edit\Balance;
 
 use Magento\Backend\Block\Template;
@@ -6,9 +7,6 @@ use Balancepay\Balancepay\Model\Config;
 use Webkul\Marketplace\Model\SellerFactory;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 
-/**
- * DashboardLink Class
- */
 class DashboardLink extends Template
 {
     /**
@@ -24,10 +22,27 @@ class DashboardLink extends Template
     protected $requestFactory;
 
     /**
+     * @var SellerFactory
+     */
+    private $sellerModel;
+
+    /**
+     * @var Config
+     */
+    private $balancepayConfig;
+
+    /**
+     * @var SellerFactory
+     */
+    private $sellerFactory;
+
+    /**
+     * DashboardLink constructor.
      * @param Template\Context $context
      * @param SellerFactory $sellerModel
      * @param Config $balancepayConfig
      * @param RequestFactory $requestFactory
+     * @param SellerFactory $sellerFactory
      * @param array $data
      */
     public function __construct(
@@ -35,31 +50,71 @@ class DashboardLink extends Template
         SellerFactory $sellerModel,
         Config $balancepayConfig,
         RequestFactory $requestFactory,
+        SellerFactory $sellerFactory,
         array $data = []
     ) {
         $this->sellerModel = $sellerModel;
         $this->balancepayConfig = $balancepayConfig;
         $this->requestFactory = $requestFactory;
+        $this->sellerFactory = $sellerFactory;
         parent::__construct($context, $data);
     }
 
     /**
+     * Is Vendor Id Set
+     *
      * @return bool
      */
-    public function isVendorIdSet() {
-        return (bool) $this->getBalanceVendorId();
+    public function isVendorIdSet()
+    {
+        return (bool)$this->getBalanceVendorId();
     }
 
     /**
+     * Get Balancepay dashboard URL
+     *
      * @return string
      */
-    public function getBalancePayDashboardUrl() {
+    public function getBalancePayDashboardUrl()
+    {
         $vendorId = $this->getBalanceVendorId();
         $balancePayDashboardUrl = $this->balancepayConfig->getBalanceDashboardUrl();
-        return $balancePayDashboardUrl.'/vendors/'.$vendorId;
+        if ($vendorId) {
+            return $balancePayDashboardUrl . '/vendors/' . $vendorId;
+        }
+        return $balancePayDashboardUrl;
     }
 
-    public function getBalanceVendor() {
+    /**
+     * Get balancepaystatus
+     *
+     * @return bool
+     */
+    public function getBalancePayStatus()
+    {
+        $customerId = $this->getRequest()->getParam('id');
+        $sellerCollection = $this->sellerModel->create()
+            ->getCollection()
+            ->addFieldToFilter('seller_id', $customerId)
+            ->addFieldToFilter('is_seller', 1);
+        if (isset($sellerCollection) && count($sellerCollection) > 0) {
+            foreach ($sellerCollection as $collection) {
+                if ($collection->getPayouts()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Get Balance Vendor
+     *
+     * @return mixed|string
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function getBalanceVendor()
+    {
         $vendorId = $this->getBalanceVendorId();
         if ($vendorId) {
             $response = $this->requestFactory
@@ -67,7 +122,22 @@ class DashboardLink extends Template
                 ->setRequestMethod('vendors/' . $vendorId)
                 ->setTopic('vendors')
                 ->process();
-            
+            $collection = $this->sellerFactory->create()
+                ->getCollection()
+                ->addFieldToFilter('is_seller', \Webkul\Marketplace\Model\Seller::STATUS_ENABLED)
+                ->addFieldToFilter('balance_vendor_id', $response['sellerInfo']['id'])->getFirstItem();
+
+            if (!empty($response['paymentData']['banks']) && !empty($response['sellerInfo']['address'])) {
+                if (!empty($collection['balance_vendor_id'])) {
+                    $collection->setPayouts(true);
+                }
+            } else {
+                if (!empty($collection['balance_vendor_id'])) {
+                    $collection->setPayouts(false);
+                }
+            }
+            $collection->save();
+
             if (isset($response['sellerInfo']['name'])) {
                 return $response['sellerInfo']['name'];
             }
@@ -76,20 +146,23 @@ class DashboardLink extends Template
     }
 
     /**
-     * @return void
+     * Get Balance Vendor Id
+     *
+     * @return bool
      */
-    public function getBalanceVendorId() {
+    public function getBalanceVendorId()
+    {
         $customerId = $this->getRequest()->getParam('id');
         $collection = $this->sellerModel->create()
             ->getCollection()
             ->addFieldToFilter('seller_id', $customerId)
             ->addFieldToFilter('is_seller', 1);
 
-        foreach ($collection as $col) {
-            if ($col->getBalanceVendorId() != '') {
-                return $col->getBalanceVendorId();
+        foreach ($collection as $seller) {
+            if ($seller->getBalanceVendorId() != '') {
+                return $seller->getBalanceVendorId();
             }
         }
-        return;
+        return false;
     }
 }

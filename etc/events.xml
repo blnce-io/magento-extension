@@ -10,14 +10,22 @@
  * @author   Company: Girit-Interactive (https://www.girit-tech.com/)
  */
 -->
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
     <event name="checkout_submit_all_after">
-        <observer name="balancepay_checkout_submit_all_after" instance="Balancepay\Balancepay\Observer\Checkout\SubmitAllAfter"/>
+        <observer name="balancepay_checkout_submit_all_after"
+                  instance="Balancepay\Balancepay\Observer\Checkout\SubmitAllAfter"/>
     </event>
     <event name="adminhtml_customer_save_after">
-        <observer name="balance_webkul_marketplace_adminhtml_customer_save_after_observer" instance="Balancepay\Balancepay\Observer\BalanceAdminhtmlCustomerSaveAfterObserver"/>
+        <observer name="balance_webkul_marketplace_adminhtml_customer_save_after_observer"
+                  instance="Balancepay\Balancepay\Observer\BalanceAdminhtmlCustomerSaveAfterObserver"/>
     </event>
     <event name="catalog_product_save_after">
-        <observer name="balance_webkul_marketplace_catalog_product_save_after_observer" instance="Balancepay\Balancepay\Observer\BalanceProductSaveAfterObserver" />
+        <observer name="balance_webkul_marketplace_catalog_product_save_after_observer"
+                  instance="Balancepay\Balancepay\Observer\BalanceProductSaveAfterObserver"/>
+    </event>
+    <event name="customer_register_success">
+        <observer name="balance_webkul_marketplace_customer_register_success_observer"
+                  instance="Balancepay\Balancepay\Observer\BalanceCustomerRegisterSuccessObserver"/>
     </event>
 </config>
