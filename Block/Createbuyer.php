@@ -9,6 +9,7 @@ use Balancepay\Balancepay\Model\Config as BalancepayConfig;
 use Magento\Framework\App\Http\Context;
 use Magento\Framework\Pricing\Helper\Data;
 use Magento\Framework\View\Element\Html\Link;
+use Balancepay\Balancepay\Helper\Data as BalancepayHelper;
 
 /**
  * Class Createbuyer
@@ -64,6 +65,7 @@ class Createbuyer extends Link
         BalancepayConfig $balancepayConfig,
         Data $pricingHelper,
         Context $appContext,
+        BalancepayHelper $balancepayHelper,
         array $data = []
     ) {
         $this->customerSession = $customerSession;
@@ -72,6 +74,7 @@ class Createbuyer extends Link
         $this->balancepayConfig = $balancepayConfig;
         $this->pricingHelper = $pricingHelper;
         $this->appContext = $appContext;
+        $this->balancepayHelper = $balancepayHelper;
         parent::__construct($context, $data);
     }
 
@@ -99,6 +102,7 @@ class Createbuyer extends Link
             $this->balancepayConfig->log('Get Buyer [Exception: ' .
                 $e->getMessage() . "]\n" . $e->getTraceAsString(), 'error');
         }
+        $this->balancepayHelper->cleanConfigCache();
         return $response;
     }
 
