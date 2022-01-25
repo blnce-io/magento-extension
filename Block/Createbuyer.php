@@ -6,6 +6,7 @@ use \Magento\Customer\Model\Session;
 use \Magento\Customer\Api\CustomerRepositoryInterface;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Balancepay\Balancepay\Model\Config as BalancepayConfig;
+use Magento\Framework\App\Http\Context;
 use Magento\Framework\Pricing\Helper\Data;
 use Magento\Framework\View\Element\Html\Link;
 
@@ -62,6 +63,7 @@ class Createbuyer extends Link
         RequestFactory $requestFactory,
         BalancepayConfig $balancepayConfig,
         Data $pricingHelper,
+        Context $appContext,
         array $data = []
     ) {
         $this->customerSession = $customerSession;
@@ -69,6 +71,7 @@ class Createbuyer extends Link
         $this->requestFactory = $requestFactory;
         $this->balancepayConfig = $balancepayConfig;
         $this->pricingHelper = $pricingHelper;
+        $this->appContext = $appContext;
         parent::__construct($context, $data);
     }
 
@@ -82,12 +85,9 @@ class Createbuyer extends Link
      */
     public function getBuyerAmount($customerId)
     {
-        $customer = $this->customerRepositoryInterface->getById($customerId);
-        $customerAttributeData = $customer->__toArray();
         $response = [];
         try {
-            $buyerId = isset($customerAttributeData['custom_attributes']['buyer_id']) ?
-                $customerAttributeData['custom_attributes']['buyer_id']['value'] : '';
+            $buyerId = $this->getCustomerSessionBuyerId();
             if (!empty($buyerId)) {
                 $response = $this->requestFactory
                     ->create(RequestFactory::BUYER_REQUEST_METHOD)
@@ -109,7 +109,7 @@ class Createbuyer extends Link
      */
     public function getCustomerSessionId()
     {
-        return $this->customerSession->getCustomer()->getId();
+        return $this->appContext->getValue('customer_id');;
     }
 
     /**
@@ -119,7 +119,15 @@ class Createbuyer extends Link
      */
     public function getCustomerSessionBuyerId()
     {
-        return $this->customerSession->getCustomer()->getBuyerId();
+        $customerId = $this->getCustomerSessionId();
+        if (!empty($customerId)) {
+            $customer = $this->customerRepositoryInterface->getById($customerId);
+            $customerAttributeData = $customer->__toArray();
+            $buyerId = isset($customerAttributeData['custom_attributes']['buyer_id']) ?
+                $customerAttributeData['custom_attributes']['buyer_id']['value'] : '';
+            return $buyerId;
+        }
+        return 0;
     }
 
     /**
@@ -128,6 +136,6 @@ class Createbuyer extends Link
      */
     public function formattedAmount($price)
     {
-        return $this->pricingHelper->currency($price,true,false);
+        return $this->pricingHelper->currency($price/100,true,false);
     }
 }

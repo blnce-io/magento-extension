@@ -14,4 +14,7 @@
     <type name="Magento\Sales\Model\Order\Payment\State\AuthorizeCommand">
         <plugin name="balancepay_plugin_sales_model_order_payment_state_authorizecommand" type="Balancepay\Balancepay\Plugin\Sales\Model\Order\Payment\State\AuthorizeCommand"/>
     </type>
+    <type name="Magento\Framework\App\Action\AbstractAction">
+        <plugin name="customer-session-data-to-context" type="Balancepay\Balancepay\Plugin\CustomerSessionContext" sortOrder="15"/>
+    </type>
 </config>

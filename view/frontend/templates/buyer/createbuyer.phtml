@@ -10,6 +10,7 @@ if (!empty($block->getCustomerSessionId())) {
         </div>
         <?php
     } else {
+        echo "net testrms";
         ?>
         <div class="qualify net-terms-link">
             <li> <a class="action primary" href="#" id="click-me">Qualify for Net Terms</a></li>
@@ -19,9 +20,27 @@ if (!empty($block->getCustomerSessionId())) {
 
 <div id="popup-modal" style="display:none;"></div>
 <style>
+
+    @media screen and (min-width: 768px) {
+        .header.panel > .header.links > li {
+            vertical-align: middle !important;
+        }
+    }
+
+    .modal-popup._inner-scroll .modal-inner-wrap {
+        height: calc(100% - 90px);
+        overflow: visible;
+        width: 75%;
+    }
+    #popup-modal #qualify-iframe {
+        position: absolute;
+        height: 90%;
+        width: 100%;
+        top: 0;
+        left: 0;
+    }
     .qualify {
         display: inline-block;
-        float: right;
         margin: 0 0 0 12px;
     }
 
@@ -33,8 +52,9 @@ if (!empty($block->getCustomerSessionId())) {
         padding: 0 0;
         cursor: unset;
     }
+
     .net-terms-link li a.action.primary {
-        margin: -5px 0 0px;
+        margin: 0px 0 0px;
     }
 
     .modal-popup .modal-footer {
@@ -82,7 +102,7 @@ if (!empty($block->getCustomerSessionId())) {
                     success: function (response) {
                         if (response && response.hasOwnProperty('qualificationLink') && response.qualificationLink) {
                             $("#popup-modal").empty();
-                            $("#popup-modal").append('<iframe scrolling="no" width="100%" height="494px" src="' + response.qualificationLink + '" frameborder="0" allowfullscreen=""></iframe>');
+                            $("#popup-modal").append('<iframe id="qualify-iframe" scrolling="no" width="100%" src="' + response.qualificationLink + '" frameborder="0" allowfullscreen=""></iframe>');
                             $('#popup-modal').modal(options).modal('openModal');
                         } else {
                             setTimeout(function() {
