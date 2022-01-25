@@ -2,9 +2,10 @@
 if (!empty($block->getCustomerSessionId())) {
     $buyerResponse = $block->getBuyerAmount($block->getCustomerSessionId());
     if (!empty($buyerResponse) && $buyerResponse['qualificationStatus'] == 'completed' && !empty($block->getCustomerSessionBuyerId())) { ?>
+        <?php $price = $block->formattedAmount($buyerResponse['qualification']['creditLimit'] ?? 0.00); ?>
         <div class="qualify credit-limit">
             <li><a class="action primary" href="javascript:void(0)">
-                Terms Limit: <?php echo $buyerResponse['qualification']['creditLimit'] ?? 0.00; ?>
+                Terms Limit: <?php echo $price; ?>
             </a></li>
         </div>
         <?php

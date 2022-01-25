@@ -6,8 +6,8 @@ use \Magento\Customer\Model\Session;
 use \Magento\Customer\Api\CustomerRepositoryInterface;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Balancepay\Balancepay\Model\Config as BalancepayConfig;
+use Magento\Framework\Pricing\Helper\Data;
 use Magento\Framework\View\Element\Html\Link;
-use Webkul\Marketplace\Helper\Data;
 
 /**
  * Class Createbuyer
@@ -37,14 +37,13 @@ class Createbuyer extends Link
     private $requestFactory;
 
     /**
-     * @var Data
-     */
-    private $helperData;
-
-    /**
      * @var string
      */
     protected $_template = 'Balancepay_Balancepay::buyer/createbuyer.phtml';
+    /**
+     * @var Data
+     */
+    protected $pricingHelper;
 
     /**
      * Createbuyer constructor.
@@ -54,7 +53,6 @@ class Createbuyer extends Link
      * @param CustomerRepositoryInterface $customerRepositoryInterface
      * @param RequestFactory $requestFactory
      * @param BalancepayConfig $balancepayConfig
-     * @param Data $helperData
      * @param array $data
      */
     public function __construct(
@@ -63,14 +61,14 @@ class Createbuyer extends Link
         CustomerRepositoryInterface $customerRepositoryInterface,
         RequestFactory $requestFactory,
         BalancepayConfig $balancepayConfig,
-        Data $helperData,
+        Data $pricingHelper,
         array $data = []
     ) {
         $this->customerSession = $customerSession;
         $this->customerRepositoryInterface = $customerRepositoryInterface;
         $this->requestFactory = $requestFactory;
         $this->balancepayConfig = $balancepayConfig;
-        $this->helperData = $helperData;
+        $this->pricingHelper = $pricingHelper;
         parent::__construct($context, $data);
     }
 
@@ -122,5 +120,14 @@ class Createbuyer extends Link
     public function getCustomerSessionBuyerId()
     {
         return $this->customerSession->getCustomer()->getBuyerId();
+    }
+
+    /**
+     * @param $price
+     * @return float|string
+     */
+    public function formattedAmount($price)
+    {
+        return $this->pricingHelper->currency($price,true,false);
     }
 }

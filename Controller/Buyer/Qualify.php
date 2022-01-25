@@ -98,12 +98,12 @@ class Qualify extends Action
             $buyerId = $this->customerSession->getCustomer()->getBuyerId() ?? '';
             if (empty($buyerId)) {
                 $buyerId = $this->createBuyer($buyerId);
-                $qualificationLink = $this->getQualificationLink($buyerId);
-                if (!empty($qualificationLink)) {
-                    $strQualifyLink = str_replace("_", ".", key($qualificationLink)) .
-                        '=' . $qualificationLink[key($qualificationLink)];
-                    return $resultJson->setData(['qualificationLink' => $strQualifyLink]);
-                }
+            }
+            $qualificationLink = $this->getQualificationLink($buyerId);
+            if (!empty($qualificationLink)) {
+                $strQualifyLink = str_replace("_", ".", key($qualificationLink)) .
+                    '=' . $qualificationLink[key($qualificationLink)];
+                return $resultJson->setData(['qualificationLink' => $strQualifyLink]);
             }
         }
         return $resultJson->setData([]);
@@ -131,7 +131,7 @@ class Qualify extends Action
             $this->balancepayConfig->log('Qualification Link [Exception: ' .
                 $e->getMessage() . "]\n" . $e->getTraceAsString(), 'error');
         }
-        return '';
+        return $data;
     }
 
     /**
