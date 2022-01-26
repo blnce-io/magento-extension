@@ -37,6 +37,36 @@ if (!empty($block->getCustomerSessionId())) {
         top: 0;
         left: 0;
     }
+    @media screen and (max-width: 1366px) {
+        .modal-popup._inner-scroll .modal-inner-wrap {
+            height: calc(100% - 35px);
+            overflow: visible;
+            width: 90%;
+            max-height: fit-content;
+        }
+        #popup-modal #qualify-iframe {
+            position: absolute;
+            height: 85%;
+            width: 100% !important;
+            top: 0;
+            left: 0;
+            right: 0;
+        }
+        .modal-popup .modal-inner-wrap {
+            margin: 2rem auto;
+        }
+    }
+    @media screen and (max-width: 1200px) {
+        .modal-popup._inner-scroll .modal-inner-wrap {
+            height: calc(100% - 35px);
+            overflow: visible;
+            width: 94%;
+            max-height: fit-content;
+        }
+        #popup-modal #qualify-iframe body #root{
+            overflow: auto;
+        }
+    }
     .qualify {
         display: inline-block;
         margin: 0 0 0 12px;
