@@ -5,8 +5,8 @@ use Balancepay\Balancepay\Model\ResourceModel\BalancepayProduct\CollectionFactor
 use Magento\Framework\App\Cache\TypeListInterface;
 use Magento\Framework\App\Config\ReinitableConfigInterface;
 use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Framework\App\Http\Context;
 use Magento\Framework\Message\ManagerInterface as MessageManagerInterface;
-use Magento\Framework\App\Cache\Type\Config;
 
 class Data extends AbstractHelper
 {
@@ -16,19 +16,36 @@ class Data extends AbstractHelper
     protected $_mpProductCollectionFactory;
 
     /**
-     * Data constructor.
+     * @var TypeListInterface
+     */
+    protected $cacheTypeList;
+
+    /**
+     * @var MessageManagerInterface
+     */
+    protected $messageManager;
+
+    /**
+     * @var Context
+     */
+    protected $appContext;
+
+    /**
      * @param MpProductCollection $mpProductCollectionFactory
+     * @param TypeListInterface $cacheTypeList
+     * @param MessageManagerInterface $messageManager
+     * @param Context $appContext
      */
     public function __construct(
         MpProductCollection $mpProductCollectionFactory,
         TypeListInterface $cacheTypeList,
-        ReinitableConfigInterface $appConfig,
-        MessageManagerInterface $messageManager
+        MessageManagerInterface $messageManager,
+        Context $appContext
     ) {
         $this->_mpProductCollectionFactory = $mpProductCollectionFactory;
         $this->cacheTypeList = $cacheTypeList;
-        $this->appConfig = $appConfig;
         $this->messageManager = $messageManager;
+        $this->appContext = $appContext;
     }
 
     /**
@@ -57,20 +74,12 @@ class Data extends AbstractHelper
     }
 
     /**
-     * CleanConfigCache
+     * GetCustomerSessionId
      *
-     * @return $this
+     * @return mixed
      */
-    public function cleanConfigCache()
+    public function getCustomerSessionId()
     {
-        try {
-            $this->cacheTypeList->cleanType(Config::TYPE_IDENTIFIER);
-            $this->appConfig->reinit();
-        } catch (\Exception $e) {
-            $this->messageManager->addNoticeMessage(__('For some reason,
-            Balance (payment) couldn\'t clear your config cache,
-            please clear the cache manually. (Exception message: %1)', $e->getMessage()));
-        }
-        return $this;
+        return $this->appContext->getValue('customer_id');
     }
 }

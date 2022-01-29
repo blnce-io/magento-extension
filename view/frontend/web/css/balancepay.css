@@ -1,0 +1,120 @@
+@media screen and (min-width: 768px) {
+    .header.panel > .header.links > li {
+        vertical-align: middle !important;
+    }
+    .header.panel>.header.links>li{
+        margin: 0 0;
+    }
+    .header.panel>.header.links>li.welcome,
+    .header.panel>.header.links>li>a {
+        margin: 8px 0 0 15px;
+    }
+    .header.panel > .header.links {
+        margin: 0;
+        padding: 0;
+        list-style: none none;
+        float: right;
+        margin-left: auto;
+        display: inline-flex;
+    }
+}
+
+.header.panel>.header.links>li.customer-welcome {
+    margin: 8px 0 0 5px;
+}
+.header.panel>.header.links>.custom-section>.credit-limit {
+    display: block;
+    font-size: 14px;
+    color: #fff;
+    margin: 8px 0 0 15px;
+}
+.header.panel>.header.links>.custom-section>.credit-limit a {
+    color: #fff;
+    text-decoration: none;
+}
+.header.panel>.header.links>.custom-section>.net-terms-link {
+    margin: 0 0 0 15px;
+}
+.modal-slide._inner-scroll .modal-header {
+    z-index: 1;
+}
+
+.modal-popup .modal-footer {
+    display: none;
+}
+
+.modal-popup .action-close:before {
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 16px;
+}
+
+.modal-popup._inner-scroll .modal-inner-wrap {
+    height: calc(100% - 90px);
+    overflow: visible;
+    width: 75%;
+}
+#popup-modal #qualify-iframe {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+}
+@media screen and (max-width: 1366px) {
+    .modal-popup._inner-scroll .modal-inner-wrap {
+        height: calc(100% - 35px);
+        overflow: visible;
+        width: 90%;
+        max-height: fit-content;
+    }
+    #popup-modal #qualify-iframe {
+        position: absolute;
+        height: 85%;
+        width: 100% !important;
+        top: 0;
+        left: 0;
+        right: 0;
+    }
+    .modal-popup .modal-inner-wrap {
+        margin: 2rem auto;
+    }
+}
+@media screen and (max-width: 1200px) {
+    .modal-popup._inner-scroll .modal-inner-wrap {
+        height: calc(100% - 35px);
+        overflow: visible;
+        width: 94%;
+        max-height: fit-content;
+    }
+    #popup-modal #qualify-iframe body #root{
+        overflow: auto;
+    }
+}
+.qualify {
+    display: inline-block;
+    float: right;
+    margin: 0 0 0 12px;
+}
+
+.credit-limit li a.action.primary {
+    background: transparent;
+    border: none;
+    font-weight: normal;
+    display: inline;
+    padding: 0 0;
+    cursor: unset;
+}
+
+.net-terms-link li a.action.primary {
+    margin: 0px 0 0px;
+}
+
+.modal-popup .modal-footer {
+    padding-bottom: 2rem !important;
+    padding-top: 2rem !important;
+}
+
+.modal-slide .modal-content {
+    padding: 0 1.6rem 1.6rem !important;
+}

@@ -1,153 +1,27 @@
-<?php
-if (!empty($block->getCustomerSessionId())) {
-    $buyerResponse = $block->getBuyerAmount($block->getCustomerSessionId());
-    if (!empty($buyerResponse) && $buyerResponse['qualificationStatus'] == 'completed' && !empty($block->getCustomerSessionBuyerId())) { ?>
-        <?php $price = $block->formattedAmount($buyerResponse['qualification']['creditLimit'] ?? 0.00); ?>
-        <div class="qualify credit-limit">
-            <li><a class="action primary" href="javascript:void(0)">
-                Terms Limit: <?php echo $price; ?>
-            </a></li>
-        </div>
-        <?php
-    } else { ?>
-        <div class="qualify net-terms-link">
-            <li> <a class="action primary" href="#" id="click-me">Qualify for Net Terms</a></li>
-        </div>
-    <?php }
-} ?>
+<?php if ($block->getCustomerSessionId()): ?>
+<div class="custom-section" data-bind="scope:'section'">
+    <li class="credit-limit" style="display: none" data-bind="visible: customsection().showCredit">
+        <a class="action" href="javascript:void(0)" data-bind="text: customsection().creditLimit"></a>
+    </li>
+    <li class="net-terms-link" style="display: none" data-bind="visible: customsection().showButton">
+        <a class="action primary" data-bind="click:callPopup" href="javascript:void(0)">Qualify for Net Terms</a>
+    </li>
+    <!-- ko ifnot: customsection().status  -->
+    <div id="popup-modal" style="display:none;"></div>
+    <!-- /ko -->
+</div>
+<script type="text/x-magento-init">
+   {
+      "*": {
+          "Magento_Ui/js/core/app": {
+              "components": {
+                  "section": {
+                      "component": "Balancepay_Balancepay/js/section"
+                  }
+              }
+          }
+      }
+   }
 
-<div id="popup-modal" style="display:none;"></div>
-<style>
-
-    @media screen and (min-width: 768px) {
-        .header.panel > .header.links > li {
-            vertical-align: middle !important;
-        }
-    }
-
-    .modal-popup._inner-scroll .modal-inner-wrap {
-        height: calc(100% - 90px);
-        overflow: visible;
-        width: 75%;
-    }
-    #popup-modal #qualify-iframe {
-        position: absolute;
-        height: 90%;
-        width: 100%;
-        top: 0;
-        left: 0;
-    }
-    @media screen and (max-width: 1366px) {
-        .modal-popup._inner-scroll .modal-inner-wrap {
-            height: calc(100% - 35px);
-            overflow: visible;
-            width: 90%;
-            max-height: fit-content;
-        }
-        #popup-modal #qualify-iframe {
-            position: absolute;
-            height: 85%;
-            width: 100% !important;
-            top: 0;
-            left: 0;
-            right: 0;
-        }
-        .modal-popup .modal-inner-wrap {
-            margin: 2rem auto;
-        }
-    }
-    @media screen and (max-width: 1200px) {
-        .modal-popup._inner-scroll .modal-inner-wrap {
-            height: calc(100% - 35px);
-            overflow: visible;
-            width: 94%;
-            max-height: fit-content;
-        }
-        #popup-modal #qualify-iframe body #root{
-            overflow: auto;
-        }
-    }
-    .qualify {
-        display: inline-block;
-        margin: 0 0 0 12px;
-    }
-
-    .credit-limit li a.action.primary {
-        background: transparent;
-        border: none;
-        font-weight: normal;
-        display: inline;
-        padding: 0 0;
-        cursor: unset;
-    }
-
-    .net-terms-link li a.action.primary {
-        margin: 0px 0 0px;
-    }
-
-    .modal-popup .modal-footer {
-        padding-bottom: 2rem !important;
-        padding-top: 2rem !important;
-    }
-
-    .modal-slide .modal-content {
-        padding: 0 1.6rem 1.6rem !important;
-    }
-
-</style>
-<script>
-    require(
-        [
-            'jquery',
-            'Magento_Ui/js/modal/modal',
-            'Magento_Customer/js/customer-data'
-        ],
-        function (
-            $,
-            modal,
-            customerData
-        ) {
-            var options = {
-                type: 'popup',
-                responsive: true,
-                innerScroll: true,
-                buttons: [{
-                    text: $.mage.__('Continue'),
-                    class: '',
-                    click: function () {
-                        this.closeModal();
-                        window.location.reload();
-                    }
-                }]
-            };
-            var customurl = "<?php echo $block->getUrl() . 'balancepay/buyer/qualify'?>";
-            $("#click-me").on('click', function () {
-                $.ajax({
-                    url: customurl,
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {},
-                    success: function (response) {
-                        if (response && response.hasOwnProperty('qualificationLink') && response.qualificationLink) {
-                            $("#popup-modal").empty();
-                            $("#popup-modal").append('<iframe id="qualify-iframe" scrolling="no" width="100%" src="' + response.qualificationLink + '" frameborder="0" allowfullscreen=""></iframe>');
-                            $('#popup-modal').modal(options).modal('openModal');
-                        } else {
-                            setTimeout(function() {
-                                customerData.set('messages', {
-                                    messages: [{
-                                        text: 'There was a problem generating a qualification link. Please contact the administrator.',
-                                        type: 'error'
-                                    }]
-                                });
-                            },1000);
-                        }
-                    },
-                    error: function (xhr, status, errorThrown) {
-                        console.log('Error happens. Try again.');
-                    }
-                });
-            });
-        }
-    );
 </script>
+<?php endif; ?>
