@@ -11,12 +11,15 @@
 
 namespace Balancepay\Balancepay\Model\Request;
 
+use Balancepay\Balancepay\Helper\Data as HelperData;
 use Balancepay\Balancepay\Lib\Http\Client\Curl;
 use Balancepay\Balancepay\Model\AbstractRequest;
 use Balancepay\Balancepay\Model\BalancepayMethod;
 use Balancepay\Balancepay\Model\Config;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Balancepay\Balancepay\Model\Response\Factory as ResponseFactory;
+use Magento\Customer\Api\AccountManagementInterface;
+use Magento\Directory\Model\RegionFactory;
 use Magento\Sales\Model\Order\Payment as OrderPayment;
 
 /**
@@ -30,25 +33,34 @@ class Close extends AbstractRequest
     protected $_payment;
 
     /**
-     * AbstractGateway constructor.
-     *
-     * @param Config                $config
-     * @param Curl                  $curl
-     * @param ResponseFactory       $responseFactory
+     * @param Config $balancepayConfig
+     * @param Curl $curl
+     * @param ResponseFactory $responseFactory
+     * @param HelperData $helper
+     * @param AccountManagementInterface $accountManagement
+     * @param RegionFactory $region
      */
     public function __construct(
         Config $balancepayConfig,
         Curl $curl,
-        ResponseFactory $responseFactory
+        ResponseFactory $responseFactory,
+        HelperData $helper,
+        AccountManagementInterface $accountManagement,
+        RegionFactory $region
     ) {
         parent::__construct(
             $balancepayConfig,
             $curl,
-            $responseFactory
+            $helper,
+            $responseFactory,
+            $accountManagement,
+            $region
         );
     }
 
     /**
+     * Set Payment
+     *
      * @method setPayment
      * @param  OrderPayment $payment
      * @return Capture $this
@@ -60,6 +72,8 @@ class Close extends AbstractRequest
     }
 
     /**
+     * Get Payment
+     *
      * @method getPayment
      * @return OrderPayment|null
      */
@@ -84,7 +98,7 @@ class Close extends AbstractRequest
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      *
      * @return string
      */
@@ -94,22 +108,12 @@ class Close extends AbstractRequest
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      *
      * @return string
      */
     protected function getResponseHandlerType()
     {
         return ResponseFactory::CLOSE_RESPONSE_HANDLER;
-    }
-
-    /**
-     * Return request params.
-     *
-     * @return array
-     */
-    protected function getParams()
-    {
-        return parent::getParams();
     }
 }

@@ -11,12 +11,15 @@
 
 namespace Balancepay\Balancepay\Model\Request;
 
+use Balancepay\Balancepay\Helper\Data as HelperData;
 use Balancepay\Balancepay\Lib\Http\Client\Curl;
 use Balancepay\Balancepay\Model\AbstractRequest;
 use Balancepay\Balancepay\Model\Config;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Balancepay\Balancepay\Model\Response\Factory as ResponseFactory;
 use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Customer\Api\AccountManagementInterface;
+use Magento\Directory\Model\RegionFactory;
 use Magento\Quote\Model\Cart\CartTotalRepository;
 use Magento\Quote\Model\Quote;
 
@@ -36,33 +39,46 @@ class Checkout extends AbstractRequest
     protected $_cartTotalRepository;
 
     /**
-     * AbstractGateway constructor.
-     *
-     * @param Config                $config
-     * @param Curl                  $curl
-     * @param ResponseFactory       $responseFactory
-     * @param CheckoutSession       $checkoutSession
-     * @param CartTotalRepository   $cartTotalRepository
+     * @var HelperData
+     */
+    protected $helper;
+
+    /**
+     * @param Config $balancepayConfig
+     * @param Curl $curl
+     * @param ResponseFactory $responseFactory
+     * @param CheckoutSession $checkoutSession
+     * @param CartTotalRepository $cartTotalRepository
+     * @param HelperData $helper
+     * @param AccountManagementInterface $accountManagement
+     * @param RegionFactory $region
      */
     public function __construct(
         Config $balancepayConfig,
         Curl $curl,
         ResponseFactory $responseFactory,
         CheckoutSession $checkoutSession,
-        CartTotalRepository $cartTotalRepository
+        CartTotalRepository $cartTotalRepository,
+        HelperData $helper,
+        AccountManagementInterface $accountManagement,
+        RegionFactory $region
     ) {
         parent::__construct(
             $balancepayConfig,
             $curl,
-            $responseFactory
+            $helper,
+            $responseFactory,
+            $accountManagement,
+            $region
         );
 
         $this->_checkoutSession = $checkoutSession;
         $this->_cartTotalRepository = $cartTotalRepository;
+        $this->helper = $helper;
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      *
      * @return string
      */
@@ -72,7 +88,7 @@ class Checkout extends AbstractRequest
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      *
      * @return string
      */
@@ -82,6 +98,8 @@ class Checkout extends AbstractRequest
     }
 
     /**
+     * Amount format
+     *
      * @method amountFormat
      * @param  float|int              $amount
      * @return string
@@ -130,6 +148,8 @@ class Checkout extends AbstractRequest
     }
 
     /**
+     * Get Buyer params
+     *
      * @param Quote $quote
      *
      * @return array
@@ -152,6 +172,8 @@ class Checkout extends AbstractRequest
     }
 
     /**
+     * Get billing address params
+     *
      * @param Quote $quote
      *
      * @return array
@@ -174,6 +196,8 @@ class Checkout extends AbstractRequest
     }
 
     /**
+     * Get line items params
+     *
      * @param Quote $quote
      *
      * @return array
@@ -189,13 +213,13 @@ class Checkout extends AbstractRequest
             }
             $variationId = $quoteItem->getProductId();
             $quoteItem->getProduct()->load($quoteItem->getProductId());
-            $balanceVendorId = $quoteItem->getProduct()->getData('balancepay_vendor_id');
+            $balanceVendorId = $this->helper->getBalanceVendors($variationId);
             if ($quoteItem->getProductType() === 'configurable' && $quoteItem->getHasChildren()) {
                 foreach ($quoteItem->getChildren() as $child) {
                     $variationId = $child->getProductId();
                     $child->getProduct()->load($child->getProductId());
                     if (!$balanceVendorId) {
-                        $balanceVendorId = $child->getProduct()->getData('balancepay_vendor_id');
+                        $balanceVendorId = $this->helper->getBalanceVendors($child->getProductId());
                     }
                     continue;
                 }

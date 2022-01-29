@@ -23,8 +23,8 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
     /**
      * Response result const.
      */
-    const STATUS_SUCCESS = 1;
-    const STATUS_FAILED = 2;
+    public const STATUS_SUCCESS = 1;
+    public const STATUS_FAILED = 2;
 
     /**
      * @var Curl
@@ -63,6 +63,8 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
     }
 
     /**
+     * Process
+     *
      * @return AbstractResponse
      * @throws PaymentException
      */
@@ -87,6 +89,8 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
     }
 
     /**
+     * Get Error Message
+     *
      * @return \Magento\Framework\Phrase
      */
     protected function getErrorMessage()
@@ -100,6 +104,8 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
     }
 
     /**
+     * Get Error Reason
+     *
      * @return bool
      */
     protected function getErrorReason()
@@ -127,6 +133,8 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
     }
 
     /**
+     * Get Request Id
+     *
      * @return int
      */
     protected function getRequestId()
@@ -135,6 +143,8 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
     }
 
     /**
+     * Get Status
+     *
      * @return int
      */
     protected function getStatus()
@@ -147,6 +157,8 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
     }
 
     /**
+     * Get Headers
+     *
      * @return array
      */
     protected function getHeaders()
@@ -159,6 +171,8 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
     }
 
     /**
+     * Get Body
+     *
      * @return array
      */
     protected function getBody()
@@ -175,6 +189,8 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
     }
 
     /**
+     * Prepare response data
+     *
      * @return array
      */
     protected function prepareResponseData()
@@ -187,28 +203,35 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
     }
 
     /**
+     * Validate response data
+     *
      * @return AbstractResponse
      * @throws PaymentException
      */
     protected function validateResponseData()
     {
+        $body = $this->getBody();
+        $error = 'Balancepay required response data fields are missing: %1.';
+        if (!empty($body['error']) && !empty($body['message'])) {
+            $error = $body['message'];
+        }
         $requiredKeys = $this->getRequiredResponseDataKeys();
-        $bodyKeys = array_keys($this->getBody());
-
+        $bodyKeys = array_keys($body);
         $diff = array_diff($requiredKeys, $bodyKeys);
         if (!empty($diff)) {
             throw new PaymentException(
                 __(
-                    'Balancepay required response data fields are missing: %1.',
+                    $error,
                     implode(', ', $diff)
                 )
             );
         }
-
         return $this;
     }
 
     /**
+     * Get Required Response Data Keys
+     *
      * @return array
      */
     protected function getRequiredResponseDataKeys()
@@ -216,6 +239,11 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
         return [];
     }
 
+    /**
+     * Get data object
+     *
+     * @return DataObject
+     */
     public function getDataObject()
     {
         return new DataObject($this->getBody());
