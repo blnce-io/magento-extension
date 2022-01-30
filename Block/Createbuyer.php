@@ -2,12 +2,6 @@
 namespace Balancepay\Balancepay\Block;
 
 use Magento\Backend\Block\Template;
-use \Magento\Customer\Model\Session;
-use \Magento\Customer\Api\CustomerRepositoryInterface;
-use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
-use Balancepay\Balancepay\Model\Config as BalancepayConfig;
-use Magento\Framework\App\Http\Context;
-use Magento\Framework\Pricing\Helper\Data;
 use Magento\Framework\View\Element\Html\Link;
 use Balancepay\Balancepay\Helper\Data as BalancepayHelper;
 
@@ -43,6 +37,22 @@ class Createbuyer extends Link
     }
 
     /**
+     * @param $customerId
+     * @return array
+     */
+    public function getBuyerDetails()
+    {
+        $response = [];
+        try {
+            $response = $this->balancepayHelper->getBuyerAmount();
+        } catch (\Exception $e) {
+            $this->balancepayConfig->log('Webhook\Checkout\Charged::execute() [Exception: ' .
+                $e->getMessage() . "]\n" . $e->getTraceAsString(), 'error');
+        }
+        return $response;
+    }
+
+    /**
      * GetCustomerSessionId
      *
      * @return mixed
@@ -50,5 +60,14 @@ class Createbuyer extends Link
     public function getCustomerSessionId()
     {
         return $this->balancepayHelper->getCustomerSessionId();
+    }
+
+    /**
+     * @param $price
+     * @return float|string
+     */
+    public function formattedAmount($price)
+    {
+        return $this->balancepayHelper->formattedAmount($price);
     }
 }

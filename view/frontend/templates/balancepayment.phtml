@@ -1,0 +1,88 @@
+<?php if (!empty($block->getCustomerSessionId())): ?>
+    <?php $buyerResponse = $block->getBuyerDetails(); ?>
+
+    <div class="table-wrapper my-credit-cards">
+        <?php if (!empty($buyerResponse) && $buyerResponse['qualificationStatus'] == 'completed'): ?>
+            <?php
+                $maxCreditLimit = $block->formattedAmount($buyerResponse['qualification']['maxCreditLimit'] ?? '$0.00');
+                $creditLimit = $block->formattedAmount($buyerResponse['qualification']['creditLimit'] ?? '$0.00');
+            ?>
+            <h3><?= $block->escapeHtml(__('Net Terms')) ?></h3>
+            <table class="data table table-credit-cards" id="my-orders-table">
+                <thead>
+                <tr>
+                    <th scope="col" class="col card-number"><?= $block->escapeHtml(__('Max Credit Limit')) ?></th>
+                    <th scope="col" class="col expire"><?= $block->escapeHtml(__('Credit Limit')) ?></th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-th="<?= $block->escapeHtml(__('Max Credit Limit')) ?>" class="col card-number">
+                            <span><?php echo $maxCreditLimit; ?>
+                        </td>
+                        <td data-th="<?= $block->escapeHtml(__('Credit Limit')) ?>" class="col card-type">
+                            <?php echo $creditLimit; ?>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        <?php endif; ?>
+
+        <?php if (!empty($buyerResponse) && !empty($buyerResponse['paymentData']['creditCards'] )): ?>
+            <h3><?= $block->escapeHtml(__('Stored Credit Cards')) ?></h3>
+            <table class="data table table-credit-cards" id="my-orders-table">
+                <thead>
+                <tr>
+                    <th scope="col" class="col card-number"><?= $block->escapeHtml(__('Card Number')) ?></th>
+                    <th scope="col" class="col expire"><?= $block->escapeHtml(__('Expiration Date')) ?></th>
+                    <th scope="col" class="col card-type"><?= $block->escapeHtml(__('Type')) ?></th>
+                </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($buyerResponse['paymentData']['creditCards'] as $creditcard):?>
+                        <tr>
+                           <td data-th="<?= $block->escapeHtml(__('Card Number')) ?>" class="col card-number">
+                                <span><?= $block->escapeHtml(__('ending')) ?></span> <?php echo $creditcard['last4'] ?? ''; ?>
+                            </td>
+                            <td data-th="<?= $block->escapeHtml(__('Expiration Date')) ?>" class="col card-expire">
+                                <?php echo $creditcard['expiredMonth'].'/'.$creditcard['expiredYear']; ?>
+                            </td>
+                            <td data-th="<?= $block->escapeHtml(__('Type')) ?>" class="col card-type">
+                                <?php echo $creditcard['brand'] ?? ''; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
+
+        <?php if (!empty($buyerResponse) && !empty($buyerResponse['paymentData']['banks'])): ?>
+            <h3><?= $block->escapeHtml(__('Stored Bank Accounts')) ?></h3>
+            <table class="data table table-credit-cards" id="my-orders-table">
+                <caption class="table-caption"><?= $block->escapeHtml(__('Stored Bank Accounts')) ?></caption>
+                <thead>
+                <tr>
+                    <th scope="col" class="col card-number"><?= $block->escapeHtml(__('Institution Name')) ?></th>
+                    <th scope="col" class="col expire"><?= $block->escapeHtml(__('Account Name')) ?></th>
+                    <th scope="col" class="col card-type"><?= $block->escapeHtml(__('Account Number Mask')) ?></th>
+                </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($buyerResponse['paymentData']['banks'] as $bank):?>
+                        <tr>
+                            <td data-th="<?= $block->escapeHtml(__('Institution Name')) ?>" class="col card-number">
+                                <?php echo $bank['institutionName'] ?? ''; ?>
+                            </td>
+                            <td data-th="<?= $block->escapeHtml(__('Account Name')) ?>" class="col card-expire">
+                                <?php echo $bank['accountName']; ?>
+                            </td>
+                            <td data-th="<?= $block->escapeHtml(__('Account Number Mask')) ?>" class="col card-type">
+                                <?php echo $bank['accountNumberMask'] ?? ''; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
+    </div>
+<?php endif; ?>

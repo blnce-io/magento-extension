@@ -1,0 +1,15 @@
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="../../../../../../../lib/internal/Magento/Framework/View/Layout/etc/page_configuration.xsd">
+    <update handle="customer_account"/>
+    <body>
+        <referenceBlock name="page.main.title">
+            <action method="setPageTitle">
+                <argument translate="true" name="title" xsi:type="string">Balance Payment Methods</argument>
+            </action>
+        </referenceBlock>
+        <referenceContainer name="content">
+            <block class="Balancepay\Balancepay\Block\Createbuyer" ifconfig="payment/balancepay/active" name="my_tab"
+                   template="Balancepay_Balancepay::balancepayment.phtml"></block>
+        </referenceContainer>
+    </body>
+</page>
