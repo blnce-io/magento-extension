@@ -19,6 +19,20 @@
     }
 }
 
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scroll::-webkit-scrollbar {
+    display: none !important;
+    width: 0px;
+    background: transparent;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scroll {
+    overflow-y: scroll !important;
+    -ms-overflow-style: none !important;  /* IE and Edge */
+    scrollbar-width: none !important;  /* Firefox */
+}
+
 .header.panel>.header.links>li.customer-welcome {
     margin: 8px 0 0 5px;
 }

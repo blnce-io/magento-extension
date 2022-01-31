@@ -2,21 +2,15 @@
 namespace Balancepay\Balancepay\Block;
 
 use Magento\Backend\Block\Template;
-use \Magento\Customer\Model\Session;
-use \Magento\Customer\Api\CustomerRepositoryInterface;
-use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
-use Balancepay\Balancepay\Model\Config as BalancepayConfig;
-use Magento\Framework\App\Http\Context;
-use Magento\Framework\Pricing\Helper\Data;
 use Magento\Framework\View\Element\Html\Link;
 use Balancepay\Balancepay\Helper\Data as BalancepayHelper;
 
 /**
- * Class Createbuyer
+ * Class CreateBuyerLink
  *
  * Balancepay\Balancepay\Block
  */
-class Createbuyer extends Link
+class CreateBuyerLink extends Link
 {
     /**
      * @var string

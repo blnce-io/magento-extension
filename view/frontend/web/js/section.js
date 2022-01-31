@@ -8,7 +8,6 @@ define([
 
     return Component.extend({
         initialize: function () {
-            console.log('initialize');
             this._super();
             this.customsection = customerData.get('custom_section');
         },
@@ -25,10 +24,7 @@ define([
                         url: customeurl,
                         type: 'POST',
                         dataType: 'json',
-                        data: {},
-                        error: function (xhr, status, errorThrown) {
-                            console.log(xhr);
-                        }
+                        data: {}
                     });
                     this.closeModal();
                 }
@@ -42,7 +38,7 @@ define([
                 success: function (response) {
                     if (response && response.hasOwnProperty('qualificationLink') && response.qualificationLink) {
                         $("#popup-modal").empty();
-                        $("#popup-modal").append('<iframe id="qualify-iframe" scrolling="no" width="100%" src="' + response.qualificationLink + '" frameborder="0" allowfullscreen=""></iframe>');
+                        $("#popup-modal").append('<iframe id="qualify-iframe" class="no-scroll" scrolling="no" width="100%" src="' + response.qualificationLink + '" frameborder="0" allowfullscreen=""></iframe>');
                         $('#popup-modal').modal(options).modal('openModal');
                     } else {
                         setTimeout(function() {
@@ -56,7 +52,12 @@ define([
                     }
                 },
                 error: function (xhr, status, errorThrown) {
-                    console.log('Error happens. Try again.');
+                    customerData.set('messages', {
+                        messages: [{
+                            text: 'There was a problem generating a qualification link. Please contact the administrator.',
+                            type: 'error'
+                        }]
+                    });
                 }
             });
         }
