@@ -31,6 +31,7 @@ class Factory
     public const WEBHOOKS_KEYS_REQUEST_METHOD = 'webhooks/keys';
     public const WEBHOOKS_REQUEST_METHOD = 'webhooks';
     public const VENDORS_REQUEST_METHOD = 'vendors';
+    public const BUYER_REQUEST_METHOD = 'buyers';
 
     /**
      * Set of requests.
@@ -45,6 +46,7 @@ class Factory
         self::WEBHOOKS_KEYS_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Webhooks\Keys::class,
         self::WEBHOOKS_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Webhooks::class,
         self::VENDORS_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Vendors::class,
+        self::BUYER_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Buyers::class,
     ];
 
     /**

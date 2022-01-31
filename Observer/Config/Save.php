@@ -82,7 +82,7 @@ class Save implements ObserverInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function execute(Observer $observer)
     {
@@ -104,7 +104,9 @@ class Save implements ObserverInterface
         $this->appEmulation->stopEnvironmentEmulation();
         if ($storeId && $scope !== ScopeConfigInterface::SCOPE_TYPE_DEFAULT) {
             $this->appEmulation->startEnvironmentEmulation(
-                !empty($websiteId) ? $this->balancepayConfig->getStoreManager()->getWebsite($websiteId)->getDefaultStore()->getId() : $storeId,
+                !empty($websiteId)
+                    ? $this->balancepayConfig->getStoreManager()->getWebsite($websiteId)->getDefaultStore()->getId()
+                    : $storeId,
                 Area::AREA_FRONTEND,
                 true
             );
@@ -130,9 +132,12 @@ class Save implements ObserverInterface
                         ->process();
 
                     $this->appEmulation->stopEnvironmentEmulation();
-                    return $this->messageManager->addSuccess(__('Balance API key is valid! (Webhooks have been successfully registered)'));
+                    return $this->messageManager->addSuccess(__('Balance API key is valid!
+                    (Webhooks have been successfully registered)'));
                 } catch (\Exception $e) {
-                    throw new \Exception(__('Balance payments - Failed to register webhooks! [Exception: %1]', $e->getMessage()));
+                    $this->balancepayConfig->updateBalancePayStatus($scope);
+                    throw new \Exception(__('Balance payments - Failed to register webhooks!
+                    [Exception: %1]', $e->getMessage()));
                 }
             } else {
                 $this->appEmulation->stopEnvironmentEmulation();
@@ -142,13 +147,20 @@ class Save implements ObserverInterface
         }
     }
 
+    /**
+     * CleanConfigCache
+     *
+     * @return $this
+     */
     private function cleanConfigCache()
     {
         try {
             $this->cacheTypeList->cleanType(Config::TYPE_IDENTIFIER);
             $this->appConfig->reinit();
         } catch (\Exception $e) {
-            $this->messageManager->addNoticeMessage(__('For some reason, Balance (payment) couldn\'t clear your config cache, please clear the cache manually. (Exception message: %1)', $e->getMessage()));
+            $this->messageManager->addNoticeMessage(__('For some reason,
+            Balance (payment) couldn\'t clear your config cache,
+            please clear the cache manually. (Exception message: %1)', $e->getMessage()));
         }
         return $this;
     }
