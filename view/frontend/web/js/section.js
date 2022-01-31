@@ -42,7 +42,7 @@ define([
                 success: function (response) {
                     if (response && response.hasOwnProperty('qualificationLink') && response.qualificationLink) {
                         $("#popup-modal").empty();
-                        $("#popup-modal").append('<iframe id="qualify-iframe" scrolling="no" width="100%" src="' + response.qualificationLink + '" frameborder="0" allowfullscreen=""></iframe>');
+                        $("#popup-modal").append('<iframe id="qualify-iframe" class="no-scroll" scrolling="no" width="100%" src="' + response.qualificationLink + '" frameborder="0" allowfullscreen=""></iframe>');
                         $('#popup-modal').modal(options).modal('openModal');
                     } else {
                         setTimeout(function() {

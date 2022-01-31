@@ -60,6 +60,11 @@ class Data extends AbstractHelper
     protected $pricingHelper;
 
     /**
+     * @var string[]
+     */
+    public $ccIcons;
+
+    /**
      * @param MpProductCollection $mpProductCollectionFactory
      * @param TypeListInterface $cacheTypeList
      * @param MessageManagerInterface $messageManager
@@ -76,6 +81,12 @@ class Data extends AbstractHelper
         BalancepayConfig $balancepayConfig,
         PricingHelper $pricingHelper
     ) {
+        $this->ccIcons = [
+            'visa' => 'vi',
+            'discover' => 'di',
+            'mastercard' => 'mc',
+            'maestro' => 'mi'
+        ];
         $this->_mpProductCollectionFactory = $mpProductCollectionFactory;
         $this->cacheTypeList = $cacheTypeList;
         $this->messageManager = $messageManager;

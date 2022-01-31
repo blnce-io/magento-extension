@@ -37,22 +37,6 @@ class Createbuyer extends Link
     }
 
     /**
-     * @param $customerId
-     * @return array
-     */
-    public function getBuyerDetails()
-    {
-        $response = [];
-        try {
-            $response = $this->balancepayHelper->getBuyerAmount();
-        } catch (\Exception $e) {
-            $this->balancepayConfig->log('Webhook\Checkout\Charged::execute() [Exception: ' .
-                $e->getMessage() . "]\n" . $e->getTraceAsString(), 'error');
-        }
-        return $response;
-    }
-
-    /**
      * GetCustomerSessionId
      *
      * @return mixed
@@ -60,14 +44,5 @@ class Createbuyer extends Link
     public function getCustomerSessionId()
     {
         return $this->balancepayHelper->getCustomerSessionId();
-    }
-
-    /**
-     * @param $price
-     * @return float|string
-     */
-    public function formattedAmount($price)
-    {
-        return $this->balancepayHelper->formattedAmount($price);
     }
 }
