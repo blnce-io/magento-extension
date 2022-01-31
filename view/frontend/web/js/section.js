@@ -8,7 +8,6 @@ define([
 
     return Component.extend({
         initialize: function () {
-            console.log('initialize');
             this._super();
             this.customsection = customerData.get('custom_section');
         },
@@ -25,10 +24,7 @@ define([
                         url: customeurl,
                         type: 'POST',
                         dataType: 'json',
-                        data: {},
-                        error: function (xhr, status, errorThrown) {
-                            console.log(xhr);
-                        }
+                        data: {}
                     });
                     this.closeModal();
                 }
@@ -56,7 +52,12 @@ define([
                     }
                 },
                 error: function (xhr, status, errorThrown) {
-                    console.log('Error happens. Try again.');
+                    customerData.set('messages', {
+                        messages: [{
+                            text: 'There was a problem generating a qualification link. Please contact the administrator.',
+                            type: 'error'
+                        }]
+                    });
                 }
             });
         }

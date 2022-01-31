@@ -6,11 +6,11 @@ use Magento\Framework\View\Element\Html\Link;
 use Balancepay\Balancepay\Helper\Data as BalancepayHelper;
 
 /**
- * Class Createbuyer
+ * Class CreateBuyerLink
  *
  * Balancepay\Balancepay\Block
  */
-class Createbuyer extends Link
+class CreateBuyerLink extends Link
 {
     /**
      * @var string

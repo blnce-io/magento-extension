@@ -6,7 +6,7 @@ use Magento\Framework\App\Action\Context;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 
-class Creditlimit extends Action
+class CreditLimit extends Action
 {
     /**
      * @var resultJsonFactory

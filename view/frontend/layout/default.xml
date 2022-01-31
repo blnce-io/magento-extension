@@ -4,7 +4,7 @@
         <css src="Balancepay_Balancepay::css/balancepay.css"/>
     </head>
     <referenceBlock name="header.links">
-        <block class="Balancepay\Balancepay\Block\Createbuyer" ifconfig="payment/balancepay/active" name="buyer-header-link">
+        <block class="Balancepay\Balancepay\Block\CreateBuyerLink" ifconfig="payment/balancepay/active" name="buyer-header-link">
             <arguments>
                 <argument name="label" xsi:type="string" translate="true">Buyer Link</argument>
                 <argument name="path" xsi:type="string" translate="true">Buyer Link</argument>

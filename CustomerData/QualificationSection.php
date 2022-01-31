@@ -7,10 +7,10 @@ use Magento\Customer\CustomerData\SectionSourceInterface;
 use Magento\Customer\Model\Session;
 
 /**
- * Class CustomSection
+ * Class QualificationSection
  * @package Balancepay\Balancepay\CustomerData
  */
-class CustomSection implements SectionSourceInterface
+class QualificationSection implements SectionSourceInterface
 {
     /**
      * @var Session
