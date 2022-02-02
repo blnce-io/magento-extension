@@ -51,6 +51,7 @@
 }
 .modal-slide._inner-scroll .modal-header {
     z-index: 1;
+    border: none !important;
 }
 
 .modal-popup .modal-footer {
