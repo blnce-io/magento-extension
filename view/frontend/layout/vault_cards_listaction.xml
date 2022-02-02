@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <referenceBlock name="vault.cards.list" template="Balancepay_Balancepay::cards_list.phtml">
+        <arguments>
+            <argument name="view_model" xsi:type="object">Balancepay\Balancepay\ViewModel\CardList</argument>
+        </arguments>
+    </referenceBlock>
+</page>

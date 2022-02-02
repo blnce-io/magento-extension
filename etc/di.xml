@@ -14,5 +14,11 @@
     <type name="Magento\Sales\Model\Order\Payment\State\AuthorizeCommand">
         <plugin name="balancepay_plugin_sales_model_order_payment_state_authorizecommand" type="Balancepay\Balancepay\Plugin\Sales\Model\Order\Payment\State\AuthorizeCommand"/>
     </type>
-    <preference for="Webkul\Marketplace\Controller\Seller\Usernameverify" type="Balancepay\Balancepay\Controller\Seller\Usernameverify"/>
+    <!-- plugin for Customer Id -->
+    <type name="Magento\Framework\App\Action\AbstractAction">
+        <plugin name="marketplace-abstractaction-customerid-plugin" disabled="true"/>
+    </type>
+    <type name="Magento\Framework\App\Action\AbstractAction">
+        <plugin name="customer-session-data-to-context" type="Balancepay\Balancepay\Plugin\CustomerSessionContext" sortOrder="15"/>
+    </type>
 </config>

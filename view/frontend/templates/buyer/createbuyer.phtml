@@ -1,0 +1,27 @@
+<?php if ($block->canShowIf()): ?>
+<div class="custom-section" data-bind="scope:'section'">
+    <li class="credit-limit" style="display: none" data-bind="visible: customsection().showCredit">
+        <a class="action" href="javascript:void(0)" data-bind="text: customsection().creditLimit"></a>
+    </li>
+    <li class="net-terms-link" style="display: none" data-bind="visible: customsection().showButton">
+        <a class="action primary" data-bind="click:callPopup" href="javascript:void(0)">Qualify for Net Terms</a>
+    </li>
+    <!-- ko ifnot: customsection().status  -->
+    <div id="popup-modal" style="display:none;"></div>
+    <!-- /ko -->
+</div>
+<script type="text/x-magento-init">
+   {
+      "*": {
+          "Magento_Ui/js/core/app": {
+              "components": {
+                  "section": {
+                      "component": "Balancepay_Balancepay/js/section"
+                  }
+              }
+          }
+      }
+   }
+
+</script>
+<?php endif; ?>

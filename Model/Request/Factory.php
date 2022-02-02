@@ -24,13 +24,14 @@ class Factory
     /**
      * Request methods.
      */
-    const CAPTURE_REQUEST_METHOD = 'capture';
-    const CLOSE_REQUEST_METHOD = 'close';
-    const CHECKOUT_REQUEST_METHOD = 'checkout';
-    const TRANSACTIONS_REQUEST_METHOD = 'transactions';
-    const WEBHOOKS_KEYS_REQUEST_METHOD = 'webhooks/keys';
-    const WEBHOOKS_REQUEST_METHOD = 'webhooks';
-    const VENDORS_REQUEST_METHOD = 'vendors';
+    public const CAPTURE_REQUEST_METHOD = 'capture';
+    public const CLOSE_REQUEST_METHOD = 'close';
+    public const CHECKOUT_REQUEST_METHOD = 'checkout';
+    public const TRANSACTIONS_REQUEST_METHOD = 'transactions';
+    public const WEBHOOKS_KEYS_REQUEST_METHOD = 'webhooks/keys';
+    public const WEBHOOKS_REQUEST_METHOD = 'webhooks';
+    public const VENDORS_REQUEST_METHOD = 'vendors';
+    public const BUYER_REQUEST_METHOD = 'buyers';
 
     /**
      * Set of requests.
@@ -45,6 +46,7 @@ class Factory
         self::WEBHOOKS_KEYS_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Webhooks\Keys::class,
         self::WEBHOOKS_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Webhooks::class,
         self::VENDORS_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Vendors::class,
+        self::BUYER_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Buyers::class,
     ];
 
     /**
