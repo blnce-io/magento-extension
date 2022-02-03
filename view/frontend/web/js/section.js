@@ -10,6 +10,7 @@ define([
         initialize: function () {
             this._super();
             this.customsection = customerData.get('custom_section');
+            customerData.reload(['custom_section']);
         },
 
         callPopup: function () {
