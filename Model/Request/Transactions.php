@@ -22,6 +22,8 @@ use Magento\Customer\Api\AccountManagementInterface;
 use Magento\Directory\Model\RegionFactory;
 use Magento\Quote\Model\Cart\CartTotalRepository;
 use Magento\Quote\Model\Quote;
+use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Customer\Model\Session;
 
 /**
  * Balancepay transactions request model.
@@ -39,6 +41,18 @@ class Transactions extends AbstractRequest
     protected $_cartTotalRepository;
 
     /**
+     * @var CustomerRepositoryInterface
+     */
+    private $customerRepository;
+
+    /**
+     * @var Session
+     */
+    private $customerSession;
+
+    /**
+     * Transactions constructor.
+     *
      * @param Config $balancepayConfig
      * @param Curl $curl
      * @param ResponseFactory $responseFactory
@@ -47,6 +61,8 @@ class Transactions extends AbstractRequest
      * @param HelperData $helper
      * @param AccountManagementInterface $accountManagement
      * @param RegionFactory $region
+     * @param CustomerRepositoryInterface $customerRepository
+     * @param Session $customerSession
      */
     public function __construct(
         Config $balancepayConfig,
@@ -56,8 +72,11 @@ class Transactions extends AbstractRequest
         CartTotalRepository $cartTotalRepository,
         HelperData $helper,
         AccountManagementInterface $accountManagement,
-        RegionFactory $region
-    ) {
+        RegionFactory $region,
+        CustomerRepositoryInterface $customerRepository,
+        Session $customerSession
+    )
+    {
         parent::__construct(
             $balancepayConfig,
             $curl,
@@ -69,6 +88,9 @@ class Transactions extends AbstractRequest
 
         $this->_checkoutSession = $checkoutSession;
         $this->_cartTotalRepository = $cartTotalRepository;
+        $this->customerRepository = $customerRepository;
+        $this->customerSession = $customerSession;
+
     }
 
     /**
@@ -102,24 +124,32 @@ class Transactions extends AbstractRequest
         $quote->collectTotals();
         $requiresShipping = $quote->getShippingAddress() !== null ? 1 : 0;
         $quoteTotals = $this->_cartTotalRepository->get($quote->getId());
+        $termsOptions = $this->getAttributeValue($this->customerSession->getCustomer()->getId());
+        $options = [];
+        if (!empty($termsOptions)) {
+            foreach (explode(",", $termsOptions) as $terms) {
+                $options[$terms] = $terms;
+            }
+        }
 
         return array_replace_recursive(
             parent::getParams(),
             [
-            'currency' => $quote->getBaseCurrencyCode(),
-            'externalReferenceId' => $this->_balancepayConfig->getReservedOrderId($quote),
-            'notes' => $this->_balancepayConfig->getReservedOrderId($quote),
-            'buyer' => $this->getBuyerParams($quote),
-            "plan" => [
-                "planType" => "invoice",
-                "chargeDate" => date('Y-m-d', strtotime($this->_balancepayConfig->getGmtDate())),
-            ],
-            'lines' => $this->getLinesParams($quote, $quoteTotals->getBaseShippingAmount()),
-            'shippingLines' => $this->getShippingLinesParams($quote),
-            'totalDiscount' => abs($this->amountFormat($quoteTotals->getBaseDiscountAmount())),
-            'billingAddress' => $this->getBillingAddressParams($quote),
-            'shippingAddress' => $this->getShippingAddressParams($quote),
-            'allowedPaymentMethods' => $this->_balancepayConfig->getAllowedPaymentMethods(),
+                'currency' => $quote->getBaseCurrencyCode(),
+                'externalReferenceId' => $this->_balancepayConfig->getReservedOrderId($quote),
+                'notes' => $this->_balancepayConfig->getReservedOrderId($quote),
+                'buyer' => $this->getBuyerParams($quote),
+                "plan" => [
+                    "planType" => "invoice",
+                    "chargeDate" => date('Y-m-d', strtotime($this->_balancepayConfig->getGmtDate())),
+                ],
+                "financingConfig" => !empty($options) ? [ "financingNetDaysOptions" => array_keys($options), ] : [],
+                'lines' => $this->getLinesParams($quote, $quoteTotals->getBaseShippingAmount()),
+                'shippingLines' => $this->getShippingLinesParams($quote),
+                'totalDiscount' => abs($this->amountFormat($quoteTotals->getBaseDiscountAmount())),
+                'billingAddress' => $this->getBillingAddressParams($quote),
+                'shippingAddress' => $this->getShippingAddressParams($quote),
+                'allowedPaymentMethods' => $this->_balancepayConfig->getAllowedPaymentMethods(),
             ]
         );
     }
@@ -143,5 +173,19 @@ class Transactions extends AbstractRequest
         $params['isRegistered'] = $quote->getCustomerIsGuest() ? false : true;
 
         return $params;
+    }
+
+    /**
+     * @param $customerId
+     * @return mixed|string
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function getAttributeValue($customerId)
+    {
+        $customer = $this->customerRepository->getById($customerId);
+        $customerAttributeData = $customer->__toArray();
+        return isset($customerAttributeData['custom_attributes']['term_options']) ?
+            $customerAttributeData['custom_attributes']['term_options']['value'] : '';
     }
 }
