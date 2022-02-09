@@ -155,11 +155,11 @@ class Data extends AbstractHelper
     }
 
     /**
-     * GetBuyerAmount
+     * GetBuyerDetails
      *
      * @return array
      */
-    public function getBuyerAmount()
+    public function getBuyerDetails()
     {
         $response = [];
         try {

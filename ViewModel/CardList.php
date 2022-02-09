@@ -68,7 +68,7 @@ class CardList implements ArgumentInterface
     {
         $response = [];
         try {
-            $response = $this->balancepayHelper->getBuyerAmount();
+            $response = $this->balancepayHelper->getBuyerDetails();
         } catch (\Exception $e) {
             $this->balancepayConfig->log('Webhook\Checkout\Charged::execute() [Exception: ' .
                 $e->getMessage() . "]\n" . $e->getTraceAsString(), 'error');

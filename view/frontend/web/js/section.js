@@ -45,7 +45,7 @@ define([
                         setTimeout(function() {
                             customerData.set('messages', {
                                 messages: [{
-                                    text: 'There was a problem generating a qualification link. Please contact the administrator.',
+                                    text: 'There was a problem starting qualification process. Please try again later or contact us.',
                                     type: 'error'
                                 }]
                             });
@@ -55,7 +55,7 @@ define([
                 error: function (xhr, status, errorThrown) {
                     customerData.set('messages', {
                         messages: [{
-                            text: 'There was a problem generating a qualification link. Please contact the administrator.',
+                            text: 'There was a problem starting qualification process. Please try again later or contact us.',
                             type: 'error'
                         }]
                     });

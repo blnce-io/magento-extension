@@ -51,7 +51,7 @@ class QualificationSection implements SectionSourceInterface
         $showButton = true;
         $showCredit = false;
         $creditLimit = '$0.00';
-        $buyerResponse = $this->balancepayHelper->getBuyerAmount();
+        $buyerResponse = $this->balancepayHelper->getBuyerDetails();
         if (!empty($buyerResponse['qualificationStatus']) && $buyerResponse['qualificationStatus'] == 'completed'){
             $status = true;
             $showButton = false;
@@ -60,7 +60,7 @@ class QualificationSection implements SectionSourceInterface
         }
         return [
             'creditLimit' => 'Terms Limit: '.$creditLimit,
-            'status' => $status, // $buyerResponse['qualificationStatus'] ?? ''
+            'status' => $status,
             'showButton' => $showButton,
             'showCredit' => $showCredit
         ];

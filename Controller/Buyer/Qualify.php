@@ -150,24 +150,21 @@ class Qualify extends Action
                 ->setRequestMethod('buyers')
                 ->setTopic('buyers')
                 ->process();
+
+            $buyerId = $response['id'] ?? '';
+            $customer = $this->customer->load($this->customerSession->getCustomer()->getId());
+            $customerData = $customer->getDataModel();
+            $customerData->setCustomAttribute('buyer_id', $buyerId);
+            $customer->updateData($customerData);
+            $customerResource = $this->customerFactory->create();
+            $customerResource->saveAttribute($customer, 'buyer_id');
+            $this->customerSession->setBuyerId($buyerId);
+            return $buyerId;
         } catch (Exception $e) {
             $this->balancepayConfig->log('Create buyer [Exception: ' .
                 $e->getMessage() . "]\n" . $e->getTraceAsString(), 'error');
             return false;
         }
-        $buyerId = $response['id'] ?? '';
-        $customer = $this->customer->load($this->customerSession->getCustomer()->getId());
-        $customerData = $customer->getDataModel();
-        $customerData->setCustomAttribute('buyer_id', $buyerId);
-        $customer->updateData($customerData);
-        $customerResource = $this->customerFactory->create();
-        $customerResource->saveAttribute($customer, 'buyer_id');
-        $this->customerSession->setBuyerId($buyerId);
-        $writer = new \Zend_Log_Writer_Stream(BP . '/var/log/test.log');
-        $logger = new \Zend_Log();
-        $logger->addWriter($writer);
-        $logger->info('$buyerId Qualify session');
-        $logger->info($this->customerSession->getBuyerId());
-        return $buyerId;
+
     }
 }
