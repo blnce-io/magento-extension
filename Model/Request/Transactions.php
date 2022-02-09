@@ -124,10 +124,10 @@ class Transactions extends AbstractRequest
         $quote->collectTotals();
         $requiresShipping = $quote->getShippingAddress() !== null ? 1 : 0;
         $quoteTotals = $this->_cartTotalRepository->get($quote->getId());
-        $termsOptions = $this->getAttributeValue($this->customerSession->getCustomer()->getId());
+        $termsOptions = $this->getTermOptions($this->customerSession->getCustomer()->getId());
         $options = [];
         if (!empty($termsOptions)) {
-            foreach (explode(",", $termsOptions) as $terms) {
+            foreach ($termsOptions as $terms) {
                 $options[$terms] = $terms;
             }
         }
@@ -177,15 +177,19 @@ class Transactions extends AbstractRequest
 
     /**
      * @param $customerId
-     * @return mixed|string
+     * @return array|string[]
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function getAttributeValue($customerId)
+    public function getTermOptions($customerId)
     {
         $customer = $this->customerRepository->getById($customerId);
         $customerAttributeData = $customer->__toArray();
-        return isset($customerAttributeData['custom_attributes']['term_options']) ?
+        $optionValues = isset($customerAttributeData['custom_attributes']['term_options']) ?
             $customerAttributeData['custom_attributes']['term_options']['value'] : '';
+        if ($optionValues) {
+            return explode(",", $optionValues);
+        }
+        return [];
     }
 }

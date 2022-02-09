@@ -1,49 +1,43 @@
 <?php
-
-declare(strict_types=1);
-
 namespace Balancepay\Balancepay\Setup\Patch\Data;
 
 use Magento\Customer\Model\Customer;
 use Magento\Customer\Setup\CustomerSetup;
 use Magento\Customer\Setup\CustomerSetupFactory;
+use Magento\Eav\Model\Entity\Attribute\Set;
+use Magento\Eav\Model\Entity\Attribute\SetFactory;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
-use Magento\Eav\Model\Entity\Attribute\SetFactory as AttributeSetFactory;
 
 class TermOptions implements DataPatchInterface
 {
-    /**
-     * Setup dependencies
-     */
-    const DEPENDENCIES = [];
-
-    /**
-     * Setup dependencies
-     */
-    const ALIASES = [];
 
     /**
      * @var ModuleDataSetupInterface
      */
     private $moduleDataSetup;
-
     /**
-     * @var CustomerSetupFactory
+     * @var CustomerSetup
      */
     private $customerSetupFactory;
+    /**
+     * @var SetFactory
+     */
+    private $attributeSetFactory;
 
     /**
-     * CommunicationPreferences constructor.
+     * Constructor
      *
      * @param ModuleDataSetupInterface $moduleDataSetup
      * @param CustomerSetupFactory $customerSetupFactory
+     * @param SetFactory $attributeSetFactory
      */
     public function __construct(
         ModuleDataSetupInterface $moduleDataSetup,
-        CustomerSetupFactory $customerSetupFactory,
-        AttributeSetFactory $attributeSetFactory
-    ) {
+        CustomerSetupFactory     $customerSetupFactory,
+        SetFactory               $attributeSetFactory
+    )
+    {
         $this->moduleDataSetup = $moduleDataSetup;
         $this->customerSetupFactory = $customerSetupFactory;
         $this->attributeSetFactory = $attributeSetFactory;
@@ -57,11 +51,11 @@ class TermOptions implements DataPatchInterface
         $this->moduleDataSetup->getConnection()->startSetup();
         /** @var CustomerSetup $customerSetup */
         $customerSetup = $this->customerSetupFactory->create(['setup' => $this->moduleDataSetup]);
-
-        $customerEntity = $customerSetup->getEavConfig()->getEntityType('customer');
+        $customerSetup->removeAttribute(\Magento\Customer\Model\Customer::ENTITY, 'term_options');
+        $customerEntity = $customerSetup->getEavConfig()->getEntityType(Customer::ENTITY);
         $attributeSetId = $customerEntity->getDefaultAttributeSetId();
 
-        /** @var \Magento\Eav\Model\Entity\Attribute\SetFactory $attributeSet */
+        /** @var $attributeSet Set */
         $attributeSet = $this->attributeSetFactory->create();
         $attributeGroupId = $attributeSet->getDefaultGroupId($attributeSetId);
 
@@ -69,39 +63,25 @@ class TermOptions implements DataPatchInterface
             Customer::ENTITY,
             'term_options',
             [
-                'type' => 'text',
                 'label' => 'Terms Options',
-                'input' => 'multiselect',
+                'input' => 'checkbox',
+                'type' => 'varchar',
+                'source' => 'Balancepay\Balancepay\Model\Config\Customer\TermsOptions',
                 'required' => false,
-                'visible' => true,
-                'user_defined' => true,
-                'sort_order' => 1000,
-                'position' => 1000,
-                'system' => 0,
-                'backend' => 'Magento\Eav\Model\Entity\Attribute\Backend\ArrayBackend',
-                'source' => 'Balancepay\Balancepay\Model\Config\Customer\TermsOptions'
+                'position' => 333,
+                'visible' => false,
+                'system' => false,
+                'is_used_in_grid' => true,
+                'is_visible_in_grid' => true,
+                'is_filterable_in_grid' => true,
+                'is_searchable_in_grid' => true,
+                'backend' => 'Magento\Eav\Model\Entity\Attribute\Backend\ArrayBackend'
             ]
         );
 
-        $attribute = $customerSetup->getEavConfig()
-            ->getAttribute(Customer::ENTITY, 'term_options')
-            ->addData([
-                'attribute_set_id' => $attributeSetId,
-                'attribute_group_id' => $attributeGroupId,
-                'used_in_forms' => [
-                    'adminhtml_customer',
-                    'customer_account_edit'
-                ],
-            ]);
+        $attribute = $customerSetup->getEavConfig()->getAttribute(Customer::ENTITY, 'term_options');
         $attribute->save();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function getDependencies()
-    {
-        return static::DEPENDENCIES;
+        $this->moduleDataSetup->getConnection()->endSetup();
     }
 
     /**
@@ -109,6 +89,16 @@ class TermOptions implements DataPatchInterface
      */
     public function getAliases()
     {
-        return static::ALIASES;
+        return [];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function getDependencies()
+    {
+        return [
+
+        ];
     }
 }
