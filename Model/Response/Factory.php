@@ -25,13 +25,14 @@ class Factory
     /**
      * Response handlers.
      */
-    const CAPTURE_RESPONSE_HANDLER = 'capture';
-    const CLOSE_RESPONSE_HANDLER = 'close';
-    const CHECKOUT_RESPONSE_HANDLER = 'checkout';
-    const TRANSACTIONS_RESPONSE_HANDLER = 'transactions';
-    const WEBHOOKS_KEYS_RESPONSE_HANDLER = 'webhooks/keys';
-    const WEBHOOKS_RESPONSE_HANDLER = 'webhooks';
-    const VENDORS_RESPONSE_HANDLER = 'vendors';
+    public const CAPTURE_RESPONSE_HANDLER = 'capture';
+    public const CLOSE_RESPONSE_HANDLER = 'close';
+    public const CHECKOUT_RESPONSE_HANDLER = 'checkout';
+    public const TRANSACTIONS_RESPONSE_HANDLER = 'transactions';
+    public const WEBHOOKS_KEYS_RESPONSE_HANDLER = 'webhooks/keys';
+    public const WEBHOOKS_RESPONSE_HANDLER = 'webhooks';
+    public const VENDORS_RESPONSE_HANDLER = 'vendors';
+    public const BUYERS_RESPONSE_HANDLER = 'buyers';
 
     /**
      * Set of requests.
@@ -46,6 +47,7 @@ class Factory
         self::WEBHOOKS_KEYS_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Webhooks\Keys::class,
         self::WEBHOOKS_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Webhooks::class,
         self::VENDORS_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Vendors::class,
+        self::BUYERS_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Buyers::class,
     ];
 
     /**

@@ -1,54 +1,112 @@
 <?php
+
 namespace Balancepay\Balancepay\Helper;
 
-use Magento\Framework\Message\ManagerInterface;
-use Webkul\Marketplace\Helper\Data as MpDataHelper;
+use Balancepay\Balancepay\Model\Config as BalancepayConfig;
+use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
+use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Customer\Model\Session;
+use Magento\Framework\App\Http\Context;
+use Magento\Framework\Pricing\Helper\Data as PricingHelper;
 use \Webkul\Marketplace\Model\SellerFactory;
 use \Webkul\Marketplace\Model\ResourceModel\Product\CollectionFactory;
 use Balancepay\Balancepay\Model\ResourceModel\BalancepayProduct\CollectionFactory as MpProductCollection;
 use \Magento\Framework\App\Helper\AbstractHelper;
-use Webkul\Marketplace\Model\ResourceModel\Seller\CollectionFactory as sellerCollectionFactory;
 
 class Data extends AbstractHelper
 {
-
     /**
-     * @var \Magento\Framework\Message\ManagerInterface
+     * @var string[]
      */
-    protected $messageManager;
+    public $ccIcons;
 
     /**
-     * @var \Magento\Framework\Json\Helper\Data
+     * @var PricingHelper
      */
-    protected $_jsonHelper;
+    protected $pricingHelper;
 
     /**
-     * @var \Webkul\Marketplace\Model\ResourceModel\Seller\CollectionFactory
+     * @var SellerFactory
      */
-    protected $_sellerCollectionFactory;
+    protected $sellerFactory;
 
     /**
+     * @var MpProductCollection
+     */
+    protected $_mpProductCollectionFactory;
+
+    /**
+     * @var CollectionFactory
+     */
+    protected $collectionFactory;
+
+    /**
+     * @var CustomerRepositoryInterface
+     */
+    protected $customerRepositoryInterface;
+
+    /**
+     * @var Context
+     */
+    protected $appContext;
+
+    /**
+     * @var BalancepayConfig
+     */
+    protected $balancepayConfig;
+
+    /**
+     * @var RequestFactory
+     */
+    protected $requestFactory;
+
+    /**
+     * @var Session
+     */
+    protected $customerSession;
+
+    /**
+     * Data constructor.
+     *
      * @param SellerFactory $sellerFactory
      * @param MpProductCollection $mpProductCollectionFactory
      * @param CollectionFactory $collectionFactory
-     * @param ManagerInterface $messageManager
-     * @param sellerCollectionFactory $sellerCollectionFactory
-     * @param \Magento\Framework\Json\Helper\Data $jsonHelper
+     * @param PricingHelper $pricingHelper
+     * @param Context $appContext
+     * @param Session $customerSession
+     * @param BalancepayConfig $balancepayConfig
+     * @param CustomerRepositoryInterface $customerRepositoryInterface
+     * @param RequestFactory $requestFactory
      */
     public function __construct(
         SellerFactory $sellerFactory,
         MpProductCollection $mpProductCollectionFactory,
         CollectionFactory $collectionFactory,
-        ManagerInterface $messageManager,
-        sellerCollectionFactory $sellerCollectionFactory,
-        \Magento\Framework\Json\Helper\Data $jsonHelper
+        PricingHelper $pricingHelper,
+        Context $appContext,
+        Session $customerSession,
+        BalancepayConfig $balancepayConfig,
+        CustomerRepositoryInterface $customerRepositoryInterface,
+        RequestFactory $requestFactory
     ) {
+        $this->ccIcons = [
+            'visa' => 'vi',
+            'discover' => 'di',
+            'mastercard' => 'mc',
+            'maestro' => 'mi',
+            'amex' => 'ae',
+            'discover' => 'di',
+            'jcb' => 'jcb'
+        ];
         $this->sellerFactory = $sellerFactory;
         $this->_mpProductCollectionFactory = $mpProductCollectionFactory;
         $this->collectionFactory = $collectionFactory;
-        $this->messageManager = $messageManager;
-        $this->_sellerCollectionFactory = $sellerCollectionFactory;
-        $this->_jsonHelper = $jsonHelper;
+        $this->pricingHelper = $pricingHelper;
+        $this->appContext = $appContext;
+        $this->customerSession = $customerSession;
+        $this->balancepayConfig = $balancepayConfig;
+        $this->customerRepositoryInterface = $customerRepositoryInterface;
+        $this->requestFactory = $requestFactory;
     }
 
     /**
@@ -77,25 +135,9 @@ class Data extends AbstractHelper
      * @param string $productId
      * @return string
      */
-    public function getBalanceVendor($productId = '')
+    public function getBalanceVendors($productId = '')
     {
-        $balanceVendorId = '';
-        try {
-            $transactionColl = $this->collectionFactory->create()
-                ->addFieldToFilter(
-                    'mageproduct_id',
-                    $productId
-                );
-            $sellerId = $transactionColl->getFirstItem()->getSellerId();
-            $balanceVendorId = $this->getVendorId($sellerId);
-        } catch (\Exception $e) {
-            $this->messageManager->addError($e->getMessage());
-        }
-        if (empty($balanceVendorId)) {
-            $balanceVendorId = $this->getSellerIdByProductId($productId);
-        }
-
-        return $balanceVendorId;
+        return $this->getSellerIdByProductId($productId);
     }
 
     /**
@@ -113,40 +155,67 @@ class Data extends AbstractHelper
     }
 
     /**
-     * Valid domain
+     * GetBuyerDetails
      *
-     * @param string $domainName
-     * @return bool
+     * @return array
      */
-    private function isValidDomain($domainName): bool
+    public function getBuyerDetails()
     {
-        if (preg_match(
-            '/^(?!\-)(?:(?:[a-zA-Z\d][a-zA-Z\d\-]{0,61})?[a-zA-Z\d]\.){1,126}(?!\d+)[a-zA-Z\d]{1,63}$/',
-            $domainName
-        )) {
-            return true;
+        $response = [];
+        try {
+            $buyerId = $this->getCustomerSessionBuyerId();
+            if (!empty($buyerId)) {
+                $response = $this->requestFactory
+                    ->create(RequestFactory::BUYER_REQUEST_METHOD)
+                    ->setRequestMethod('buyers/' . $buyerId)
+                    ->setTopic('getbuyers')
+                    ->process();
+            }
+        } catch (\Exception $e) {
+            $this->balancepayConfig->log('Get Buyer [Exception: ' .
+                $e->getMessage() . "]\n" . $e->getTraceAsString(), 'error');
         }
-        return false;
+        return $response;
     }
 
     /**
-     * Check shop url
+     * GetCustomerSessionBuyerId
      *
-     * @param string $profileUrl
-     * @return string
+     * @return mixed
      */
-    public function checkShopUrl($profileUrl)
+    public function getCustomerSessionBuyerId()
     {
-        if ($profileUrl == "" || $profileUrl == MpDataHelper::MARKETPLACE_ADMIN_URL) {
-            return $this->_jsonHelper->jsonEncode(true);
-        } else {
-            $collection = $this->_sellerCollectionFactory->create();
-            $collection->addFieldToFilter('shop_url', $profileUrl);
-            if (!$collection->getSize() && $this->isValidDomain($profileUrl)) {
-                return $this->_jsonHelper->jsonEncode(false);
-            } else {
-                return $this->_jsonHelper->jsonEncode(true);
-            }
+        if ($this->customerSession->getBuyerId()) {
+            return $this->customerSession->getBuyerId();
         }
+        $customerId = $this->getCustomerSessionId();
+        if (!empty($customerId)) {
+            $customer = $this->customerRepositoryInterface->getById($customerId);
+            $customerAttributeData = $customer->__toArray();
+            $buyerId = isset($customerAttributeData['custom_attributes']['buyer_id']) ?
+                $customerAttributeData['custom_attributes']['buyer_id']['value'] : '';
+            $this->customerSession->setBuyerId($buyerId);
+            return $buyerId;
+        }
+        return 0;
+    }
+
+    /**
+     * @param $price
+     * @return float|string
+     */
+    public function formattedAmount($price)
+    {
+        return $this->pricingHelper->currency($price/100,true,false);
+    }
+
+    /**
+     * GetCustomerSessionId
+     *
+     * @return mixed
+     */
+    public function getCustomerSessionId()
+    {
+        return $this->appContext->getValue('customer_id');
     }
 }
