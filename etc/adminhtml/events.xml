@@ -3,4 +3,7 @@
     <event name="admin_system_config_changed_section_payment">
         <observer name="balancepay_admin_system_config_changed_section_payment" instance="Balancepay\Balancepay\Observer\Config\Save" />
     </event>
+    <event name="adminhtml_customer_save_after">
+        <observer name="balance_webkul_marketplace_adminhtml_customer_save_after_observer" instance="Balancepay\Balancepay\Observer\BalanceAdminhtmlCustomerS>
+    </event>
 </config>
