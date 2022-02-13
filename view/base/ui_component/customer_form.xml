@@ -18,6 +18,7 @@
                     <item name="multiple" xsi:type="boolean">true</item>
                     <item name="dataScope" xsi:type="string">term_options</item>
                     <item name="additionalClasses" xsi:type="string">term_checkboxes</item>
+                    <item name="notice" xsi:type="string">Choose up to 3 terms options.</item>
                 </item>
             </argument>
             <settings>
