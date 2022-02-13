@@ -2,6 +2,8 @@
 
 namespace Balancepay\Balancepay\Observer;
 
+use Magento\Customer\Model\Customer;
+use Magento\Customer\Model\ResourceModel\CustomerFactory;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Exception\LocalizedException;
@@ -45,7 +47,9 @@ class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
         ResourceConnection $resource,
         Config $balancepayConfig,
         RequestFactory $requestFactory,
-        ManagerInterface $messageManager
+        ManagerInterface $messageManager,
+        Customer           $customer,
+        CustomerFactory    $customerFactory
     ) {
         $this->collectionFactory = $collectionFactory;
         $this->connection = $resource->getConnection();
@@ -53,6 +57,8 @@ class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
         $this->balancepayConfig = $balancepayConfig;
         $this->requestFactory = $requestFactory;
         $this->_messageManager = $messageManager;
+        $this->customer = $customer;
+        $this->customerFactory = $customerFactory;
     }
 
     /**
@@ -81,6 +87,16 @@ class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
                     "`seller_id`= $customerId"
                 );
             }
+        }
+
+        if (!empty($customerId) && !empty($postData['buyer']['term_options'])) {
+            $termOptions = implode(',', $postData['buyer']['term_options']);
+            $customer = $this->customer->load($customerId);
+            $customerData = $customer->getDataModel();
+            $customerData->setCustomAttribute('term_options', $termOptions);
+            $customer->updateData($customerData);
+            $customerResource = $this->customerFactory->create();
+            $customerResource->saveAttribute($customer, 'term_options');
         }
         return $this;
     }
