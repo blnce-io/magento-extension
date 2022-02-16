@@ -1,0 +1,74 @@
+<?php
+    $termsOptionsAvailable = $block->isTermsOptionSet();
+?>
+<?php if ($termsOptionsAvailable): ?>
+    <?php $options = $block->getTermsOptionAttribute(); ?>
+    <div class="termoptions_days">
+        <div class="admin__field">
+            <div class="admin__field-label">
+                <label>
+                    <span><?php echo __("Terms Options (In Days)"); ?></span>
+                </label>
+            </div>
+            <div class="admin__field-control">
+                <?php echo '[ '.$options.' ]'; ?>
+                <a class="action action-edit-termsoptions" href="javascript:void(0)" title="Edit Terms Options"></a>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
+
+<script type="text/javascript">
+    require([
+            "jquery"
+        ],
+        function($) {
+            "use strict";
+
+            var termsOptionsAvailable = '<?php echo $termsOptionsAvailable; ?>';
+            if (termsOptionsAvailable) {
+                setTimeout(function () {
+                    $('.admin__fieldset').find('[data-index="term_options"]').hide();
+                },10);
+            }
+            $(document).ready(function($){
+                $('.action-edit-termsoptions').on('click', function(){
+                    $('.admin__fieldset').find('[data-index="term_options"]').show();
+                });
+            });
+            return;
+        });
+</script>
+<style>
+    .termoptions_days {
+        width: 100%;
+        display: inline-block;
+    }
+    .termoptions_days .admin__field {
+        margin-left: -30px;
+    }
+    .termoptions_days .admin__field-label,  .termoptions_days .admin__field-control {
+        width: calc( (100%) * .25 - 30px );
+        float: left;
+        margin-left: 30px;
+        line-height: 3.2rem;
+    }
+    .termoptions_days .admin__field-control a {
+        font-weight: bold;
+    }
+    .action-edit-termsoptions:before{
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        font-size: 18px;
+        line-height: 20px;
+        color: #757575;
+        content: '\e601';
+        font-family: 'luma-icons';
+        vertical-align: middle;
+        display: inline-block;
+        font-weight: normal;
+        overflow: hidden;
+        speak: none;
+        text-align: center;
+    }
+</style>
