@@ -372,6 +372,17 @@ class Config
     }
 
     /**
+     * @param $scope
+     * @param $storeId
+     * @return mixed
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function getAllowedCustomerGroups($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
+    {
+        return $this->getConfigValue('allowed_customer_groups', $scope, $storeId);
+    }
+
+    /**
      * GetBalanceDashboardUrl
      *
      * @param string $scope
