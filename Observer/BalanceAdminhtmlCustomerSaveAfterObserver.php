@@ -5,6 +5,7 @@ use Magento\Customer\Model\Customer;
 use Magento\Customer\Model\ResourceModel\CustomerFactory;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
+use Magento\Indexer\Model\IndexerFactory;
 
 class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
 {
@@ -18,13 +19,19 @@ class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
      */
     protected $customerFactory;
 
+    /**
+     * @var IndexerFactory
+     */
+    protected $indexFactory;
+
     public function __construct(
-        Customer           $customer,
-        CustomerFactory    $customerFactory
-    )
-    {
+        Customer $customer,
+        CustomerFactory $customerFactory,
+        IndexerFactory $indexFactory
+    ) {
         $this->customer = $customer;
         $this->customerFactory = $customerFactory;
+        $this->indexFactory = $indexFactory;
     }
 
     /**
@@ -46,6 +53,16 @@ class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
             $customerResource = $this->customerFactory->create();
             $customerResource->saveAttribute($customer, 'term_options');
         }
+        $this->runCustomerGridIndex();
         return $this;
+    }
+
+    /**
+     * @return void
+     */
+    public function runCustomerGridIndex()
+    {
+        $indexer = $this->indexFactory->create()->load('customer_grid');
+        $indexer->reindexAll();
     }
 }
