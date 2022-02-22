@@ -68,6 +68,12 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <config_path>payment/balancepay/is_auth</config_path>
                 </field>
+                <field id="allowed_customer_groups" translate="label" type="multiselect" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Allowed Customer Groups</label>
+                    <comment>Customer Groups that are allowed to use Balance payment method.</comment>
+                    <source_model>Magento\Customer\Model\Config\Source\Group\Multiselect</source_model>
+                    <config_path>payment/balancepay/allowed_customer_groups</config_path>
+                </field>
                 <field id="allowed_payment_methods" translate="label" type="multiselect" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                     <label>Allowed Payment Methods</label>
                     <comment>Payment methods that should be displayed on the Balance payment popup.</comment>
