@@ -51,7 +51,7 @@ class TermOptions implements DataPatchInterface
         $this->moduleDataSetup->getConnection()->startSetup();
         /** @var CustomerSetup $customerSetup */
         $customerSetup = $this->customerSetupFactory->create(['setup' => $this->moduleDataSetup]);
-        $customerSetup->removeAttribute(\Magento\Customer\Model\Customer::ENTITY, 'term_options');
+        $customerSetup->removeAttribute(Customer::ENTITY, 'term_options');
         $customerEntity = $customerSetup->getEavConfig()->getEntityType(Customer::ENTITY);
         $attributeSetId = $customerEntity->getDefaultAttributeSetId();
 
