@@ -11,6 +11,7 @@ use Webkul\Marketplace\Model\ResourceModel\Seller\CollectionFactory;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Balancepay\Balancepay\Model\Config;
 use Magento\Framework\Message\ManagerInterface;
+use Magento\Indexer\Model\IndexerFactory;
 
 class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
 {
@@ -35,6 +36,11 @@ class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
     private $balancepayConfig;
 
     /**
+     * @var IndexerFactory
+     */
+    protected $indexFactory;
+
+    /**
      * BalanceAdminhtmlCustomerSaveAfterObserver constructor.
      * @param CollectionFactory $collectionFactory
      * @param ResourceConnection $resource
@@ -49,7 +55,8 @@ class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
         RequestFactory $requestFactory,
         ManagerInterface $messageManager,
         Customer           $customer,
-        CustomerFactory    $customerFactory
+        CustomerFactory    $customerFactory,
+        IndexerFactory $indexFactory
     ) {
         $this->collectionFactory = $collectionFactory;
         $this->connection = $resource->getConnection();
@@ -59,6 +66,7 @@ class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
         $this->_messageManager = $messageManager;
         $this->customer = $customer;
         $this->customerFactory = $customerFactory;
+        $this->indexFactory = $indexFactory;
     }
 
     /**
@@ -98,6 +106,7 @@ class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
             $customerResource = $this->customerFactory->create();
             $customerResource->saveAttribute($customer, 'term_options');
         }
+        $this->runCustomerGridIndex();
         return $this;
     }
 
@@ -145,5 +154,15 @@ class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
         } catch (LocalizedException $e) {
             $this->messageManager->addExceptionMessage($e->getMessage());
         }
+    }
+
+    /**
+     * @return void
+     * @throws \Exception
+     */
+    public function runCustomerGridIndex()
+    {
+        $indexer = $this->indexFactory->create()->load('customer_grid');
+        $indexer->reindexAll();
     }
 }

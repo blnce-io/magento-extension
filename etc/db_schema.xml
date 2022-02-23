@@ -17,4 +17,11 @@
             <column name="product_id"/>
         </index>
     </table>
+    <table name="customer_group" resource="default" engine="innodb" comment="Customer Group">
+        <column xsi:type="smallint" name="enable_balance_payments" unsigned="true" nullable="false" identity="false"
+                default="0" comment="Enable Balance payments"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="customer_group_id"/>
+        </constraint>
+    </table>
 </schema>

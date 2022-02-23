@@ -14,4 +14,5 @@
         </arguments>
     </virtualType>
     <preference for="Webkul\Marketplace\Controller\Adminhtml\Seller\Usernameverify" type="Balancepay\Balancepay\Controller\Adminhtml\Seller\Usernameverify"/>
+    <preference for="Magento\Customer\Block\Adminhtml\Group\Edit\Form" type="Balancepay\Balancepay\Block\Adminhtml\Group\Edit\Form" />
 </config>
