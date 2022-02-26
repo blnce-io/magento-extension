@@ -1,9 +1,11 @@
 <?php
 namespace Balancepay\Balancepay\Block\Adminhtml\Group\Edit;
 
+use Magento\Customer\Api\Data\GroupInterface;
 use Magento\Customer\Api\GroupExcludedWebsiteRepositoryInterface;
 use Magento\Customer\Controller\RegistryConstants;
 use Magento\Framework\App\ObjectManager;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Store\Model\System\Store as SystemStore;
 use Magento\Backend\Block\Template\Context;
 use Magento\Framework\Registry;
@@ -12,8 +14,9 @@ use Magento\Tax\Model\TaxClass\Source\Customer;
 use Magento\Tax\Helper\Data;
 use Magento\Customer\Api\GroupRepositoryInterface;
 use Magento\Customer\Api\Data\GroupInterfaceFactory;
-use Magento\Framework\App\ResourceConnection;
+use Balancepay\Balancepay\Model\Config;
 use Magento\Customer\Block\Adminhtml\Group\Edit\Form as CustomerForm;
+use Magento\Customer\Model\GroupManagement;
 
 /**
  * Adminhtml customer groups edit form
@@ -50,12 +53,14 @@ class Form extends CustomerForm
      */
     private $groupExcludedWebsiteRepository;
 
-    /**
-     * @var ResourceConnection
+    /**\
+     * @var Config
      */
-    private $resourceConnection;
+    private $config;
 
     /**
+     * Form constructor.
+     *
      * @param Context $context
      * @param Registry $registry
      * @param FormFactory $formFactory
@@ -64,9 +69,9 @@ class Form extends CustomerForm
      * @param GroupRepositoryInterface $groupRepository
      * @param GroupInterfaceFactory $groupDataFactory
      * @param array $data
+     * @param Config $config
      * @param SystemStore|null $systemStore
      * @param GroupExcludedWebsiteRepositoryInterface|null $groupExcludedWebsiteRepository
-     * @param ResourceConnection $resourceConnection
      */
     public function __construct(
         Context $context,
@@ -77,18 +82,18 @@ class Form extends CustomerForm
         GroupRepositoryInterface $groupRepository,
         GroupInterfaceFactory $groupDataFactory,
         array $data = [],
+        Config $config,
         SystemStore $systemStore = null,
-        GroupExcludedWebsiteRepositoryInterface $groupExcludedWebsiteRepository = null,
-        ResourceConnection $resourceConnection
+        GroupExcludedWebsiteRepositoryInterface $groupExcludedWebsiteRepository = null
     ) {
         $this->_taxCustomer = $taxCustomer;
         $this->_taxHelper = $taxHelper;
         $this->_groupRepository = $groupRepository;
         $this->groupDataFactory = $groupDataFactory;
+        $this->config = $config;
         $this->systemStore = $systemStore ?: ObjectManager::getInstance()->get(SystemStore::class);
         $this->groupExcludedWebsiteRepository = $groupExcludedWebsiteRepository
             ?: ObjectManager::getInstance()->get(GroupExcludedWebsiteRepositoryInterface::class);
-        $this->resourceConnection = $resourceConnection;
         parent::__construct($context, $registry, $formFactory, $taxCustomer, $taxHelper, $groupRepository, $groupDataFactory, $data, $systemStore, $groupExcludedWebsiteRepository);
     }
 
@@ -100,12 +105,8 @@ class Form extends CustomerForm
     protected function _prepareLayout()
     {
         parent::_prepareLayout();
-
-        /** @var \Magento\Framework\Data\Form $form */
         $form = $this->_formFactory->create();
-
         $groupId = $this->_coreRegistry->registry(RegistryConstants::CURRENT_GROUP_ID);
-        /** @var \Magento\Customer\Api\Data\GroupInterface $customerGroup */
         $customerGroupExcludedWebsites = [];
         if ($groupId === null) {
             $customerGroup = $this->groupDataFactory->create();
@@ -117,12 +118,10 @@ class Form extends CustomerForm
                 $groupId
             );
         }
-
         $fieldset = $form->addFieldset('base_fieldset', ['legend' => __('Group Information')]);
-
         $validateClass = sprintf(
             'required-entry validate-length maximum-length-%d',
-            \Magento\Customer\Model\GroupManagement::GROUP_CODE_MAX_LENGTH
+            GroupManagement::GROUP_CODE_MAX_LENGTH
         );
         $name = $fieldset->addField(
             'customer_group_code',
@@ -133,7 +132,7 @@ class Form extends CustomerForm
                 'title' => __('Group Name'),
                 'note' => __(
                     'Maximum length must be less then %1 characters.',
-                    \Magento\Customer\Model\GroupManagement::GROUP_CODE_MAX_LENGTH
+                    GroupManagement::GROUP_CODE_MAX_LENGTH
                 ),
                 'class' => $validateClass,
                 'required' => true
@@ -165,7 +164,7 @@ class Form extends CustomerForm
                 'title' => __('Enable Balance payments'),
                 'class' => '',
                 'value' => 1,
-                'checked' => $this->getEnableBalancePay($groupId),
+                'checked' => $this->checkCustomerGroup($groupId),
             ]
         );
 
@@ -211,17 +210,27 @@ class Form extends CustomerForm
     }
 
     /**
-     * GetEnableBalancePay
+     * CheckCustomerGroup
      *
      * @param $groupId
-     * @return mixed|string
+     * @return bool
+     * @throws NoSuchEntityException
      */
-    protected function getEnableBalancePay($groupId)
+    public function checkCustomerGroup($groupId)
     {
-        $connection = $this->resourceConnection->getConnection();
-        $tableName = $this->resourceConnection->getTableName('customer_group');
-        $query = "SELECT `enable_balance_payments` FROM `customer_group` WHERE `customer_group_id` = " . $groupId;
-        $result = $connection->fetchAll($query);
-        return $result[0]['enable_balance_payments'] ?? '';
+        $arrCustomerGroup = [];
+        $allowedCustomerGroups = $this->config->getAllowedCustomerGroups();
+        if (!empty($allowedCustomerGroups)) {
+            foreach ($allowedCustomerGroups as $customerGroup) {
+                if ($customerGroup != '') {
+                    $arrCustomerGroup[] = $customerGroup;
+                }
+            }
+        }
+        $isCustomerGroupAllowed = in_array($groupId, $arrCustomerGroup);
+        if ($isCustomerGroupAllowed) {
+            return true;
+        }
+        return false;
     }
 }
