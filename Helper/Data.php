@@ -218,4 +218,14 @@ class Data extends AbstractHelper
     {
         return $this->appContext->getValue('customer_id');
     }
+
+    /**
+     * @return bool
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function isCustomerGroupAllowed() {
+        $currentCustomerGroup = $this->customerSession->getCustomer()->getGroupId();
+        $allowedCustomerGroups = $this->balancepayConfig->getAllowedCustomerGroups();
+        return in_array($currentCustomerGroup, $allowedCustomerGroups);
+    }
 }
