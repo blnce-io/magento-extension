@@ -129,6 +129,22 @@ class Config
     }
 
     /**
+     * Update Balance Pay status
+     *
+     * @param string $scope
+     * @param int $storeId
+     */
+    public function updateCustomerGroup($scope = ScopeInterface::SCOPE_STORE, $value, $storeId = null)
+    {
+        $this->resourceConfig->saveConfig(
+            $this->getConfigPath() . 'allowed_customer_groups',
+            $value,
+            $scope,
+            $storeId
+        );
+    }
+
+    /**
      * Return store manager.
      *
      * @return StoreManagerInterface
