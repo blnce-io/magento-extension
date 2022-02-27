@@ -182,4 +182,14 @@ class Data extends AbstractHelper
     {
         return $this->pricingHelper->currency($price/100,true,false);
     }
+
+    /**
+     * @return bool
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function isCustomerGroupAllowed() {
+        $currentCustomerGroup = $this->customerSession->getCustomer()->getGroupId();
+        $allowedCustomerGroups = $this->balancepayConfig->getAllowedCustomerGroups();
+        return in_array($currentCustomerGroup, $allowedCustomerGroups);
+    }
 }

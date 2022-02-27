@@ -45,4 +45,9 @@ class CreateBuyerLink extends Link
     {
         return $this->balancepayHelper->getCustomerSessionId();
     }
+
+    public function isCustomerGroupAllowed()
+    {
+        return $this->balancepayHelper->isCustomerGroupAllowed();
+    }
 }

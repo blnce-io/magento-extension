@@ -1,4 +1,4 @@
-<?php if ($block->getCustomerSessionId()): ?>
+<?php if ($block->getCustomerSessionId() && $block->isCustomerGroupAllowed()): ?>
 <div class="custom-section" data-bind="scope:'section'">
     <li class="credit-limit" style="display: none" data-bind="visible: customsection().showCredit">
         <a class="action" href="javascript:void(0)" data-bind="text: customsection().creditLimit"></a>
