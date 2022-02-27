@@ -97,8 +97,8 @@ class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
             }
         }
 
-        if (!empty($customerId) && !empty($postData['buyer']['term_options'])) {
-            $termOptions = implode(',', $postData['buyer']['term_options']);
+        if (!empty($customerId)) {
+            $termOptions = !empty($postData['buyer']['term_options']) ? implode(',', $postData['buyer']['term_options']) : '';
             $customer = $this->customer->load($customerId);
             $customerData = $customer->getDataModel();
             $customerData->setCustomAttribute('term_options', $termOptions);
