@@ -82,4 +82,13 @@ class CreateBuyerLink extends Link
         }
         return false;
     }
+
+    /**
+     * @return bool
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function isCustomerGroupAllowed()
+    {
+        return $this->balancepayHelper->isCustomerGroupAllowed();
+    }
 }

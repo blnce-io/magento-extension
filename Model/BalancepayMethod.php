@@ -271,9 +271,7 @@ class BalancepayMethod extends AbstractMethod
     public function isAvailable(CartInterface $quote = null)
     {
         $isMultipleShippingAddresses = ($quote && $quote->isMultipleShippingAddresses());
-        $currentCustomerGroup = $this->customerSession->getCustomer()->getGroupId();
-        $allowedCustomerGroups = $this->balancepayConfig->getAllowedCustomerGroups();
-        $isCustomerGroupAllowed = in_array($currentCustomerGroup, $allowedCustomerGroups);
+        $isCustomerGroupAllowed = $this->helper->isCustomerGroupAllowed();
         if ($isMultipleShippingAddresses || !$isCustomerGroupAllowed) {
             return false;
         }
