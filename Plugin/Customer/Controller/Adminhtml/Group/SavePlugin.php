@@ -8,6 +8,7 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Http\Context;
 use Balancepay\Balancepay\Model\Config;
 use Magento\Framework\App\Cache\Type\Config as CacheConfig;
+use Magento\Customer\Model\ResourceModel\Group\CollectionFactory;
 
 class SavePlugin
 {
@@ -32,23 +33,30 @@ class SavePlugin
     protected $appConfig;
 
     /**
+     * @var CollectionFactory
+     */
+    private $collectionFactory;
+
+    /**
      * SavePlugin constructor.
-     *
      * @param Context $httpContext
      * @param Config $config
      * @param TypeListInterface $cacheTypeList
      * @param ReinitableConfigInterface $appConfig
+     * @param CollectionFactory $collectionFactory
      */
     public function __construct(
         Context $httpContext,
         Config $config,
         TypeListInterface $cacheTypeList,
-        ReinitableConfigInterface $appConfig
+        ReinitableConfigInterface $appConfig,
+        CollectionFactory $collectionFactory
     ) {
         $this->httpContext = $httpContext;
         $this->config = $config;
         $this->cacheTypeList = $cacheTypeList;
         $this->appConfig = $appConfig;
+        $this->collectionFactory = $collectionFactory;
     }
 
     /**
@@ -57,11 +65,12 @@ class SavePlugin
      */
     public function afterExecute(
         Save $subject,
-        $result
+             $result
     )
     {
         $customerGroups = [];
-        $id = $subject->getRequest()->getParam('id');
+        $customerGroupData =  $this->collectionFactory->create()->setOrder('customer_group_id','DESC')->getFirstItem();
+        $id = $subject->getRequest()->getParam('id') ?? $customerGroupData->getCustomerGroupId();
         $enableBalancePayments = $subject->getRequest()->getParam('enable_balance_payments') ?? 0;
         $allowedCustomerGroups = $this->config->getAllowedCustomerGroups();
         foreach ($allowedCustomerGroups as $customerGroup) {
@@ -70,6 +79,7 @@ class SavePlugin
             }
         }
         $this->updateGroup($id, $customerGroups, $enableBalancePayments);
+
         $this->cacheTypeList->cleanType(CacheConfig::TYPE_IDENTIFIER);
         $this->appConfig->reinit();
         return $result;
@@ -93,3 +103,4 @@ class SavePlugin
         $this->config->updateCustomerGroup($scope, implode(",", array_unique($customerGroups)));
     }
 }
+
