@@ -15,6 +15,7 @@ use Balancepay\Balancepay\Helper\Data as HelperData;
 use Balancepay\Balancepay\Model\Config as BalancepayConfig;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Customer\Model\Session;
 use Magento\Directory\Helper\Data as DirectoryHelper;
 use Magento\Framework\Api\AttributeValueFactory;
 use Magento\Framework\Api\ExtensionAttributesFactory;
@@ -31,6 +32,7 @@ use Magento\Payment\Helper\Data as PaymentDataHelper;
 use Magento\Payment\Model\InfoInterface;
 use Magento\Payment\Model\Method\AbstractMethod;
 use Magento\Payment\Model\Method\Logger as PaymentMethodLogger;
+use Magento\Quote\Api\Data\CartInterface;
 
 /**
  * Balancepay payment model.
@@ -170,6 +172,11 @@ class BalancepayMethod extends AbstractMethod
     protected $helper;
 
     /**
+     * @var Session
+     */
+    protected $customerSession;
+
+    /**
      * @param Context $context
      * @param Registry $registry
      * @param ExtensionAttributesFactory $extensionFactory
@@ -185,6 +192,7 @@ class BalancepayMethod extends AbstractMethod
      * @param RequestFactory $requestFactory
      * @param RequestInterface $request
      * @param HelperData $helper
+     * @param Session $customerSession
      * @param array $data
      */
     public function __construct(
@@ -203,6 +211,7 @@ class BalancepayMethod extends AbstractMethod
         RequestFactory $requestFactory,
         RequestInterface $request,
         HelperData $helper,
+        Session $customerSession,
         array $data = []
     ) {
         parent::__construct(
@@ -218,7 +227,7 @@ class BalancepayMethod extends AbstractMethod
             $data,
             $directory
         );
-
+        $this->customerSession = $customerSession;
         $this->checkoutSession = $checkoutSession;
         $this->balancepayConfig = $balancepayConfig;
         $this->requestFactory = $requestFactory;
@@ -229,13 +238,15 @@ class BalancepayMethod extends AbstractMethod
     /**
      * Check whether payment method can be used
      *
-     * @param \Magento\Quote\Api\Data\CartInterface|null $quote
+     * @param CartInterface|null $quote
      * @return bool
      * @deprecated 100.2.0
      */
-    public function isAvailable(\Magento\Quote\Api\Data\CartInterface $quote = null)
+    public function isAvailable(CartInterface $quote = null)
     {
-        if ($quote && $quote->isMultipleShippingAddresses()) {
+        $isMultipleShippingAddresses = ($quote && $quote->isMultipleShippingAddresses());
+        $isCustomerGroupAllowed = $this->helper->isCustomerGroupAllowed();
+        if ($isMultipleShippingAddresses || !$isCustomerGroupAllowed) {
             return false;
         }
         return parent::isAvailable($quote);

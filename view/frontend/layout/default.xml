@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="Balancepay_Balancepay::css/balancepay.css"/>
+    </head>
+    <referenceBlock name="header.links">
+        <block class="Balancepay\Balancepay\Block\CreateBuyerLink" ifconfig="payment/balancepay/active" name="buyer-header-link">
+            <arguments>
+                <argument name="label" xsi:type="string" translate="true">Buyer Link</argument>
+                <argument name="path" xsi:type="string" translate="true">Buyer Link</argument>
+            </arguments>
+        </block>
+    </referenceBlock>
+</page>
