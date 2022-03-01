@@ -134,7 +134,7 @@ class Config
      * @param string $scope
      * @param int $storeId
      */
-    public function updateCustomerGroup($scope = ScopeInterface::SCOPE_STORE, $value, $storeId = null)
+    public function updateCustomerGroup($scope = ScopeInterface::SCOPE_STORE, $value, int $storeId = 0)
     {
         $this->resourceConfig->saveConfig(
             $this->getConfigPath() . 'allowed_customer_groups',
