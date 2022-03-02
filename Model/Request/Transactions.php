@@ -20,6 +20,7 @@ use Balancepay\Balancepay\Model\Response\Factory as ResponseFactory;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Customer\Api\AccountManagementInterface;
 use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Customer\Model\Session;
 use Magento\Directory\Model\RegionFactory;
 use Magento\Quote\Model\Cart\CartTotalRepository;
 use Magento\Quote\Model\Quote;
@@ -45,6 +46,11 @@ class Transactions extends AbstractRequest
     protected $customerRepository;
 
     /**
+     * @var Session
+     */
+    protected $customerSession;
+
+    /**
      * Transactions constructor.
      * @param Config $balancepayConfig
      * @param Curl $curl
@@ -62,7 +68,8 @@ class Transactions extends AbstractRequest
         HelperData $helper,
         AccountManagementInterface $accountManagement,
         RegionFactory $region,
-        CustomerRepositoryInterface $customerRepository
+        CustomerRepositoryInterface $customerRepository,
+        Session $customerSession
     ) {
         parent::__construct(
             $balancepayConfig,
@@ -76,6 +83,7 @@ class Transactions extends AbstractRequest
         $this->_checkoutSession = $checkoutSession;
         $this->_cartTotalRepository = $cartTotalRepository;
         $this->customerRepository = $customerRepository;
+        $this->customerSession = $customerSession;
     }
 
     /**
