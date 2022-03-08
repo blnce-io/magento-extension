@@ -10,7 +10,7 @@ use Balancepay\Balancepay\Helper\Data as BalancepayHelper;
  *
  * Balancepay\Balancepay\Block
  */
-class CreateBuyerLink extends Link
+class CreateBuyerLink extends \Magento\Framework\View\Element\Template
 {
     /**
      * @var string
@@ -46,6 +46,12 @@ class CreateBuyerLink extends Link
         return $this->balancepayHelper->getCustomerSessionId();
     }
 
+    /**
+     * IsCustomerGroupAllowed
+     *
+     * @return bool
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
     public function isCustomerGroupAllowed()
     {
         return $this->balancepayHelper->isCustomerGroupAllowed();

@@ -20,7 +20,9 @@ use Magento\Framework\App\Config\ReinitableConfigInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Message\ManagerInterface as MessageManagerInterface;
+use Magento\Framework\Phrase;
 use Magento\Store\Model\App\Emulation as AppEmulation;
 use Magento\Store\Model\ScopeInterface;
 
@@ -136,13 +138,11 @@ class Save implements ObserverInterface
                     (Webhooks have been successfully registered)'));
                 } catch (\Exception $e) {
                     $this->balancepayConfig->updateBalancePayStatus($scope);
-                    throw new \Exception(__('Balance payments - Failed to register webhooks!
-                    [Exception: %1]', $e->getMessage()));
                 }
             } else {
                 $this->appEmulation->stopEnvironmentEmulation();
                 $this->balancepayConfig->resetStoreCredentials($scope, $storeId);
-                throw new \Exception(__('Can\' enable Balance payments, API key is missing!'));
+                throw new LocalizedException(new Phrase('Can\' enable Balance payments, API key is missing!'));
             }
         }
     }

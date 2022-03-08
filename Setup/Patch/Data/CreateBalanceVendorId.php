@@ -1,56 +1,43 @@
 <?php
-/**
- * Balance Payments For Magento 2
- * https://www.getbalance.com/
- *
- * @category Balance
- * @package  Balancepay_Balancepay
- * @author   Developer: Pniel Cohen
- * @author   Company: Girit-Interactive (https://www.girit-tech.com/)
- */
-
-namespace Balancepay\Balancepay\Setup;
+namespace Balancepay\Balancepay\Setup\Patch\Data;
 
 use Magento\Catalog\Model\Product;
 use Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface;
-use Magento\Eav\Setup\EavSetup;
 use Magento\Eav\Setup\EavSetupFactory;
-use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
-use Magento\Framework\Setup\UpgradeDataInterface;
+use Magento\Framework\Setup\Patch\DataPatchInterface;
 
-/**
- * Upgrade Data script
- * @codeCoverageIgnore
- */
-class UpgradeData implements UpgradeDataInterface
+class CreateBalanceVendorId implements DataPatchInterface
 {
-
+    /**
+     * @var ModuleDataSetupInterface
+     */
+    private $moduleDataSetup;
     /**
      * @var EavSetupFactory
      */
-    private $eavSetupFactory;
+    protected $eavSetupFactory;
 
     /**
-     * Init
-     * @method __construct
-     * @param  EavSetupFactory   $eavSetupFactory
+     * @param ModuleDataSetupInterface $moduleDataSetup
+     * @param EavSetupFactory $eavSetupFactory
      */
-    public function __construct(EavSetupFactory $eavSetupFactory)
-    {
+    public function __construct(
+        ModuleDataSetupInterface $moduleDataSetup,
+        EavSetupFactory $eavSetupFactory
+    ) {
+        $this->moduleDataSetup = $moduleDataSetup;
         $this->eavSetupFactory = $eavSetupFactory;
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
-    public function upgrade(ModuleDataSetupInterface $setup, ModuleContextInterface $context)
+    public function apply()
     {
-        $setup->startSetup();
-
-        /** @var \Magento\Eav\Setup\EavSetup $eavSetup */
-        $eavSetup = $this->eavSetupFactory->create(['setup' => $setup]);
-
+        $this->moduleDataSetup->getConnection()->startSetup();
+        $eavSetup = $this->eavSetupFactory->create(['setup' => $this->moduleDataSetup]);
+        $eavSetup->removeAttribute(Product::ENTITY, 'balancepay_vendor_id');
         if (!$eavSetup->getAttributeId(Product::ENTITY, 'balancepay_vendor_id')) {
             $eavSetup->addAttribute(
                 Product::ENTITY,
@@ -81,7 +68,24 @@ class UpgradeData implements UpgradeDataInterface
                 ]
             );
         }
+        $this->moduleDataSetup->getConnection()->endSetup();
+    }
 
-        $setup->endSetup();
+    /**
+     * @inheritdoc
+     */
+    public function getAliases()
+    {
+        return [];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function getDependencies()
+    {
+        return [
+
+        ];
     }
 }

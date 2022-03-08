@@ -7,25 +7,25 @@
         <div class="admin__field">
             <div class="admin__field-label">
                 <label>
-                    <span><?php echo __("Terms Options (In Days)"); ?></span>
+                    <span><?= /* @noEscape */ __("Terms Options (In Days)"); ?></span>
                 </label>
             </div>
             <div class="admin__field-control">
-                <?php echo '[ '.$options.' ]'; ?>
+                <?= /* @noEscape */ '[ '.$options.' ]'; ?>
                 <a class="action action-edit-termsoptions" href="javascript:void(0)" title="Edit Terms Options"></a>
             </div>
         </div>
     </div>
 <?php endif; ?>
 
-<script type="text/javascript">
+<script>
     require([
             "jquery"
         ],
         function($) {
             "use strict";
 
-            var termsOptionsAvailable = '<?php echo $termsOptionsAvailable; ?>';
+            var termsOptionsAvailable = '<?= /* @noEscape */ $termsOptionsAvailable; ?>';
             if (termsOptionsAvailable) {
                 setTimeout(function () {
                     $('.admin__fieldset').find('[data-index="term_options"]').hide();

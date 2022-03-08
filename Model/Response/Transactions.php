@@ -29,6 +29,8 @@ class Transactions extends AbstractResponse
     protected $_transactionId;
 
     /**
+     * Process
+     *
      * @return AbstractResponse
      * @throws \Magento\Framework\Exception\LocalizedException
      */
@@ -44,6 +46,8 @@ class Transactions extends AbstractResponse
     }
 
     /**
+     * GetRequiredResponseDataKeys
+     *
      * @return array
      */
     protected function getRequiredResponseDataKeys()
@@ -55,6 +59,8 @@ class Transactions extends AbstractResponse
     }
 
     /**
+     * GetToken
+     *
      * @return string
      */
     public function getToken()
@@ -63,6 +69,8 @@ class Transactions extends AbstractResponse
     }
 
     /**
+     * GetTransactionId
+     *
      * @return string|null
      */
     public function getTransactionId()

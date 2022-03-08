@@ -1,4 +1,5 @@
 <?php
+
 namespace Balancepay\Balancepay\Block\Adminhtml\Edit\Balance;
 
 use Magento\Backend\Block\Template;
@@ -45,13 +46,22 @@ class TermsOptions extends Template
     }
 
     /**
+     * IsTermsOptionSet
+     *
      * @return bool
      */
-    public function isTermsOptionSet() {
-        return (bool) $this->getTermsOptionAttribute();
+    public function isTermsOptionSet(): bool
+    {
+        return (bool)$this->getTermsOptionAttribute();
     }
 
-    public function getTermsOptionAttribute() {
+    /**
+     * GetTermsOptionAttribute
+     *
+     * @return false|mixed
+     */
+    public function getTermsOptionAttribute()
+    {
         $customerId = $this->getRequest()->getParam('id');
         try {
             $customer = $this->customerRepository->getById($customerId);
@@ -59,7 +69,7 @@ class TermsOptions extends Template
                 return $customer->getCustomAttribute('term_options')->getValue();
             }
         } catch (\Exception $e) {
-
+            return false;
         }
         return false;
     }

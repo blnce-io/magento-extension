@@ -1,4 +1,5 @@
 <?php
+
 namespace Balancepay\Balancepay\Block\Adminhtml\Group\Edit;
 
 use Magento\Customer\Api\Data\GroupInterface;
@@ -59,8 +60,6 @@ class Form extends CustomerForm
     private $config;
 
     /**
-     * Form constructor.
-     *
      * @param Context $context
      * @param Registry $registry
      * @param FormFactory $formFactory
@@ -68,10 +67,10 @@ class Form extends CustomerForm
      * @param Data $taxHelper
      * @param GroupRepositoryInterface $groupRepository
      * @param GroupInterfaceFactory $groupDataFactory
-     * @param array $data
      * @param Config $config
      * @param SystemStore|null $systemStore
      * @param GroupExcludedWebsiteRepositoryInterface|null $groupExcludedWebsiteRepository
+     * @param array $data
      */
     public function __construct(
         Context $context,
@@ -81,10 +80,10 @@ class Form extends CustomerForm
         Data $taxHelper,
         GroupRepositoryInterface $groupRepository,
         GroupInterfaceFactory $groupDataFactory,
-        array $data = [],
         Config $config,
         SystemStore $systemStore = null,
-        GroupExcludedWebsiteRepositoryInterface $groupExcludedWebsiteRepository = null
+        GroupExcludedWebsiteRepositoryInterface $groupExcludedWebsiteRepository = null,
+        array $data = []
     ) {
         $this->_taxCustomer = $taxCustomer;
         $this->_taxHelper = $taxHelper;
@@ -94,7 +93,18 @@ class Form extends CustomerForm
         $this->systemStore = $systemStore ?: ObjectManager::getInstance()->get(SystemStore::class);
         $this->groupExcludedWebsiteRepository = $groupExcludedWebsiteRepository
             ?: ObjectManager::getInstance()->get(GroupExcludedWebsiteRepositoryInterface::class);
-        parent::__construct($context, $registry, $formFactory, $taxCustomer, $taxHelper, $groupRepository, $groupDataFactory, $data, $systemStore, $groupExcludedWebsiteRepository);
+        parent::__construct(
+            $context,
+            $registry,
+            $formFactory,
+            $taxCustomer,
+            $taxHelper,
+            $groupRepository,
+            $groupDataFactory,
+            $data,
+            $systemStore,
+            $groupExcludedWebsiteRepository
+        );
     }
 
     /**
@@ -212,7 +222,7 @@ class Form extends CustomerForm
     /**
      * CheckCustomerGroup
      *
-     * @param $groupId
+     * @param  int|bool $groupId
      * @return bool
      * @throws NoSuchEntityException
      */

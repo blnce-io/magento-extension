@@ -3,6 +3,8 @@ namespace Balancepay\Balancepay\Controller\Buyer;
 
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
+use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 
@@ -26,7 +28,9 @@ class CreditLimit extends Action
     }
 
     /**
-     * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\Result\Json|ResultInterface
+     * Execute
+     *
+     * @return ResponseInterface|Json|ResultInterface
      */
     public function execute()
     {

@@ -19,6 +19,8 @@ use Balancepay\Balancepay\Model\AbstractResponse;
 class Webhooks extends AbstractResponse
 {
     /**
+     * GetRequiredResponseDataKeys
+     *
      * @return array
      */
     protected function getRequiredResponseDataKeys()

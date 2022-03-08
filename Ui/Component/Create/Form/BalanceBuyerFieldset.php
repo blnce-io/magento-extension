@@ -4,9 +4,7 @@ namespace Balancepay\Balancepay\Ui\Component\Create\Form;
 use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\View\Element\ComponentVisibilityInterface;
 use \Magento\Ui\Component\Form\Fieldset;
-/**
- * Balance Buyer fieldset class
- */
+
 class BalanceBuyerFieldset extends Fieldset implements ComponentVisibilityInterface
 {
     /**
@@ -24,6 +22,8 @@ class BalanceBuyerFieldset extends Fieldset implements ComponentVisibilityInterf
     }
 
     /**
+     * IsComponentVisible
+     *
      * @return bool
      */
     public function isComponentVisible(): bool

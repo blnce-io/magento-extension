@@ -17,7 +17,7 @@ use Magento\Framework\Module\ModuleListInterface;
 
 class ModuleVersion extends Field
 {
-    const MODULE_NAME = 'Balancepay_Balancepay';
+    public const MODULE_NAME = 'Balancepay_Balancepay';
 
     /**
      * @var ModuleListInterface
@@ -51,6 +51,11 @@ class ModuleVersion extends Field
         return parent::render($element);
     }
 
+    /**
+     * GetModuleVersion
+     *
+     * @return mixed
+     */
     public function getModuleVersion()
     {
         return $this->moduleList->getOne(self::MODULE_NAME)['setup_version'];

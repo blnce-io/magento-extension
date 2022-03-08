@@ -24,6 +24,13 @@ class CardList implements ArgumentInterface
      */
     protected $abstractBlock;
 
+    /**
+     * CardList constructor.
+     *
+     * @param Template $template
+     * @param BalancepayHelper $balancepayHelper
+     * @param BalancepayConfig $balancepayConfig
+     */
     public function __construct(
         Template $template,
         BalancepayHelper $balancepayHelper,
@@ -45,6 +52,8 @@ class CardList implements ArgumentInterface
     }
 
     /**
+     * GetBuyerDetails
+     *
      * @param $customerId
      * @return array
      */
@@ -61,7 +70,9 @@ class CardList implements ArgumentInterface
     }
 
     /**
-     * @param $price
+     * FormattedAmount
+     *
+     * @param int|string $price
      * @return float|string
      */
     public function formattedAmount($price)
@@ -70,7 +81,9 @@ class CardList implements ArgumentInterface
     }
 
     /**
-     * @param $type
+     * GetCcIconUrl
+     *
+     * @param string $type
      * @return false|string
      */
     public function getCcIconUrl($type = '')

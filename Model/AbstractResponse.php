@@ -14,6 +14,7 @@ namespace Balancepay\Balancepay\Model;
 use Balancepay\Balancepay\Lib\Http\Client\Curl;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\PaymentException;
+use Zend\Uri\Uri;
 
 /**
  * Balancepay abstract response model.
@@ -50,16 +51,19 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
      * AbstractResponse constructor.
      *
      * @param Config $balancepayConfig
-     * @param Curl   $curl
+     * @param Curl $curl
+     * @param Uri $zendUri
      */
     public function __construct(
         Config $balancepayConfig,
-        Curl $curl
+        Curl $curl,
+        Uri $zendUri
     ) {
         parent::__construct(
             $balancepayConfig
         );
         $this->_curl = $curl;
+        $this->zendUri = $zendUri;
     }
 
     /**
@@ -181,7 +185,8 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
             $body = $this->_curl->getBody();
             $this->_body = (array) json_decode($body, 1);
             if ($body && !$this->_body) {
-                parse_str($body, $this->_body);
+                $this->zendUri->setQuery($body);
+                $this->_body = $this->zendUri->getQueryAsArray();
             }
         }
 

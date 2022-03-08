@@ -31,6 +31,8 @@ class CustomerSessionContext
     }
 
     /**
+     * AroundDispatch
+     *
      * @param ActionInterface $subject
      * @param callable $proceed
      * @param RequestInterface $request
