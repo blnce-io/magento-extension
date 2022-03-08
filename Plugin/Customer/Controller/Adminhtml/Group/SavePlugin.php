@@ -69,8 +69,12 @@ class SavePlugin
     }
 
     /**
+     * AfterExecute
+     *
      * @param Save $subject
-     * @param $result
+     * @param mixed $result
+     * @return mixed
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function afterExecute(
         Save $subject,
@@ -93,6 +97,9 @@ class SavePlugin
         return $result;
     }
 
+    /**
+     * FlushCache
+     */
     public function flushCache()
     {
         $_types = [
@@ -119,10 +126,11 @@ class SavePlugin
     }
 
     /**
-     * @param $id
-     * @param $arrCustomerGroup
-     * @param $enableBalancePayments
-     * @return void
+     * UpdateGroup
+     *
+     * @param int $id
+     * @param array $customerGroups
+     * @param bool $enableBalancePayments
      */
     public function updateGroup($id, $customerGroups, $enableBalancePayments)
     {

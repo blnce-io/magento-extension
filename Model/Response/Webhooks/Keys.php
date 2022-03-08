@@ -25,6 +25,8 @@ class Keys extends AbstractResponse
     protected $_webhookSecret;
 
     /**
+     * Process
+     *
      * @return AbstractResponse
      * @throws \Magento\Framework\Exception\LocalizedException
      */
@@ -39,9 +41,10 @@ class Keys extends AbstractResponse
     }
 
     /**
-     * @method save
-     * @param  string                $scope Scope
-     * @param  int|null              $storeId
+     * Update
+     *
+     * @param  string $scope Scope
+     * @param  int|null $storeId
      * @return AbstractResponse
      * @throws \Magento\Framework\Exception\LocalizedException
      */
@@ -52,6 +55,8 @@ class Keys extends AbstractResponse
     }
 
     /**
+     * GetRequiredResponseDataKeys
+     *
      * @return array
      */
     protected function getRequiredResponseDataKeys()
@@ -60,6 +65,8 @@ class Keys extends AbstractResponse
     }
 
     /**
+     * GetWebhookSecret
+     *
      * @return string
      */
     public function getWebhookSecret()

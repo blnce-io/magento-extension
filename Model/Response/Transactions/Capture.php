@@ -19,15 +19,6 @@ use Balancepay\Balancepay\Model\AbstractResponse;
 class Capture extends AbstractResponse
 {
     /**
-     * @return AbstractResponse
-     * @throws \Magento\Framework\Exception\LocalizedException
-     */
-    public function process()
-    {
-        return parent::process();
-    }
-
-    /**
      * Determine if request succeed or failed.
      *
      * @return bool
@@ -43,6 +34,8 @@ class Capture extends AbstractResponse
     }
 
     /**
+     * GetRequiredResponseDataKeys
+     *
      * @return array
      */
     protected function getRequiredResponseDataKeys()

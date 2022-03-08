@@ -8,7 +8,7 @@
 $tokens = $block->getPaymentTokens();
 $viewModel = $block->getViewModel();
 ?>
-<?php if (count($tokens) !== 0) : ?>
+<?php if (count($tokens) !== 0): ?>
     <div class="table-wrapper my-credit-cards">
         <table class="data table table-credit-cards" id="my-orders-table">
             <caption class="table-caption"><?= $block->escapeHtml(__('Stored Payment Methods')) ?></caption>
@@ -52,17 +52,17 @@ $viewModel = $block->getViewModel();
                 <tbody>
                 <tr>
                     <td data-th="<?= $block->escapeHtml(__('Max Credit Limit')) ?>" class="col card-number">
-                            <span><?php echo $maxCreditLimit; ?>
+                            <span><?= /* @noEscape */ $maxCreditLimit; ?>
                     </td>
                     <td data-th="<?= $block->escapeHtml(__('Credit Limit')) ?>" class="col card-type">
-                        <?php echo $creditLimit; ?>
+                        <?= /* @noEscape */ $creditLimit; ?>
                     </td>
                 </tr>
                 </tbody>
             </table>
         <?php endif; ?>
 
-        <?php if (!empty($buyerResponse) && !empty($buyerResponse['paymentData']['creditCards'] )): ?>
+        <?php if (!empty($buyerResponse) && !empty($buyerResponse['paymentData']['creditCards'])): ?>
             <h3><?= $block->escapeHtml(__('Stored Credit Cards')) ?></h3>
             <table class="data table table-credit-cards" id="my-orders-table">
                 <thead>
@@ -76,16 +76,18 @@ $viewModel = $block->getViewModel();
                 <?php foreach ($buyerResponse['paymentData']['creditCards'] as $creditcard):?>
                     <tr>
                         <td data-th="<?= $block->escapeHtml(__('Card Number')) ?>" class="col card-number">
-                            <span><?= $block->escapeHtml(__('ending')) ?></span> <?php echo $creditcard['last4'] ?? ''; ?>
+                            <span><?= $block->escapeHtml(__('ending')) ?></span>
+                            <?= /* @noEscape */ $creditcard['last4'] ?? ''; ?>
                         </td>
                         <td data-th="<?= $block->escapeHtml(__('Expiration Date')) ?>" class="col card-expire">
-                            <?php echo $creditcard['expiredMonth'].'/'.$creditcard['expiredYear']; ?>
+                            <?= /* @noEscape */ $creditcard['expiredMonth'].'/'.$creditcard['expiredYear']; ?>
                         </td>
                         <td data-th="<?= $block->escapeHtml(__('Type')) ?>" class="col card-type">
                             <?php if ($iconUrl = $viewModel->getCcIconUrl($creditcard['brand'] ?? '')): ?>
-                                <img src="<?php echo $iconUrl; ?>" alt="<?php echo $creditcard['brand'] ?? ''; ?>" />
+                                <img src="<?= /* @noEscape */ $iconUrl; ?>"
+                                     alt="<?= /* @noEscape */ $creditcard['brand'] ?? ''; ?>" />
                             <?php else: ?>
-                                <?php echo "-"; ?>
+                                <?= /* @noEscape */ "-"; ?>
                             <?php endif; ?>
                         </td>
                     </tr>
@@ -109,13 +111,13 @@ $viewModel = $block->getViewModel();
                 <?php foreach ($buyerResponse['paymentData']['banks'] as $bank):?>
                     <tr>
                         <td data-th="<?= $block->escapeHtml(__('Institution Name')) ?>" class="col card-number">
-                            <?php echo $bank['institutionName'] ?? ''; ?>
+                            <?= /* @noEscape */ $bank['institutionName'] ?? ''; ?>
                         </td>
                         <td data-th="<?= $block->escapeHtml(__('Account Name')) ?>" class="col card-expire">
-                            <?php echo $bank['accountName']; ?>
+                            <?= /* @noEscape */ $bank['accountName']; ?>
                         </td>
                         <td data-th="<?= $block->escapeHtml(__('Account Number Mask')) ?>" class="col card-type">
-                            <?php echo $bank['accountNumberMask'] ?? ''; ?>
+                            <?= /* @noEscape */ $bank['accountNumberMask'] ?? ''; ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>

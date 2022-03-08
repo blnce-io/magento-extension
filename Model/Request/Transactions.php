@@ -75,8 +75,7 @@ class Transactions extends AbstractRequest
         RegionFactory $region,
         CustomerRepositoryInterface $customerRepository,
         Session $customerSession
-    )
-    {
+    ) {
         parent::__construct(
             $balancepayConfig,
             $curl,
@@ -90,7 +89,6 @@ class Transactions extends AbstractRequest
         $this->_cartTotalRepository = $cartTotalRepository;
         $this->customerRepository = $customerRepository;
         $this->customerSession = $customerSession;
-
     }
 
     /**
@@ -176,7 +174,9 @@ class Transactions extends AbstractRequest
     }
 
     /**
-     * @param $customerId
+     * GetTermOptions
+     *
+     * @param int $customerId
      * @return array|string[]
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException

@@ -24,6 +24,13 @@ class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
      */
     protected $indexFactory;
 
+    /**
+     * BalanceAdminhtmlCustomerSaveAfterObserver constructor.
+     *
+     * @param Customer $customer
+     * @param CustomerFactory $customerFactory
+     * @param IndexerFactory $indexFactory
+     */
     public function __construct(
         Customer $customer,
         CustomerFactory $customerFactory,
@@ -35,7 +42,7 @@ class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
     }
 
     /**
-     * admin customer save after event handler.
+     * Admin customer save after event handler.
      *
      * @param Observer $observer
      */
@@ -45,7 +52,8 @@ class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
         $customerId = $customer->getId();
         $postData = $observer->getRequest()->getPostValue();
         if (!empty($customerId)) {
-            $termOptions = !empty($postData['buyer']['term_options']) ? implode(',', $postData['buyer']['term_options']) : '';
+            $termOptions = !empty($postData['buyer']['term_options'])
+                ? implode(',', $postData['buyer']['term_options']) : '';
             $customer = $this->customer->load($customerId);
             $customerData = $customer->getDataModel();
             $customerData->setCustomAttribute('term_options', $termOptions);
@@ -58,6 +66,8 @@ class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
     }
 
     /**
+     * RunCustomerGridIndex
+     *
      * @return void
      */
     public function runCustomerGridIndex()

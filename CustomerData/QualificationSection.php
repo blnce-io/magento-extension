@@ -6,10 +6,6 @@ use Balancepay\Balancepay\Model\Config as BalancepayConfig;
 use Magento\Customer\CustomerData\SectionSourceInterface;
 use Magento\Customer\Model\Session;
 
-/**
- * Class QualificationSection
- * @package Balancepay\Balancepay\CustomerData
- */
 class QualificationSection implements SectionSourceInterface
 {
     /**
@@ -43,7 +39,9 @@ class QualificationSection implements SectionSourceInterface
     }
 
     /**
-     * @return string[]
+     * GetSectionData
+     *
+     * @return array
      */
     public function getSectionData()
     {
@@ -52,11 +50,12 @@ class QualificationSection implements SectionSourceInterface
         $showCredit = false;
         $creditLimit = '$0.00';
         $buyerResponse = $this->balancepayHelper->getBuyerAmount();
-        if (!empty($buyerResponse['qualificationStatus']) && $buyerResponse['qualificationStatus'] == 'completed'){
+        if (!empty($buyerResponse['qualificationStatus']) && $buyerResponse['qualificationStatus'] == 'completed') {
             $status = true;
             $showButton = false;
             $showCredit = true;
-            $creditLimit =  $this->balancepayHelper->formattedAmount($buyerResponse['qualification']['creditLimit'] ?? 0);
+            $creditLimit =  $this->balancepayHelper
+                ->formattedAmount($buyerResponse['qualification']['creditLimit'] ?? 0);
         }
         return [
             'creditLimit' => 'Terms Limit: '.$creditLimit,

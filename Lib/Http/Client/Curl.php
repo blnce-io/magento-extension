@@ -133,6 +133,7 @@ class Curl extends \Magento\Framework\HTTP\Client\Curl
 
     /**
      * Reset class to initial values
+     *
      * @return $this
      */
     public function reset()

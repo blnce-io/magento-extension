@@ -65,10 +65,17 @@ class Data extends AbstractHelper
     public $ccIcons;
 
     /**
+     * Data constructor.
+     *
      * @param MpProductCollection $mpProductCollectionFactory
      * @param TypeListInterface $cacheTypeList
      * @param MessageManagerInterface $messageManager
      * @param Context $appContext
+     * @param Session $customerSession
+     * @param CustomerRepositoryInterface $customerRepositoryInterface
+     * @param RequestFactory $requestFactory
+     * @param BalancepayConfig $balancepayConfig
+     * @param PricingHelper $pricingHelper
      */
     public function __construct(
         MpProductCollection $mpProductCollectionFactory,
@@ -133,6 +140,12 @@ class Data extends AbstractHelper
         return $this->appContext->getValue('customer_id');
     }
 
+    /**
+     * GetBuyerAmount
+     *
+     * @return array
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
     public function getBuyerAmount()
     {
         $response = [];
@@ -175,19 +188,24 @@ class Data extends AbstractHelper
     }
 
     /**
-     * @param $price
+     * FormattedAmount
+     *
+     * @param float|string $price
      * @return float|string
      */
     public function formattedAmount($price)
     {
-        return $this->pricingHelper->currency($price/100,true,false);
+        return $this->pricingHelper->currency($price / 100, true, false);
     }
 
     /**
+     * IsCustomerGroupAllowed
+     *
      * @return bool
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function isCustomerGroupAllowed() {
+    public function isCustomerGroupAllowed()
+    {
         $currentCustomerGroup = $this->customerSession->getCustomer()->getGroupId();
         $allowedCustomerGroups = $this->balancepayConfig->getAllowedCustomerGroups();
         return in_array($currentCustomerGroup, $allowedCustomerGroups);
