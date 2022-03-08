@@ -6,13 +6,11 @@ use Magento\Framework\View\Element\ComponentVisibilityInterface;
 use \Magento\Ui\Component\Form\Fieldset;
 use Webkul\Marketplace\Block\Adminhtml\Customer\Edit;
 
-/**
- * Balance Vendor fieldset class
- */
 class BalanceVendorFieldset extends Fieldset implements ComponentVisibilityInterface
 {
     /**
      * @param ContextInterface $context
+     * @param Edit $customerEdit
      * @param array $components
      * @param array $data
      */
@@ -28,6 +26,8 @@ class BalanceVendorFieldset extends Fieldset implements ComponentVisibilityInter
     }
 
     /**
+     * IsComponentVisible
+     *
      * @return bool
      */
     public function isComponentVisible(): bool

@@ -25,6 +25,11 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <config_path>payment/balancepay/payments_terms</config_path>
                 </field>
+                <field id="is_balance_vendors_seller_register" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Create vendor on Balance?</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <config_path>payment/balancepay/is_balance_vendors_seller_register</config_path>
+                </field>
                 <field id="module_version" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Module Version</label>
                     <frontend_model>Balancepay\Balancepay\Block\Adminhtml\System\Config\ModuleVersion</frontend_model>

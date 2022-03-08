@@ -58,9 +58,23 @@ class Usernameverify extends Action
         if ($profileUrl == "" || $profileUrl == MpDataHelper::MARKETPLACE_ADMIN_URL) {
             $this->getResponse()->representJson($this->_jsonHelper->jsonEncode(true));
         } else {
+            $writer = new \Zend_Log_Writer_Stream(BP . '/var/log/test.log');
+
+            $logger = new \Zend_Log();
+
+            $logger->addWriter($writer);
+
+            $logger->info('checking - ');
             $collection = $this->_sellerCollectionFactory->create();
             $collection->addFieldToFilter('shop_url', $profileUrl);
-            if (!$collection->getSize() && $this->balanceHelper->isValidDomain($profileUrl)) {
+
+            $logger->info('collection size - ');
+            $logger->info($collection->getSize());
+            $logger->info('collection query - ');
+            $logger->info($collection->getSelect()->assemble());
+            $logger->info('isValidDomain - ');
+            $logger->info($collection->getSelect()->assemble());
+            if ($collection->getSize() || !$this->balanceHelper->isValidDomain($profileUrl)) {
                 $this->getResponse()->representJson($this->_jsonHelper->jsonEncode(false));
             } else {
                 $this->getResponse()->representJson($this->_jsonHelper->jsonEncode(true));

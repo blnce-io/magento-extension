@@ -22,6 +22,8 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Phrase;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\OrderFactory;
@@ -58,13 +60,12 @@ class Charged extends Action implements CsrfAwareActionInterface
     private $orderFactory;
 
     /**
-     * @method __construct
-     * @param  Context                $context
-     * @param  JsonFactory            $jsonResultFactory
-     * @param  BalancepayConfig       $balancepayConfig
-     * @param  RequestFactory         $requestFactory
-     * @param  Json                   $json
-     * @param  OrderCollectionFactory $orderCollectionFactory
+     * @param Context $context
+     * @param JsonFactory $jsonResultFactory
+     * @param BalancepayConfig $balancepayConfig
+     * @param RequestFactory $requestFactory
+     * @param Json $json
+     * @param OrderFactory $orderFactory
      */
     public function __construct(
         Context $context,
@@ -82,6 +83,8 @@ class Charged extends Action implements CsrfAwareActionInterface
         $this->orderFactory = $orderFactory;
     }
     /**
+     * Execute
+     *
      * @return ResultInterface
      * @throws \InvalidArgumentException
      * @throws \Exception
@@ -106,7 +109,7 @@ class Charged extends Action implements CsrfAwareActionInterface
             //Validate Signature:
             $signature = hash_hmac("sha256", $content, $this->balancepayConfig->getWebhookSecret());
             if ($signature !== $headers['X-Blnce-Signature']) {
-                throw new \Exception("Signature is doesn't match!");
+                throw new LocalizedException(new Phrase("Signature is doesn't match!"));
             }
 
             //Prepare & validate params:
@@ -120,24 +123,33 @@ class Charged extends Action implements CsrfAwareActionInterface
             $order = $this->orderFactory->create()->loadByIncrementId($externalReferenceId);
 
             if (!$order || !$order->getId()) {
-                throw new \Exception("No matching order!");
+                throw new LocalizedException(new Phrase("No matching order!"));
             }
 
             $orderPayment = $order->getPayment();
 
             //Process if needed:
-            if (\strpos($orderPayment->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID), $chargeId) === false) {
-                if (!$orderPayment->getAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_AUTH_CHECKOUT) && round((float)$order->getBaseGrandTotal()) !== round($amount)) {
+            if (\strpos(
+                $orderPayment->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID),
+                $chargeId
+            ) === false) {
+                if (!$orderPayment->getAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_AUTH_CHECKOUT) &&
+                    round((float)$order->getBaseGrandTotal()) !== round($amount)) {
                     $orderPayment->setIsFraudDetected(true)->save();
                     $order->setStatus(Order::STATUS_FRAUD)->save();
-                    throw new \Exception("The charged amount doesn't match the order total!");
+                    throw new LocalizedException(new Phrase("The charged amount doesn't match the order total!"));
                 }
 
                 $orderPayment
-                    ->setTransactionId($orderPayment->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHECKOUT_TRANSACTION_ID))
-                    ->setIsTransactionPending(false)
+                    ->setTransactionId(
+                        $orderPayment->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHECKOUT_TRANSACTION_ID)
+                    )->setIsTransactionPending(false)
                     ->setIsTransactionClosed(true)
-                    ->setAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID, $orderPayment->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID, $chargeId) . " \n" . $chargeId);
+                    ->setAdditionalInformation(
+                        BalancepayMethod::BALANCEPAY_CHARGE_ID,
+                        $orderPayment->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID, $chargeId) .
+                        " \n" . $chargeId
+                    );
 
                 if (!$orderPayment->getAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_AUTH_CHECKOUT)) {
                     $orderPayment->capture(null);
@@ -145,8 +157,9 @@ class Charged extends Action implements CsrfAwareActionInterface
 
                 $orderPayment->save();
                 $order->save();
-            } elseif ($chargeId !== (string) $order->getPayment()->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID)) {
-                throw new \Exception("Charge ID mismatch!");
+            } elseif ($chargeId !==
+                (string) $order->getPayment()->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID)) {
+                throw new LocalizedException(new Phrase("Charge ID mismatch!"));
             }
 
             $resBody = [
@@ -155,7 +168,11 @@ class Charged extends Action implements CsrfAwareActionInterface
                 "order" => $order->getIncrementId()
             ];
         } catch (\Exception $e) {
-            $this->balancepayConfig->log('Webhook\Checkout\Charged::execute() [Exception: ' . $e->getMessage() . "]\n" . $e->getTraceAsString(), 'error');
+            $this->balancepayConfig
+            ->log(
+                'Webhook\Checkout\Charged::execute() [Exception: ' . $e->getMessage() . "]\n" . $e->getTraceAsString(),
+                'error'
+            );
             $resBody = [
                 "error" => 1,
                 "message" => $e->getMessage(),
@@ -171,8 +188,10 @@ class Charged extends Action implements CsrfAwareActionInterface
     }
 
     /**
+     * ValidateParams
+     *
+     * @param array $params
      * @return $this
-     * @throws Exception
      */
     private function validateParams($params)
     {
@@ -192,11 +211,23 @@ class Charged extends Action implements CsrfAwareActionInterface
         return $this;
     }
 
+    /**
+     * CreateCsrfValidationException
+     *
+     * @param RequestInterface $request
+     * @return InvalidRequestException|null
+     */
     public function createCsrfValidationException(RequestInterface $request): ? InvalidRequestException
     {
         return null;
     }
 
+    /**
+     * ValidateForCsrf
+     *
+     * @param RequestInterface $request
+     * @return bool|null
+     */
     public function validateForCsrf(RequestInterface $request): ?bool
     {
         return true;

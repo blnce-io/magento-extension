@@ -201,12 +201,14 @@ class Data extends AbstractHelper
     }
 
     /**
-     * @param $price
+     * FormattedAmount
+     *
+     * @param mixed $price
      * @return float|string
      */
     public function formattedAmount($price)
     {
-        return $this->pricingHelper->currency($price/100,true,false);
+        return $this->pricingHelper->currency($price/100, true, false);
     }
 
     /**
@@ -220,12 +222,32 @@ class Data extends AbstractHelper
     }
 
     /**
+     * IsCustomerGroupAllowed
+     *
      * @return bool
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function isCustomerGroupAllowed() {
+    public function isCustomerGroupAllowed()
+    {
         $currentCustomerGroup = $this->customerSession->getCustomer()->getGroupId();
         $allowedCustomerGroups = $this->balancepayConfig->getAllowedCustomerGroups();
         return in_array($currentCustomerGroup, $allowedCustomerGroups);
+    }
+
+    /**
+     * IsValidDomain
+     *
+     * @param string $domainName
+     * @return bool
+     */
+    public function isValidDomain($domainName)
+    {
+        if (preg_match(
+            '/^(?!\-)(?:(?:[a-zA-Z\d][a-zA-Z\d\-]{0,61})?[a-zA-Z\d]\.){1,126}(?!\d+)[a-zA-Z\d]{1,63}$/',
+            $domainName
+        )) {
+            return true;
+        }
+        return false;
     }
 }

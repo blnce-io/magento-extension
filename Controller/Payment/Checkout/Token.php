@@ -66,7 +66,10 @@ class Token extends Action
         $this->requestFactory = $requestFactory;
         $this->checkoutSession = $checkoutSession;
     }
+
     /**
+     * Execute
+     *
      * @return ResultInterface
      * @throws \InvalidArgumentException
      * @throws \Exception

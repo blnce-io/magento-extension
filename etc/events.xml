@@ -28,4 +28,7 @@
         <observer name="balance_webkul_marketplace_customer_register_success_observer"
                   instance="Balancepay\Balancepay\Observer\BalanceCustomerRegisterSuccessObserver"/>
     </event>
+    <event name="customer_register_success">
+        <observer name="webkul_marketplace_customer_register_success_observer" disabled="true" instance="Webkul\Marketplace\Observer\CustomerRegisterSuccessObserver" />
+    </event>
 </config>

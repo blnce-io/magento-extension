@@ -126,7 +126,15 @@ class DashboardLink extends Template
                 ->getCollection()
                 ->addFieldToFilter('is_seller', \Webkul\Marketplace\Model\Seller::STATUS_ENABLED)
                 ->addFieldToFilter('balance_vendor_id', $response['sellerInfo']['id'])->getFirstItem();
+            $writer = new \Zend_Log_Writer_Stream(BP . '/var/log/test.log');
 
+            $logger = new \Zend_Log();
+
+            $logger->addWriter($writer);
+
+            $logger->info('Logging crete vendor response');
+
+            $logger->info(json_encode($response));
             if (!empty($response['paymentData']['banks']) && !empty($response['sellerInfo']['address'])) {
                 if (!empty($collection['balance_vendor_id'])) {
                     $collection->setPayouts(true);
