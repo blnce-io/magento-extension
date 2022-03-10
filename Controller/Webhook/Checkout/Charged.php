@@ -94,6 +94,7 @@ class Charged extends Action implements CsrfAwareActionInterface
      */
     public function execute()
     {
+        sleep(15);// phpcs:ignore
         if (!$this->balancepayConfig->isActive()) {
             return $this->resultFactory->create(ResultFactory::TYPE_FORWARD)->forward('noroute');
         }
