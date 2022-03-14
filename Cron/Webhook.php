@@ -34,12 +34,9 @@ class Webhook
      */
     public function execute()
     {
-        $webhookCollection = $this->webhookFactory->create()
-            ->getCollection()
-            ->addFieldToFilter(
-                'status', 0);
+        $webhookCollection = $this->webhookFactory->create()->getCollection();
         foreach ($webhookCollection as $webhook) {
-            $this->helperData->getConfirmedData($webhook->getContent(), $webhook->getHeader());
+            $this->helperData->getConfirmedData($webhook->getContent(), $webhook->getHeader(), true);
         }
     }
 

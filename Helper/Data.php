@@ -181,15 +181,59 @@ class Data extends AbstractHelper
      * @return array
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function getConfirmedData($content, $headers): array
+    public function getConfirmedData($content, $headers, $flag = false)
     {
-        $resBody = [];
+        // Listen webhook (1st time) - validate request (check signature) and
+        // if order not present then add to webhook_queue Else Process webhook (process_transaction_webhook)
+        // process_transaction_webhook - gets payload and processes
 
+
+        // Cron - get webhook payload and if order not present then update attempts count to webhook_queue ELSE process_transaction_webhook
+
+        $resBody = [];
         try {
+            if ($flag) {
+                $headers = $this->json->unserialize($headers);
+            }
             $this->balancepayConfig->log('Webhook\Checkout\Confirmed::execute() ', 'debug', [
                 'content' => $content,
                 'headers' => $headers,
             ]);
+
+            //Prepare & validate params:
+            $params = (array)$this->json->unserialize($content);
+            $this->validateParams($params);
+            $externalReferenceId = (string)$params['externalReferenceId'];
+
+            //Load the order:
+            $order = $this->orderFactory->create()->loadByIncrementId($externalReferenceId);
+
+            if (!$order || !$order->getId()) {
+
+                $webhookCollection = $this->webhookFactory->create()
+                    ->getCollection()
+                    ->addFieldToFilter(
+                        'order_id',
+                        $externalReferenceId
+                    );
+                if ($webhookCollection->getSize()) {
+                    $count = $webhookCollection->getFirstItem()->getCount() + 1;
+                    $this->updateStatus($externalReferenceId, 'count', $count);
+                } else {
+                    //Add to queue
+                    $webhookModel = $this->webhookFactory->create();
+                    $webhookModel->setData([
+                        'content' => $this->json->serialize($params),
+                        'header' => $this->json->serialize($headers),
+                        'order_id' => $externalReferenceId,
+                        'flag' => 2,
+                        'count' => 1,
+                        'status' => 0
+                    ]);
+                    $webhookModel->save();
+                }
+                throw new LocalizedException(new Phrase("No matching order!"));
+            }
 
             //Validate Signature:
             $signature = hash_hmac("sha256", $content, $this->balancepayConfig->getWebhookSecret());
@@ -197,47 +241,15 @@ class Data extends AbstractHelper
                 throw new LocalizedException(new Phrase("Signature is doesn't match!"));
             }
 
-            //Prepare & validate params:
-            $params = (array)$this->json->unserialize($content);
-            $this->validateParams($params);
-            $externalReferenceId = (string)$params['externalReferenceId'];
             $isFinanced = $params['isFinanced'] ? 1 : 0;
             $selectedPaymentMethod = (float)$params['selectedPaymentMethod'];
-            $webhookCollection = $this->webhookFactory->create()
-                ->getCollection()
-                ->addFieldToFilter(
-                    'order_id',
-                    $externalReferenceId
-                );
-            if ($webhookCollection->getSize()) {
-                $count = $webhookCollection->getFirstItem()->getCount() + 1;
-                $this->updateStatus($externalReferenceId, 'count', $count);
-            } else {
-                $webhookModel = $this->webhookFactory->create();
-                $webhookModel->setContent($content);
-                $webhookModel->setHeader($headers);
-                $webhookModel->setOrderId($externalReferenceId);
-                $webhookModel->setFlag(2);
-                $webhookModel->setCount(1);
-                $webhookModel->save();
-            }
-            //Load the order:
-            $order = $this->orderFactory->create()->loadByIncrementId($externalReferenceId);
-
-            if (!$order || !$order->getId()) {
-                throw new LocalizedException(new Phrase("No matching order!"));
-            }
-
             $orderPayment = $order->getPayment();
-
             $orderPayment
                 ->setAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_FINANCED, $isFinanced)
                 ->setAdditionalInformation(BalancepayMethod::
                 BALANCEPAY_SELECTED_PAYMENT_METHOD, $selectedPaymentMethod);
-
             $orderPayment->save();
             $order->save();
-
             $resBody = [
                 "error" => 0,
                 "message" => "Success",
@@ -394,13 +406,12 @@ class Data extends AbstractHelper
     public function updateStatus($externalReferenceId, $field, $value)
     {
         try {
-            $webhookCollection = $this->webhookFactory->create()
-                ->getCollection()
-                ->addFieldToFilter(
-                    'order_id', $externalReferenceId);
-            if ($webhookCollection->getSize()) {
-                $webhookCollection->getFirstItem()->setData($field, $value)->save();
-            }
+            $webhookModel = $this->webhookFactory->create()->load($externalReferenceId, 'order_id');
+            $entityId = $webhookModel->getEntityId();
+            $webhookModel->setData([
+                'entity_id' => $entityId,
+                $field => $value
+            ])->save();
         } catch (\Exception $e) {
             $this->balancepayConfig->log($e->getMessage());
         }

@@ -108,6 +108,10 @@ class Charged extends Action implements CsrfAwareActionInterface
         }
             $content = $this->getRequest()->getContent();
             $headers = $this->getRequest()->getHeaders()->toArray();
+        $this->balancepayConfig->log('Webhook\Checkout\Charged::execute() ', 'debug', [
+            'content' => $content,
+            'headers' => $headers,
+        ]);
              $this->helperData->getChargedData($content, $headers);
     }
 
