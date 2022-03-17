@@ -17,6 +17,8 @@ namespace Balancepay\Balancepay\Model;
 interface ResponseInterface
 {
     /**
+     * Process
+     *
      * @return AbstractResponse
      * @throws \Magento\Framework\Exception\PaymentException
      */

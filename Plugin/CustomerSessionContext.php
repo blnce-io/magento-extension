@@ -31,10 +31,13 @@ class CustomerSessionContext
     }
 
     /**
+     * AroundDispatch
+     *
      * @param ActionInterface $subject
-     * @param callable $proceed
+     * @param \Closure $proceed
      * @param RequestInterface $request
      * @return mixed
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function aroundDispatch(
         ActionInterface $subject,

@@ -13,12 +13,11 @@ namespace Balancepay\Balancepay\Model\Response;
 
 use Balancepay\Balancepay\Model\AbstractResponse;
 
-/**
- * Balancepay webhooks response model.
- */
 class Webhooks extends AbstractResponse
 {
     /**
+     * GetRequiredResponseDataKeys
+     *
      * @return array
      */
     protected function getRequiredResponseDataKeys()

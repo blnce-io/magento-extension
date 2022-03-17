@@ -43,8 +43,7 @@ class CreateBuyerLink extends Link
         BalancepayHelper $balancepayHelper,
         Data $webkulHelper,
         array $data = []
-    )
-    {
+    ) {
         $this->balancepayHelper = $balancepayHelper;
         $this->webkulHelper = $webkulHelper;
         parent::__construct($context, $data);
@@ -72,8 +71,7 @@ class CreateBuyerLink extends Link
         } catch (\Exception $e) {
             $seller = false;
         }
-        if (
-            $this->_scopeConfig->isSetFlag('payment/balancepay/active') &&
+        if ($this->_scopeConfig->isSetFlag('payment/balancepay/active') &&
             $this->_scopeConfig->isSetFlag('payment/balancepay/payments_terms') &&
             $this->getCustomerSessionId() &&
             !($seller)
@@ -84,6 +82,8 @@ class CreateBuyerLink extends Link
     }
 
     /**
+     * IsCustomerGroupAllowed
+     *
      * @return bool
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */

@@ -22,6 +22,8 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Phrase;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\OrderFactory;
@@ -80,7 +82,10 @@ class Confirmed extends Action implements CsrfAwareActionInterface
         $this->json = $json;
         $this->orderFactory = $orderFactory;
     }
+
     /**
+     * Execute
+     *
      * @return ResultInterface
      * @throws \InvalidArgumentException
      * @throws \Exception
@@ -105,7 +110,7 @@ class Confirmed extends Action implements CsrfAwareActionInterface
             //Validate Signature:
             $signature = hash_hmac("sha256", $content, $this->balancepayConfig->getWebhookSecret());
             if ($signature !== $headers['X-Blnce-Signature']) {
-                throw new \Exception("Signature is doesn't match!");
+                throw new LocalizedException(new Phrase("Signature is doesn't match!"));
             }
 
             //Prepare & validate params:
@@ -119,14 +124,17 @@ class Confirmed extends Action implements CsrfAwareActionInterface
             $order = $this->orderFactory->create()->loadByIncrementId($externalReferenceId);
 
             if (!$order || !$order->getId()) {
-                throw new \Exception("No matching order!");
+                throw new LocalizedException(new Phrase("No matching order!"));
             }
 
             $orderPayment = $order->getPayment();
 
             $orderPayment
                 ->setAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_FINANCED, $isFinanced)
-                ->setAdditionalInformation(BalancepayMethod::BALANCEPAY_SELECTED_PAYMENT_METHOD, $selectedPaymentMethod);
+                ->setAdditionalInformation(
+                    BalancepayMethod::BALANCEPAY_SELECTED_PAYMENT_METHOD,
+                    $selectedPaymentMethod
+                );
 
             $orderPayment->save();
             $order->save();
@@ -137,7 +145,11 @@ class Confirmed extends Action implements CsrfAwareActionInterface
                 "order" => $order->getIncrementId()
             ];
         } catch (\Exception $e) {
-            $this->balancepayConfig->log('Webhook\Transaction\Confirmed::execute() [Exception: ' . $e->getMessage() . "]\n" . $e->getTraceAsString(), 'error');
+            $this->balancepayConfig->log(
+                'Webhook\Transaction\Confirmed::execute() [Exception: ' . $e->getMessage() . "]\n" .
+                $e->getTraceAsString(),
+                'error'
+            );
             $resBody = [
                 "error" => 1,
                 "message" => $e->getMessage(),
@@ -153,8 +165,10 @@ class Confirmed extends Action implements CsrfAwareActionInterface
     }
 
     /**
+     * ValidateParams
+     *
+     * @param mixed $params
      * @return $this
-     * @throws Exception
      */
     private function validateParams($params)
     {
@@ -170,15 +184,26 @@ class Confirmed extends Action implements CsrfAwareActionInterface
                 )
             );
         }
-
         return $this;
     }
 
+    /**
+     * CreateCsrfValidationException
+     *
+     * @param RequestInterface $request
+     * @return InvalidRequestException|null
+     */
     public function createCsrfValidationException(RequestInterface $request): ? InvalidRequestException
     {
         return null;
     }
 
+    /**
+     * ValidateForCsrf
+     *
+     * @param RequestInterface $request
+     * @return bool|null
+     */
     public function validateForCsrf(RequestInterface $request): ?bool
     {
         return true;

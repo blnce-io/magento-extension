@@ -13,9 +13,6 @@ namespace Balancepay\Balancepay\Model\Response;
 
 use Balancepay\Balancepay\Model\AbstractResponse;
 
-/**
- * Balancepay transactions response model.
- */
 class Transactions extends AbstractResponse
 {
     /**
@@ -29,6 +26,8 @@ class Transactions extends AbstractResponse
     protected $_transactionId;
 
     /**
+     * Process
+     *
      * @return AbstractResponse
      * @throws \Magento\Framework\Exception\LocalizedException
      */
@@ -44,6 +43,8 @@ class Transactions extends AbstractResponse
     }
 
     /**
+     * GetRequiredResponseDataKeys
+     *
      * @return array
      */
     protected function getRequiredResponseDataKeys()
@@ -55,6 +56,8 @@ class Transactions extends AbstractResponse
     }
 
     /**
+     * GetToken
+     *
      * @return string
      */
     public function getToken()
@@ -63,6 +66,8 @@ class Transactions extends AbstractResponse
     }
 
     /**
+     * GetTransactionId
+     *
      * @return string|null
      */
     public function getTransactionId()
