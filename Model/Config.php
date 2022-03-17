@@ -118,9 +118,11 @@ class Config
      * Update Balance Pay status
      *
      * @param string $scope
+     * @param mixed $value
      * @param int $storeId
+     * @return void
      */
-    public function updateCustomerGroup($scope = ScopeInterface::SCOPE_STORE, $value, $storeId = null)
+    public function updateCustomerGroup($scope = ScopeInterface::SCOPE_STORE, $value = '', int $storeId = 0)
     {
         $this->resourceConfig->saveConfig(
             $this->getConfigPath() . 'allowed_customer_groups',
@@ -388,12 +390,14 @@ class Config
     }
 
     /**
-     * @param $scope
-     * @param $storeId
+     * GetAllowed Customer Groups
+     *
+     * @param string $scope
+     * @param int $storeId
      * @return array|string[]
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function getAllowedCustomerGroups($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
+    public function getAllowedCustomerGroups($scope = ScopeInterface::SCOPE_STORE, int $storeId = 0)
     {
         $customerGroups = $this->getConfigValue('allowed_customer_groups', $scope, $storeId);
         if (!empty($customerGroups)) {
