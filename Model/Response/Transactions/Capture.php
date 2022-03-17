@@ -13,20 +13,8 @@ namespace Balancepay\Balancepay\Model\Response\Transactions;
 
 use Balancepay\Balancepay\Model\AbstractResponse;
 
-/**
- * Balancepay transactions/capture response model.
- */
 class Capture extends AbstractResponse
 {
-    /**
-     * @return AbstractResponse
-     * @throws \Magento\Framework\Exception\LocalizedException
-     */
-    public function process()
-    {
-        return parent::process();
-    }
-
     /**
      * Determine if request succeed or failed.
      *
@@ -43,6 +31,8 @@ class Capture extends AbstractResponse
     }
 
     /**
+     * GetRequiredResponseDataKeys
+     *
      * @return array
      */
     protected function getRequiredResponseDataKeys()

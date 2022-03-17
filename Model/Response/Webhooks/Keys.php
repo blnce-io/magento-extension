@@ -14,9 +14,6 @@ namespace Balancepay\Balancepay\Model\Response\Webhooks;
 use Balancepay\Balancepay\Model\AbstractResponse;
 use Magento\Store\Model\ScopeInterface;
 
-/**
- * Balancepay webhooks/keys response model.
- */
 class Keys extends AbstractResponse
 {
     /**
@@ -25,6 +22,8 @@ class Keys extends AbstractResponse
     protected $_webhookSecret;
 
     /**
+     * Process
+     *
      * @return AbstractResponse
      * @throws \Magento\Framework\Exception\LocalizedException
      */
@@ -39,7 +38,8 @@ class Keys extends AbstractResponse
     }
 
     /**
-     * @method save
+     * Update
+     *
      * @param  string                $scope Scope
      * @param  int|null              $storeId
      * @return AbstractResponse
@@ -52,6 +52,8 @@ class Keys extends AbstractResponse
     }
 
     /**
+     * GetRequiredResponseDataKeys
+     *
      * @return array
      */
     protected function getRequiredResponseDataKeys()
@@ -60,6 +62,8 @@ class Keys extends AbstractResponse
     }
 
     /**
+     * GetWebhookSecret
+     *
      * @return string
      */
     public function getWebhookSecret()

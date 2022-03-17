@@ -1,9 +1,11 @@
 <?php
 namespace Balancepay\Balancepay\Setup\Patch\Data;
 
+use Balancepay\Balancepay\Model\Config\Customer\TermsOptions;
 use Magento\Customer\Model\Customer;
 use Magento\Customer\Setup\CustomerSetup;
 use Magento\Customer\Setup\CustomerSetupFactory;
+use Magento\Eav\Model\Entity\Attribute\Backend\ArrayBackend;
 use Magento\Eav\Model\Entity\Attribute\Set;
 use Magento\Eav\Model\Entity\Attribute\SetFactory;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
@@ -36,15 +38,14 @@ class TermOptions implements DataPatchInterface
         ModuleDataSetupInterface $moduleDataSetup,
         CustomerSetupFactory     $customerSetupFactory,
         SetFactory               $attributeSetFactory
-    )
-    {
+    ) {
         $this->moduleDataSetup = $moduleDataSetup;
         $this->customerSetupFactory = $customerSetupFactory;
         $this->attributeSetFactory = $attributeSetFactory;
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function apply()
     {
@@ -66,7 +67,7 @@ class TermOptions implements DataPatchInterface
                 'label' => 'Terms Options',
                 'input' => 'checkbox',
                 'type' => 'varchar',
-                'source' => 'Balancepay\Balancepay\Model\Config\Customer\TermsOptions',
+                'source' => TermsOptions::class,
                 'required' => false,
                 'position' => 333,
                 'visible' => false,
@@ -75,7 +76,7 @@ class TermOptions implements DataPatchInterface
                 'is_visible_in_grid' => true,
                 'is_filterable_in_grid' => true,
                 'is_searchable_in_grid' => true,
-                'backend' => 'Magento\Eav\Model\Entity\Attribute\Backend\ArrayBackend'
+                'backend' => ArrayBackend::class
             ]
         );
 
@@ -85,7 +86,7 @@ class TermOptions implements DataPatchInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function getAliases()
     {
@@ -93,7 +94,7 @@ class TermOptions implements DataPatchInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public static function getDependencies()
     {

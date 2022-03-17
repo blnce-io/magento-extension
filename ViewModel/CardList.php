@@ -61,6 +61,8 @@ class CardList implements ArgumentInterface
     }
 
     /**
+     * GetBuyerDetails
+     *
      * @param $customerId
      * @return array
      */
@@ -77,7 +79,9 @@ class CardList implements ArgumentInterface
     }
 
     /**
-     * @param $price
+     * FormattedAmount
+     *
+     * @param mixed $price
      * @return float|string
      */
     public function formattedAmount($price)
@@ -86,7 +90,9 @@ class CardList implements ArgumentInterface
     }
 
     /**
-     * @param $type
+     * GetCcIconUrl
+     *
+     * @param mixed $type
      * @return false|string
      */
     public function getCcIconUrl($type = '')
@@ -99,7 +105,9 @@ class CardList implements ArgumentInterface
     }
 
     /**
+     * CheckIsSeller
      *
+     * @return bool|int
      */
     public function checkIsSeller()
     {

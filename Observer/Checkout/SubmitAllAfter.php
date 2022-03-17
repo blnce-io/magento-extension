@@ -52,12 +52,13 @@ class SubmitAllAfter implements ObserverInterface
     private $transactionFactory;
 
     /**
-     * @method __construct
-     * @param  Config             $balancepayConfig
-     * @param  AuthorizeCommand   $authorizeCommand
-     * @param  CaptureCommand     $captureCommand
-     * @param  InvoiceService     $invoiceService
-     * @param  TransactionFactory $transactionFactory
+     * Constructor
+     *
+     * @param Config $balancepayConfig
+     * @param AuthorizeCommand $authorizeCommand
+     * @param CaptureCommand $captureCommand
+     * @param InvoiceService $invoiceService
+     * @param TransactionFactory $transactionFactory
      */
     public function __construct(
         Config $balancepayConfig,
@@ -73,6 +74,13 @@ class SubmitAllAfter implements ObserverInterface
         $this->transactionFactory = $transactionFactory;
     }
 
+    /**
+     * Execute
+     *
+     * @param Observer $observer
+     * @return $this|void
+     * @throws LocalizedException
+     */
     public function execute(Observer $observer)
     {
         try {
@@ -87,7 +95,9 @@ class SubmitAllAfter implements ObserverInterface
                 return $this;
             }
 
-            $transactionId = $orderPayment->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHECKOUT_TRANSACTION_ID);
+            $transactionId = $orderPayment->getAdditionalInformation(
+                BalancepayMethod::BALANCEPAY_CHECKOUT_TRANSACTION_ID
+            );
 
             if ($transactionId && $this->balancepayConfig->getIsAuth()) {
                 $message = $this->authorizeCommand->execute(
@@ -106,7 +116,10 @@ class SubmitAllAfter implements ObserverInterface
                 $order->save();
             }
         } catch (\Exception $e) {
-            $this->balancepayConfig->log('SubmitAllAfter::execute() - Exception: ' . $e->getMessage() . "\n" . $e->getTraceAsString(), 'error');
+            $this->balancepayConfig->log(
+                'SubmitAllAfter::execute() - Exception: ' . $e->getMessage() . "\n" . $e->getTraceAsString(),
+                'error'
+            );
             throw new LocalizedException(
                 __('Your order have been placed, but there has been an error on the server, please contact us.')
             );

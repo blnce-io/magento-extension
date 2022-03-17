@@ -18,9 +18,6 @@ use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\Data\OrderPaymentInterface;
 use Magento\Sales\Model\Order;
 
-/**
- * Plugin for product Details Block
- */
 class AuthorizeCommand
 {
     /**
@@ -39,13 +36,15 @@ class AuthorizeCommand
     }
 
     /**
-     * @method beforeToHtml
-     * @param \Magento\Catalog\Block\Product\View\Details $authorizeCommand
-     * @param Phrase $result
+     * AfterExecute
+     *
+     * @param Order\Payment\State\AuthorizeCommand $authorizeCommand
+     * @param mixed $result
      * @param OrderPaymentInterface $payment
-     * @param string|float $amount
+     * @param mixed $amount
      * @param OrderInterface $order
-     * @return Phrase
+     * @return mixed
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function afterExecute(
         \Magento\Sales\Model\Order\Payment\State\AuthorizeCommand $authorizeCommand,

@@ -219,6 +219,7 @@ class BalancepayMethod extends AbstractMethod
      * @param RequestFactory $requestFactory
      * @param RequestInterface $request
      * @param HelperData $helper
+     * @param Session $customerSession
      * @param array $data
      */
     public function __construct(

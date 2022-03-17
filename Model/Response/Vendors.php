@@ -3,9 +3,6 @@ namespace Balancepay\Balancepay\Model\Response;
 
 use Balancepay\Balancepay\Model\AbstractResponse;
 
-/**
- * Balancepay webhooks response model.
- */
 class Vendors extends AbstractResponse
 {
 
@@ -20,6 +17,8 @@ class Vendors extends AbstractResponse
     protected $_transactionId;
 
     /**
+     * Process
+     *
      * @return AbstractResponse
      * @throws \Magento\Framework\Exception\LocalizedException
      */
@@ -32,6 +31,8 @@ class Vendors extends AbstractResponse
     }
 
     /**
+     * GetRequiredResponseDataKeys
+     *
      * @return array
      */
     protected function getRequiredResponseDataKeys()

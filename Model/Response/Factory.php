@@ -17,9 +17,6 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Sales\Model\Order\Payment as OrderPayment;
 
-/**
- * Balancepay response factory model.
- */
 class Factory
 {
     /**
@@ -70,10 +67,8 @@ class Factory
     /**
      * Create response model.
      *
-     * @param string            $type
-     * @param Curl|null         $curl
-     * @param OrderPayment|null $payment
-     *
+     * @param mixed $type
+     * @param mixed $curl
      * @return ResponseInterface
      * @throws LocalizedException
      */

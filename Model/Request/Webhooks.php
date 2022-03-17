@@ -26,8 +26,9 @@ class Webhooks extends AbstractRequest
     protected $_topic;
 
     /**
-     * @param  string   $topic
+     * SetTopic
      *
+     * @param mixed $topic
      * @return $this
      */
     public function setTopic($topic)
@@ -37,6 +38,8 @@ class Webhooks extends AbstractRequest
     }
 
     /**
+     * GetTopic
+     *
      * @return string
      */
     public function getTopic()
@@ -45,7 +48,7 @@ class Webhooks extends AbstractRequest
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      *
      * @return string
      */
@@ -55,7 +58,7 @@ class Webhooks extends AbstractRequest
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      *
      * @return string
      */
@@ -75,7 +78,8 @@ class Webhooks extends AbstractRequest
             parent::getParams(),
             [
               'topic' => $this->_topic,
-              'address' => $this->_balancepayConfig->getCurrentStore()->getBaseUrl() . 'balancepay/webhook_' . $this->_topic,
+              'address' => $this->_balancepayConfig->getCurrentStore()->getBaseUrl() .
+                  'balancepay/webhook_' . $this->_topic,
             ]
         );
     }

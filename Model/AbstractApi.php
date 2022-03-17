@@ -11,9 +11,6 @@
 
 namespace Balancepay\Balancepay\Model;
 
-/**
- * Balancepay abstract api model.
- */
 abstract class AbstractApi
 {
     /**
@@ -22,9 +19,7 @@ abstract class AbstractApi
     protected $_balancepayConfig;
 
     /**
-     * Object initialization.
-     *
-     * @param Config           $config
+     * @param Config $balancepayConfig
      */
     public function __construct(
         Config $balancepayConfig
@@ -33,8 +28,9 @@ abstract class AbstractApi
     }
 
     /**
-     * @method amountFormat
-     * @param  float|int              $amount
+     * AmountFormat
+     *
+     * @param  float|int $amount
      * @return float
      */
     protected function amountFormat($amount)

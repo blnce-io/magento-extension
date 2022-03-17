@@ -51,13 +51,16 @@ class Transactions extends AbstractRequest
     protected $customerSession;
 
     /**
-     * Transactions constructor.
      * @param Config $balancepayConfig
      * @param Curl $curl
      * @param ResponseFactory $responseFactory
      * @param CheckoutSession $checkoutSession
      * @param CartTotalRepository $cartTotalRepository
      * @param HelperData $helper
+     * @param AccountManagementInterface $accountManagement
+     * @param RegionFactory $region
+     * @param CustomerRepositoryInterface $customerRepository
+     * @param Session $customerSession
      */
     public function __construct(
         Config $balancepayConfig,
@@ -87,7 +90,7 @@ class Transactions extends AbstractRequest
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      *
      * @return string
      */
@@ -97,7 +100,7 @@ class Transactions extends AbstractRequest
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      *
      * @return string
      */
@@ -148,8 +151,9 @@ class Transactions extends AbstractRequest
     }
 
     /**
-     * @param Quote $quote
+     * GetBuyerParams
      *
+     * @param Quote $quote
      * @return array
      */
     protected function getBuyerParams(Quote $quote)
@@ -168,7 +172,9 @@ class Transactions extends AbstractRequest
     }
 
     /**
-     * @param $customerId
+     * GetTermOptions
+     *
+     * @param int $customerId
      * @return array|string[]
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException

@@ -1,5 +1,4 @@
 <?php
-
 namespace Balancepay\Balancepay\Observer;
 
 use Magento\Customer\Model\Customer;
@@ -41,12 +40,14 @@ class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
     protected $indexFactory;
 
     /**
-     * BalanceAdminhtmlCustomerSaveAfterObserver constructor.
      * @param CollectionFactory $collectionFactory
      * @param ResourceConnection $resource
      * @param Config $balancepayConfig
      * @param RequestFactory $requestFactory
      * @param ManagerInterface $messageManager
+     * @param Customer $customer
+     * @param CustomerFactory $customerFactory
+     * @param IndexerFactory $indexFactory
      */
     public function __construct(
         CollectionFactory $collectionFactory,
@@ -98,7 +99,8 @@ class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
         }
 
         if (!empty($customerId)) {
-            $termOptions = !empty($postData['buyer']['term_options']) ? implode(',', $postData['buyer']['term_options']) : '';
+            $termOptions = !empty($postData['buyer']['term_options']) ?
+                implode(',', $postData['buyer']['term_options']) : '';
             $customer = $this->customer->load($customerId);
             $customerData = $customer->getDataModel();
             $customerData->setCustomAttribute('term_options', $termOptions);
@@ -157,6 +159,8 @@ class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
     }
 
     /**
+     * RunCustomerGridIndex
+     *
      * @return void
      * @throws \Exception
      */
