@@ -14,6 +14,8 @@ namespace Balancepay\Balancepay\Model;
 use Balancepay\Balancepay\Lib\Http\Client\Curl;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\PaymentException;
+use Magento\Framework\Phrase;
+use Zend\Uri\Uri;
 
 /**
  * Balancepay abstract response model.
@@ -23,8 +25,8 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
     /**
      * Response result const.
      */
-    const STATUS_SUCCESS = 1;
-    const STATUS_FAILED = 2;
+    public const STATUS_SUCCESS = 1;
+    public const STATUS_FAILED = 2;
 
     /**
      * @var Curl
@@ -47,22 +49,25 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
     protected $_body;
 
     /**
-     * AbstractResponse constructor.
-     *
      * @param Config $balancepayConfig
-     * @param Curl   $curl
+     * @param Curl $curl
+     * @param Uri $zendUri
      */
     public function __construct(
         Config $balancepayConfig,
-        Curl $curl
+        Curl $curl,
+        Uri $zendUri
     ) {
         parent::__construct(
             $balancepayConfig
         );
         $this->_curl = $curl;
+        $this->zendUri = $zendUri;
     }
 
     /**
+     * Process
+     *
      * @return AbstractResponse
      * @throws PaymentException
      */
@@ -87,7 +92,9 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
     }
 
     /**
-     * @return \Magento\Framework\Phrase
+     * GetErrorMessage
+     *
+     * @return Phrase
      */
     protected function getErrorMessage()
     {
@@ -100,6 +107,8 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
     }
 
     /**
+     * GetErrorReason
+     *
      * @return bool
      */
     protected function getErrorReason()
@@ -127,6 +136,8 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
     }
 
     /**
+     * GetRequestId
+     *
      * @return int
      */
     protected function getRequestId()
@@ -135,6 +146,8 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
     }
 
     /**
+     * GetStatus
+     *
      * @return int
      */
     protected function getStatus()
@@ -147,6 +160,8 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
     }
 
     /**
+     * GetHeaders
+     *
      * @return array
      */
     protected function getHeaders()
@@ -159,6 +174,8 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
     }
 
     /**
+     * GetBody
+     *
      * @return array
      */
     protected function getBody()
@@ -167,7 +184,8 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
             $body = $this->_curl->getBody();
             $this->_body = (array) json_decode($body, 1);
             if ($body && !$this->_body) {
-                parse_str($body, $this->_body);
+                $this->zendUri->setQuery($body);
+                $this->_body = $this->zendUri->getQueryAsArray();
             }
         }
 
@@ -175,6 +193,8 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
     }
 
     /**
+     * PrepareResponseData
+     *
      * @return array
      */
     protected function prepareResponseData()
@@ -187,6 +207,8 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
     }
 
     /**
+     * ValidateResponseData
+     *
      * @return AbstractResponse
      * @throws PaymentException
      */
@@ -209,6 +231,8 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
     }
 
     /**
+     * GetRequiredResponseDataKeys
+     *
      * @return array
      */
     protected function getRequiredResponseDataKeys()
@@ -216,6 +240,11 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
         return [];
     }
 
+    /**
+     * GetDataObject
+     *
+     * @return DataObject
+     */
     public function getDataObject()
     {
         return new DataObject($this->getBody());

@@ -20,7 +20,9 @@ use Magento\Framework\App\Config\ReinitableConfigInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Message\ManagerInterface as MessageManagerInterface;
+use Magento\Framework\Phrase;
 use Magento\Store\Model\App\Emulation as AppEmulation;
 use Magento\Store\Model\ScopeInterface;
 
@@ -82,7 +84,7 @@ class Save implements ObserverInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function execute(Observer $observer)
     {
@@ -104,7 +106,9 @@ class Save implements ObserverInterface
         $this->appEmulation->stopEnvironmentEmulation();
         if ($storeId && $scope !== ScopeConfigInterface::SCOPE_TYPE_DEFAULT) {
             $this->appEmulation->startEnvironmentEmulation(
-                !empty($websiteId) ? $this->balancepayConfig->getStoreManager()->getWebsite($websiteId)->getDefaultStore()->getId() : $storeId,
+                !empty($websiteId) ?
+                    $this->balancepayConfig->getStoreManager()->getWebsite($websiteId)->getDefaultStore()->getId() :
+                    $storeId,
                 Area::AREA_FRONTEND,
                 true
             );
@@ -130,25 +134,36 @@ class Save implements ObserverInterface
                         ->process();
 
                     $this->appEmulation->stopEnvironmentEmulation();
-                    return $this->messageManager->addSuccess(__('Balance API key is valid! (Webhooks have been successfully registered)'));
+                    return $this->messageManager->addSuccess(__(
+                        'Balance API key is valid! (Webhooks have been successfully registered)'
+                    ));
                 } catch (\Exception $e) {
-                    throw new \Exception(__('Balance payments - Failed to register webhooks! [Exception: %1]', $e->getMessage()));
+                    $this->balancepayConfig->updateBalancePayStatus($scope);
                 }
             } else {
                 $this->appEmulation->stopEnvironmentEmulation();
                 $this->balancepayConfig->resetStoreCredentials($scope, $storeId);
-                throw new \Exception(__('Can\' enable Balance payments, API key is missing!'));
+                throw new LocalizedException(new Phrase('Can\' enable Balance payments, API key is missing!'));
             }
         }
     }
 
+    /**
+     * CleanConfigCache
+     *
+     * @return $this
+     */
     private function cleanConfigCache()
     {
         try {
             $this->cacheTypeList->cleanType(Config::TYPE_IDENTIFIER);
             $this->appConfig->reinit();
         } catch (\Exception $e) {
-            $this->messageManager->addNoticeMessage(__('For some reason, Balance (payment) couldn\'t clear your config cache, please clear the cache manually. (Exception message: %1)', $e->getMessage()));
+            $this->messageManager->addNoticeMessage(__(
+                'For some reason, Balance (payment) couldn\'t clear your config cache, please clear the cache manually.
+                (Exception message: %1)',
+                $e->getMessage()
+            ));
         }
         return $this;
     }

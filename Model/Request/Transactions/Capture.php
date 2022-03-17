@@ -43,31 +43,8 @@ class Capture extends AbstractRequest
     protected $_payment;
 
     /**
-     * Capture constructor.
-     * @param Config $balancepayConfig
-     * @param Curl $curl
-     * @param ResponseFactory $responseFactory
-     * @param HelperData $helper
-     */
-    public function __construct(
-        Config $balancepayConfig,
-        Curl $curl,
-        ResponseFactory $responseFactory,
-        HelperData $helper,
-        AccountManagementInterface $accountManagement,
-        RegionFactory $region
-    ) {
-        parent::__construct(
-            $balancepayConfig,
-            $curl,
-            $responseFactory,
-            $helper,
-            $accountManagement,
-            $region
-        );
-    }
-
-    /**
+     * Set amount
+     *
      * @method setAmount
      * @param  int|float $amount
      * @return Capture $this
@@ -79,6 +56,8 @@ class Capture extends AbstractRequest
     }
 
     /**
+     * Get Amount
+     *
      * @method getAmount
      * @return int|float|null
      */
@@ -88,6 +67,8 @@ class Capture extends AbstractRequest
     }
 
     /**
+     * Set Balance Vendor Id
+     *
      * @method setBalanceVendorId
      * @param  mixed $balanceVendorId
      * @return Capture $this
@@ -99,6 +80,8 @@ class Capture extends AbstractRequest
     }
 
     /**
+     * Get Balance Vendor Id
+     *
      * @method getBalanceVendorId
      * @return mixed
      */
@@ -108,6 +91,8 @@ class Capture extends AbstractRequest
     }
 
     /**
+     * Set payment
+     *
      * @method setPayment
      * @param  OrderPayment $payment
      * @return Capture $this
@@ -119,6 +104,8 @@ class Capture extends AbstractRequest
     }
 
     /**
+     * Get Payment
+     *
      * @method getPayment
      * @return OrderPayment|null
      */
@@ -143,7 +130,7 @@ class Capture extends AbstractRequest
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      *
      * @return string
      */
@@ -153,7 +140,7 @@ class Capture extends AbstractRequest
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      *
      * @return string
      */

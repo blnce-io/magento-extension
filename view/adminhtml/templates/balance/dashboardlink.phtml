@@ -10,36 +10,38 @@
         <div class="admin__field _required">
             <div class="admin__field-label">
                 <label>
-                    <span><?php echo __("Balance Vendor"); ?></span>
+                    <span><?= /* @noEscape */ __("Balance Vendor"); ?></span>
                 </label>
             </div>
             <div class="admin__field-control">
-                <a href="<?= $block->getBalancePayDashboardUrl(); ?>" target="_blank"><?php echo __($vendorName);?></a>
+                <a href="<?= /* @noEscape */ $block->getBalancePayDashboardUrl(); ?>" target="_blank">
+                    <?= /* @noEscape */ __($vendorName);?>
+                </a>
                 <a class="action action-edit-balance" href="javascript:void(0)" title="Edit Balance Vendor"></a>
             </div>
         </div>
         <div class="admin__field _required">
             <div class="admin__field-label">
                 <label>
-                    <span><?php echo __("Payouts:"); ?></span>
+                    <span><?= /* @noEscape */ __("Payouts:"); ?></span>
                 </label>
             </div>
             <?php if ($balancePayStatus): ?>
-            <div class="admin__field-control enable"><?php echo __('Enabled'); ?></div>
+            <div class="admin__field-control enable"><?= /* @noEscape */ __('Enabled'); ?></div>
             <?php else: ?>
-            <div class="admin__field-control disable"><?php echo __('Disabled'); ?></div>
+            <div class="admin__field-control disable"><?= /* @noEscape */ __('Disabled'); ?></div>
             <?php endif; ?>
         </div>
     </div>
 <?php endif; ?>
 
-<script type="text/javascript">
+<script>
     require([
             "jquery"
         ],
         function($) {
             "use strict";
-            var vendorIdAvailable = '<?php echo $vendorIdAvailable; ?>';
+            var vendorIdAvailable = '<?= /* @noEscape */ $vendorIdAvailable; ?>';
             if (vendorIdAvailable) {
                 setTimeout(function () {
                     $('.admin__fieldset').find('[data-index="balance_vendor_id"]').hide();

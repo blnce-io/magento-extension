@@ -165,6 +165,5 @@ class Qualify extends Action
                 $e->getMessage() . "]\n" . $e->getTraceAsString(), 'error');
             return false;
         }
-
     }
 }

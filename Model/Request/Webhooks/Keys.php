@@ -21,6 +21,8 @@ use Balancepay\Balancepay\Model\Response\Factory as ResponseFactory;
 class Keys extends AbstractRequest
 {
     /**
+     * GetCurlMethod
+     *
      * @return string
      * @throws PaymentException
      */
@@ -30,7 +32,7 @@ class Keys extends AbstractRequest
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      *
      * @return string
      */
@@ -40,7 +42,7 @@ class Keys extends AbstractRequest
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      *
      * @return string
      */

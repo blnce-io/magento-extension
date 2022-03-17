@@ -67,6 +67,8 @@ class Token extends Action
         $this->checkoutSession = $checkoutSession;
     }
     /**
+     * Execute
+     *
      * @return ResultInterface
      * @throws \InvalidArgumentException
      * @throws \Exception

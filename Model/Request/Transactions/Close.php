@@ -33,11 +33,12 @@ class Close extends AbstractRequest
     protected $_payment;
 
     /**
-     * Close constructor.
      * @param Config $balancepayConfig
      * @param Curl $curl
      * @param ResponseFactory $responseFactory
      * @param HelperData $helper
+     * @param AccountManagementInterface $accountManagement
+     * @param RegionFactory $region
      */
     public function __construct(
         Config $balancepayConfig,
@@ -50,14 +51,16 @@ class Close extends AbstractRequest
         parent::__construct(
             $balancepayConfig,
             $curl,
-            $responseFactory,
             $helper,
+            $responseFactory,
             $accountManagement,
             $region
         );
     }
 
     /**
+     * Set Payment
+     *
      * @method setPayment
      * @param  OrderPayment $payment
      * @return Capture $this
@@ -69,6 +72,8 @@ class Close extends AbstractRequest
     }
 
     /**
+     * Get Payment
+     *
      * @method getPayment
      * @return OrderPayment|null
      */
@@ -93,7 +98,7 @@ class Close extends AbstractRequest
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      *
      * @return string
      */
@@ -103,22 +108,12 @@ class Close extends AbstractRequest
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      *
      * @return string
      */
     protected function getResponseHandlerType()
     {
         return ResponseFactory::CLOSE_RESPONSE_HANDLER;
-    }
-
-    /**
-     * Return request params.
-     *
-     * @return array
-     */
-    protected function getParams()
-    {
-        return parent::getParams();
     }
 }
