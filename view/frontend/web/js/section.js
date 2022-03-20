@@ -19,6 +19,7 @@ define([
                 responsive: true,
                 clickableOverlay:false,
                 innerScroll: true,
+                buttons: [],
                 modalCloseBtnHandler: function() {
                     var customeurl = urlBuilder.build('balancepay/buyer/creditlimit');
                     $.ajax({
