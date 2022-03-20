@@ -116,11 +116,15 @@ class Transactions extends AbstractRequest
      */
     protected function getParams()
     {
+        $termsOptions = [];
         $quote = $this->_checkoutSession->getQuote();
         $quote->collectTotals();
         $requiresShipping = $quote->getShippingAddress() !== null ? 1 : 0;
         $quoteTotals = $this->_cartTotalRepository->get($quote->getId());
-        $termsOptions = $this->getTermOptions($this->customerSession->getCustomer()->getId());
+        $customerId = $this->customerSession->getCustomer()->getId();
+        if ($customerId) {
+            $termsOptions = $this->getTermOptions($customerId);
+        }
         $options = [];
         if (!empty($termsOptions)) {
             foreach ($termsOptions as $terms) {
