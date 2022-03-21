@@ -88,6 +88,10 @@ class SubmitAllAfter implements ObserverInterface
             /** @var Order $order */
             $order = $observer->getEvent()->getOrder();
 
+            if (!$order) {
+                return $this;
+            }
+
             /** @var OrderPayment $payment */
             $orderPayment = $order->getPayment();
 
