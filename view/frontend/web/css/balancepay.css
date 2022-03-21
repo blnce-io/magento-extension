@@ -54,10 +54,6 @@
     border: none !important;
 }
 
-.modal-popup .modal-footer {
-    display: none;
-}
-
 .modal-popup .action-close:before {
     font-weight: bold;
     font-size: 16px;
