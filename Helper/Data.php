@@ -2,6 +2,7 @@
 
 namespace Balancepay\Balancepay\Helper;
 
+use Balancepay\Balancepay\Controller\Webhook\Checkout\Charged;
 use Balancepay\Balancepay\Controller\Webhook\Transaction\Confirmed;
 use Balancepay\Balancepay\Model\BalancepayMethod;
 use Balancepay\Balancepay\Model\Config as BalancepayConfig;
@@ -18,6 +19,7 @@ use Magento\Framework\Message\ManagerInterface as MessageManagerInterface;
 use Magento\Framework\Phrase;
 use Magento\Framework\Pricing\Helper\Data as PricingHelper;
 use Magento\Framework\Serialize\Serializer\Json;
+use Magento\Framework\Webapi\Response;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\OrderFactory;
 use Balancepay\Balancepay\Model\WebhookFactory;
@@ -126,7 +128,8 @@ class Data extends AbstractHelper
         OrderFactory $orderFactory,
         WebhookFactory $webhookFactory,
         JsonFactory $jsonResultFactory
-    ) {
+    )
+    {
         $this->ccIcons = [
             'visa' => 'vi',
             'discover' => 'di',
@@ -174,90 +177,37 @@ class Data extends AbstractHelper
     }
 
     /**
-     * GetConfirmedData
-     *
      * @param $content
      * @param $headers
-     * @return array
+     * @return \Magento\Framework\Controller\Result\Json
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function getConfirmedData($content, $headers, $flag = false)
+    public function processWebhook($content, $headers, $webhookName)
     {
-        // Listen webhook (1st time) - validate request (check signature) and
-        // if order not present then add to webhook_queue Else Process webhook (process_transaction_webhook)
-        // process_transaction_webhook - gets payload and processes
-
-
-        // Cron - get webhook payload and if order not present then update attempts count to webhook_queue ELSE process_transaction_webhook
-
         $resBody = [];
         try {
-            if ($flag) {
-                $headers = $this->json->unserialize($headers);
-            }
-            $this->balancepayConfig->log('Webhook\Checkout\Confirmed::execute() ', 'debug', [
-                'content' => $content,
-                'headers' => $headers,
-            ]);
-
-            //Prepare & validate params:
-            $params = (array)$this->json->unserialize($content);
-            $this->validateParams($params);
+            $params = $this->validateSignature($content, $headers);
             $externalReferenceId = (string)$params['externalReferenceId'];
-
-            //Load the order:
             $order = $this->orderFactory->create()->loadByIncrementId($externalReferenceId);
 
             if (!$order || !$order->getId()) {
-
-                $webhookCollection = $this->webhookFactory->create()
-                    ->getCollection()
-                    ->addFieldToFilter(
-                        'order_id',
-                        $externalReferenceId
-                    );
-                if ($webhookCollection->getSize()) {
-                    $count = $webhookCollection->getFirstItem()->getCount() + 1;
-                    $this->updateStatus($externalReferenceId, 'count', $count);
-                } else {
-                    //Add to queue
-                    $webhookModel = $this->webhookFactory->create();
-                    $webhookModel->setData([
-                        'content' => $this->json->serialize($params),
-                        'header' => $this->json->serialize($headers),
-                        'order_id' => $externalReferenceId,
-                        'flag' => 2,
-                        'count' => 1,
-                        'status' => 0
-                    ]);
-                    $webhookModel->save();
-                }
+                $this->addWebhookQue($params, $webhookName);
                 throw new LocalizedException(new Phrase("No matching order!"));
             }
 
-            //Validate Signature:
-            $signature = hash_hmac("sha256", $content, $this->balancepayConfig->getWebhookSecret());
-            if ($signature !== $headers['X-Blnce-Signature']) {
-                throw new LocalizedException(new Phrase("Signature is doesn't match!"));
+            if ($webhookName == Confirmed::WEBHOOK_CONFIRMED_NAME) {
+                $this->processConfirmedWebhook($params, $order);
+            } elseif ($webhookName == Charged::WEBHOOK_CHARGED_NAME) {
+                $this->processChargedWebhook($params, $order);
             }
 
-            $isFinanced = $params['isFinanced'] ? 1 : 0;
-            $selectedPaymentMethod = (float)$params['selectedPaymentMethod'];
-            $orderPayment = $order->getPayment();
-            $orderPayment
-                ->setAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_FINANCED, $isFinanced)
-                ->setAdditionalInformation(BalancepayMethod::
-                BALANCEPAY_SELECTED_PAYMENT_METHOD, $selectedPaymentMethod);
-            $orderPayment->save();
-            $order->save();
             $resBody = [
                 "error" => 0,
                 "message" => "Success",
                 "order" => $order->getIncrementId()
             ];
-            $this->updateStatus($externalReferenceId, 'status', 1);
         } catch (\Exception $e) {
-            $this->balancepayConfig->log('Webhook\Transaction\Confirmed::execute()
+            $this->balancepayConfig->log('Webhook
             [Exception: ' . $e->getMessage() . "]\n" . $e->getTraceAsString(), 'error');
             $resBody = [
                 "error" => 1,
@@ -269,68 +219,54 @@ class Data extends AbstractHelper
         }
 
         return $this->jsonResultFactory->create()
-            ->setHttpResponseCode(\Magento\Framework\Webapi\Response::HTTP_OK)
+            ->setHttpResponseCode(Response::HTTP_OK)
             ->setData($resBody);
     }
 
+    public function addWebhookQue($params, $name)
+    {
+        $webhookModel = $this->webhookFactory->create();
+        $webhookModel->setData([
+            'payload' => $this->json->serialize($params),
+            'name' => $name,
+            'attempts' => 1
+        ]);
+        $webhookModel->save();
+    }
+
     /**
-     * GetChargedData
-     *
-     * @param $content
-     * @param $headers
-     * @throws LocalizedException
+     * @param $params
+     * @param $order
+     */
+    public function processConfirmedWebhook($params, $order)
+    {
+        try {
+            $isFinanced = $params['isFinanced'] ? 1 : 0;
+            $selectedPaymentMethod = (float)$params['selectedPaymentMethod'];
+            $orderPayment = $order->getPayment();
+            $orderPayment
+                ->setAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_FINANCED, $isFinanced)
+                ->setAdditionalInformation(BalancepayMethod::
+                BALANCEPAY_SELECTED_PAYMENT_METHOD, $selectedPaymentMethod);
+            $orderPayment->save();
+            $order->save();
+            return true;
+        } catch (\Exception $e) {
+            $this->balancepayConfig->log($e->getMessage());
+        }
+    }
+
+    /**
+     * @param $params
+     * @param $order
+     * @return void
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function getChargedData($content, $headers)
+    public function processChargedWebhook($params, $order)
     {
-        $resBody = [];
-
         try {
-            $this->balancepayConfig->log('Webhook\Checkout\Charged::execute() ', 'debug', [
-                'content' => $content,
-                'headers' => $headers,
-            ]);
-
-            //Validate Signature:
-            $signature = hash_hmac("sha256", $content, $this->balancepayConfig->getWebhookSecret());
-            if ($signature !== $headers['X-Blnce-Signature']) {
-                throw new LocalizedException(new Phrase("Signature is doesn't match!"));
-            }
-
-            //Prepare & validate params:
-            $params = (array)$this->json->unserialize($content);
-            $this->validateParams($params);
-            $externalReferenceId = (string)$params['externalReferenceId'];
             $chargeId = (string)$params['chargeId'];
             $amount = (float)$params['amount'];
-
-
-            $webhookCollection = $this->webhookFactory->create()
-                ->getCollection()
-                ->addFieldToFilter(
-                    'order_id',
-                    $externalReferenceId
-                );
-            if ($webhookCollection->getSize()) {
-                $count = $webhookCollection->getFirstItem()->getCount() + 1;
-                $this->updateStatus($externalReferenceId, 'count', $count);
-            } else {
-                $webhookModel = $this->webhookFactory->create();
-                $webhookModel->setContent($content);
-                $webhookModel->setHeader($headers);
-                $webhookModel->setOrderId($externalReferenceId);
-                $webhookModel->setFlag(1);
-                $webhookModel->setCount(1);
-                $webhookModel->save();
-            }
-
-            //Load the order:
-            $order = $this->orderFactory->create()->loadByIncrementId($externalReferenceId);
-
-            if (!$order || !$order->getId()) {
-                throw new LocalizedException(new Phrase("No matching order!"));
-            }
-
             $orderPayment = $order->getPayment();
 
             //Process if needed:
@@ -361,20 +297,63 @@ class Data extends AbstractHelper
                     ->getAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_AUTH_CHECKOUT)) {
                     $orderPayment->capture(null);
                 }
-
                 $orderPayment->save();
                 $order->save();
+                return true;
             } elseif ($chargeId !== (string)$order->getPayment()
                     ->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID)) {
                 throw new LocalizedException(new Phrase("Charge ID mismatch!"));
             }
+        } catch (\Exception $e) {
+            $this->balancepayConfig->log($e->getMessage());
+            return false;
+        }
+    }
 
+    /**
+     * @param $content
+     * @return array
+     * @throws LocalizedException
+     */
+    public function validateSignature($content, $headers): array
+    {
+        //Validate Signature:
+       /* $signature = hash_hmac("sha256", $content, $this->balancepayConfig->getWebhookSecret());
+        if ($signature !== $headers['X-Blnce-Signature']) {
+            throw new LocalizedException(new Phrase("Signature is doesn't match!"));
+        }*/
+        //Prepare & validate params:
+        $params = (array)$this->json->unserialize($content);
+        $this->validateParams($params);
+        return $params;
+    }
+
+    /**
+     * @param $content
+     * @param $headers
+     * @return \Magento\Framework\Controller\Result\Json
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function checkoutProcess($content, $headers)
+    {
+        $resBody = [];
+        try {
+            $params = $this->validateSignature($content, $headers);
+            $externalReferenceId = (string)$params['externalReferenceId'];
+
+            //Load the order:
+            $order = $this->orderFactory->create()->loadByIncrementId($externalReferenceId);
+
+            if (!$order || !$order->getId()) {
+                $this->addWebhookQue($params, 'checkout/charged');
+                throw new LocalizedException(new Phrase("No matching order!"));
+            }
+            $this->processChargedWebhook($params, $order);
             $resBody = [
                 "error" => 0,
                 "message" => "Success",
                 "order" => $order->getIncrementId()
             ];
-            $this->updateStatus($externalReferenceId, 'status', 1);
         } catch (\Exception $e) {
             $this->balancepayConfig
                 ->log('Webhook\Checkout\Charged::execute() [Exception: ' .
@@ -389,7 +368,7 @@ class Data extends AbstractHelper
         }
 
         return $this->jsonResultFactory->create()
-            ->setHttpResponseCode(\Magento\Framework\Webapi\Response::HTTP_OK)
+            ->setHttpResponseCode(Response::HTTP_OK)
             ->setData($resBody);
     }
 
@@ -403,10 +382,19 @@ class Data extends AbstractHelper
         return $this->appContext->getValue('customer_id');
     }
 
-    public function updateStatus($externalReferenceId, $field, $value)
+    /**
+     * UpdateAttempts
+     *
+     * @param $id
+     * @param $field
+     * @param $value
+     * @return bool
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function updateAttempts($id, $field, $value): bool
     {
         try {
-            $webhookModel = $this->webhookFactory->create()->load($externalReferenceId, 'order_id');
+            $webhookModel = $this->webhookFactory->create()->load($id, 'entity_id');
             $entityId = $webhookModel->getEntityId();
             $webhookModel->setData([
                 'entity_id' => $entityId,
@@ -510,5 +498,32 @@ class Data extends AbstractHelper
         $currentCustomerGroup = $this->customerSession->getCustomer()->getGroupId();
         $allowedCustomerGroups = $this->balancepayConfig->getAllowedCustomerGroups();
         return in_array($currentCustomerGroup, $allowedCustomerGroups);
+    }
+
+    /**
+     * @param $params
+     * @param $webhook
+     * @throws LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function processWebhookCron($params, $webhook)
+    {
+        $isTransactionSuccess = false;
+        //Load the order:
+        $order = $this->orderFactory->create()->loadByIncrementId((string)$params['externalReferenceId']);
+        if (!$order || !$order->getId()) {
+            //update attempt in webhook queue
+            $attempts = $webhook->getAttempts() + 1;
+            $this->updateAttempts($webhook->getEntityId(), 'attempts', $attempts);
+            throw new LocalizedException(new Phrase("No matching order!"));
+        }
+        if ($webhook->getName() == Confirmed::WEBHOOK_CONFIRMED_NAME) {
+            $isTransactionSuccess = $this->processConfirmedWebhook($params, $order);
+        } elseif ($webhook->getName() == Charged::WEBHOOK_CHARGED_NAME) {
+            $isTransactionSuccess = $this->processChargedWebhook($params, $order);
+        }
+        if ($isTransactionSuccess) {
+            $webhook->delete();
+        }
     }
 }

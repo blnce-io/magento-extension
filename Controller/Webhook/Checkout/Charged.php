@@ -35,6 +35,8 @@ use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollection
  */
 class Charged extends Action implements CsrfAwareActionInterface
 {
+    public const WEBHOOK_CHARGED_NAME = 'checkout/charged';
+
     /**
      * @var JsonFactory
      */
@@ -106,37 +108,13 @@ class Charged extends Action implements CsrfAwareActionInterface
         if (!$this->balancepayConfig->isActive()) {
             return $this->resultFactory->create(ResultFactory::TYPE_FORWARD)->forward('noroute');
         }
-            $content = $this->getRequest()->getContent();
-            $headers = $this->getRequest()->getHeaders()->toArray();
+        $content = $this->getRequest()->getContent();
+        $headers = $this->getRequest()->getHeaders()->toArray();
         $this->balancepayConfig->log('Webhook\Checkout\Charged::execute() ', 'debug', [
             'content' => $content,
             'headers' => $headers,
         ]);
-             $this->helperData->getChargedData($content, $headers);
-    }
-
-    /**
-     * ValidateParams
-     *
-     * @param array|string $params
-     * @return $this
-     */
-    private function validateParams($params)
-    {
-        $requiredKeys = ['externalReferenceId', 'chargeId', 'amount'];
-        $bodyKeys = array_keys($params);
-
-        $diff = array_diff($requiredKeys, $bodyKeys);
-        if (!empty($diff)) {
-            throw new LocalizedException(
-                new Phrase(
-                    'Balancepay webhook required fields are missing: %1.',
-                    [implode(', ', $diff)]
-                )
-            );
-        }
-
-        return $this;
+        $this->helperData->processWebhook($content, $headers, self::WEBHOOK_CHARGED_NAME);
     }
 
     /**
