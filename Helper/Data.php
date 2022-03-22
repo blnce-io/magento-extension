@@ -186,7 +186,7 @@ class Data extends AbstractHelper
     {
         $resBody = [];
         try {
-            $params = $this->validateSignature($content, $headers);
+            $params = $this->validateSignature($content, $headers, $webhookName);
             $externalReferenceId = (string)$params['externalReferenceId'];
             $order = $this->orderFactory->create()->loadByIncrementId($externalReferenceId);
 
@@ -269,7 +269,6 @@ class Data extends AbstractHelper
             $amount = (float)$params['amount'];
             $orderPayment = $order->getPayment();
 
-            //Process if needed:
             if (\strpos($orderPayment
                     ->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID), $chargeId) === false) {
                 if (!$orderPayment
@@ -315,16 +314,30 @@ class Data extends AbstractHelper
      * @return array
      * @throws LocalizedException
      */
-    public function validateSignature($content, $headers): array
+    public function validateSignature($content, $headers, $webhookName): array
     {
-        //Validate Signature:
-       /* $signature = hash_hmac("sha256", $content, $this->balancepayConfig->getWebhookSecret());
+        $signature = hash_hmac("sha256", $content, $this->balancepayConfig->getWebhookSecret());
         if ($signature !== $headers['X-Blnce-Signature']) {
             throw new LocalizedException(new Phrase("Signature is doesn't match!"));
-        }*/
-        //Prepare & validate params:
+        }
         $params = (array)$this->json->unserialize($content);
-        $this->validateParams($params);
+
+        if ($webhookName == Confirmed::WEBHOOK_CONFIRMED_NAME) {
+            $requiredKeys = ['externalReferenceId', 'isFinanced', 'selectedPaymentMethod'];
+        } elseif ($webhookName == Charged::WEBHOOK_CHARGED_NAME) {
+            $requiredKeys = ['externalReferenceId', 'chargeId', 'amount'];
+        }
+
+        $bodyKeys = array_keys($params);
+        $diff = array_diff($requiredKeys, $bodyKeys);
+        if (!empty($diff)) {
+            throw new LocalizedException(
+                new Phrase(
+                    'Balancepay webhook required fields are missing: %1.',
+                    [implode(', ', $diff)]
+                )
+            );
+        }
         return $params;
     }
 
@@ -336,12 +349,10 @@ class Data extends AbstractHelper
      */
     public function checkoutProcess($content, $headers)
     {
-        $resBody = [];
         try {
             $params = $this->validateSignature($content, $headers);
             $externalReferenceId = (string)$params['externalReferenceId'];
 
-            //Load the order:
             $order = $this->orderFactory->create()->loadByIncrementId($externalReferenceId);
 
             if (!$order || !$order->getId()) {
@@ -465,29 +476,6 @@ class Data extends AbstractHelper
     }
 
     /**
-     * ValidateParams
-     *
-     * @param string|Array $params
-     * @return $this
-     */
-    private function validateParams($params)
-    {
-        $requiredKeys = ['externalReferenceId', 'isFinanced', 'selectedPaymentMethod'];
-        $bodyKeys = array_keys($params);
-
-        $diff = array_diff($requiredKeys, $bodyKeys);
-        if (!empty($diff)) {
-            throw new LocalizedException(
-                new Phrase(
-                    'Balancepay webhook required fields are missing: %1.',
-                    [implode(', ', $diff)]
-                )
-            );
-        }
-        return $this;
-    }
-
-    /**
      * IsCustomerGroupAllowed
      *
      * @return bool
@@ -509,10 +497,8 @@ class Data extends AbstractHelper
     public function processWebhookCron($params, $webhook)
     {
         $isTransactionSuccess = false;
-        //Load the order:
         $order = $this->orderFactory->create()->loadByIncrementId((string)$params['externalReferenceId']);
         if (!$order || !$order->getId()) {
-            //update attempt in webhook queue
             $attempts = $webhook->getAttempts() + 1;
             $this->updateAttempts($webhook->getEntityId(), 'attempts', $attempts);
             throw new LocalizedException(new Phrase("No matching order!"));
