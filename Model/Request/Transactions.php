@@ -118,7 +118,6 @@ class Transactions extends AbstractRequest
      */
     protected function getParams()
     {
-        $termsOptions = [];
         $quote = $this->_checkoutSession->getQuote();
         $quote->collectTotals();
         $requiresShipping = $quote->getShippingAddress() !== null ? 1 : 0;
@@ -126,11 +125,18 @@ class Transactions extends AbstractRequest
         $customerId = $this->customerSession->getCustomer()->getId();
         if ($customerId) {
             $termsOptions = $this->getTermOptions($customerId);
-        }
-        $options = [];
-        if (!empty($termsOptions)) {
-            foreach ($termsOptions as $terms) {
-                $options[$terms] = $terms;
+            $options = [];
+            if (!empty($termsOptions)) {
+                foreach ($termsOptions as $terms) {
+                    $options[$terms] = $terms;
+                }
+            } else {
+                $globalTermsOptions = $this->_balancepayConfig->getTermsOption();
+                if (!empty($globalTermsOptions)) {
+                    foreach ($globalTermsOptions as $terms) {
+                        $options[$terms] = $terms;
+                    }
+                }
             }
         }
 

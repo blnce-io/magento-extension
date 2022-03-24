@@ -402,6 +402,19 @@ class Config
     }
 
     /**
+     * GetTermsOption
+     *
+     * @param string $scope
+     * @param int $storeId
+     * @return array|string[]
+     */
+    public function getTermsOption($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
+    {
+        return (($apm = $this->getConfigValue('terms_option', $scope, $storeId)) && is_string($apm))
+            ? explode(',', $apm) : [];
+    }
+
+    /**
      * GetCurrentStore
      *
      * @return \Magento\Store\Api\Data\StoreInterface
