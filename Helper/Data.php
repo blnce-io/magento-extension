@@ -128,8 +128,7 @@ class Data extends AbstractHelper
         OrderFactory $orderFactory,
         WebhookFactory $webhookFactory,
         JsonFactory $jsonResultFactory
-    )
-    {
+    ) {
         $this->ccIcons = [
             'visa' => 'vi',
             'discover' => 'di',
@@ -179,6 +178,7 @@ class Data extends AbstractHelper
     /**
      * @param $content
      * @param $headers
+     * @param $webhookName
      * @return \Magento\Framework\Controller\Result\Json
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
@@ -223,6 +223,11 @@ class Data extends AbstractHelper
             ->setData($resBody);
     }
 
+    /**
+     * @param $params
+     * @param $name
+     * @throws \Exception
+     */
     public function addWebhookQue($params, $name)
     {
         $webhookModel = $this->webhookFactory->create();
@@ -316,6 +321,7 @@ class Data extends AbstractHelper
      */
     public function validateSignature($content, $headers, $webhookName): array
     {
+        $requiredKeys = [];
         $signature = hash_hmac("sha256", $content, $this->balancepayConfig->getWebhookSecret());
         if ($signature !== $headers['X-Blnce-Signature']) {
             throw new LocalizedException(new Phrase("Signature is doesn't match!"));

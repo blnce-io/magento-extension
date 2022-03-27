@@ -16,6 +16,8 @@ class CreditLimit extends Action
     private $resultJsonFactory;
 
     /**
+     * CreditLimit constructor.
+     *
      * @param Context $context
      * @param JsonFactory $resultJsonFactory
      */
