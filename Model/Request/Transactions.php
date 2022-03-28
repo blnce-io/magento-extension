@@ -122,22 +122,18 @@ class Transactions extends AbstractRequest
         $quote->collectTotals();
         $requiresShipping = $quote->getShippingAddress() !== null ? 1 : 0;
         $quoteTotals = $this->_cartTotalRepository->get($quote->getId());
+
         $customerId = $this->customerSession->getCustomer()->getId();
+        $termsOptions = $this->_balancepayConfig->getMerchantTermsOptions();
+        $options = [];
+
         if ($customerId) {
-            $termsOptions = $this->getTermOptions($customerId);
-            $options = [];
-            if (!empty($termsOptions)) {
-                foreach ($termsOptions as $terms) {
-                    $options[$terms] = $terms;
-                }
-            } else {
-                $globalTermsOptions = $this->_balancepayConfig->getTermsOption();
-                if (!empty($globalTermsOptions)) {
-                    foreach ($globalTermsOptions as $terms) {
-                        $options[$terms] = $terms;
-                    }
-                }
-            }
+            $customerTermsOptions = $this->getCustomerTermOptions($customerId);
+            $termsOptions = !empty($customerTermsOptions) ? $customerTermsOptions : $termsOptions;
+        }
+
+        foreach ($termsOptions as $terms) {
+            $options[$terms] = $terms;
         }
 
         return array_replace_recursive(
@@ -184,14 +180,14 @@ class Transactions extends AbstractRequest
     }
 
     /**
-     * GetTermOptions
+     * GetCustomerTermOptions
      *
      * @param int $customerId
      * @return array|string[]
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function getTermOptions($customerId)
+    public function getCustomerTermOptions($customerId)
     {
         $customer = $this->customerRepository->getById($customerId);
         $customerAttributeData = $customer->__toArray();
