@@ -38,20 +38,13 @@ class ChargedProcessor
             $amount = (float)$params['amount'];
             $orderPayment = $order->getPayment();
 
-            $getBalancepayChargeId = (string)$order->getPayment()
-                ->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID);
-
-            if ($chargeId !== $getBalancepayChargeId) {
-                throw new LocalizedException(new Phrase("Charge ID mismatch!"));
-            }
-
-            $isBalancepayChargeId = $orderPayment
+            $balancepayChargeId = $orderPayment
                 ->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID);
 
             $isBalancepayAuthCheckout = $orderPayment
                 ->getAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_AUTH_CHECKOUT);
 
-            if (\strpos($isBalancepayChargeId, $chargeId) === false) {
+            if (\strpos($balancepayChargeId, $chargeId) === false) {
                 if (!$isBalancepayAuthCheckout
                     && round((float)$order->getBaseGrandTotal()) !== round($amount)) {
                     $orderPayment->setIsFraudDetected(true)->save();
@@ -80,6 +73,8 @@ class ChargedProcessor
                 $orderPayment->save();
                 $order->save();
                 return true;
+            } elseif ($chargeId !== (string) $balancepayChargeId) {
+                throw new LocalizedException(new Phrase("Charge ID mismatch!"));
             }
         } catch (\Exception $e) {
             $this->balancepayConfig->log($e->getMessage());
