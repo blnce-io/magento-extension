@@ -410,8 +410,8 @@ class Config
      */
     public function getMerchantTermsOptions($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
-        return (($apm = $this->getConfigValue('terms_option', $scope, $storeId)) && is_string($apm))
-            ? explode(',', $apm) : [];
+        return (($merchantTermsOptions = $this->getConfigValue('terms_option', $scope, $storeId)) && is_string($merchantTermsOptions))
+            ? explode(',', $merchantTermsOptions) : [];
     }
 
     /**

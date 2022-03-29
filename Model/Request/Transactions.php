@@ -128,7 +128,7 @@ class Transactions extends AbstractRequest
         $options = [];
 
         if ($customerId) {
-            $customerTermsOptions = $this->getCustomerTermOptions($customerId);
+            $customerTermsOptions = $this->getCustomerTermsOptions($customerId);
             $termsOptions = !empty($customerTermsOptions) ? $customerTermsOptions : $termsOptions;
         }
 
@@ -180,14 +180,14 @@ class Transactions extends AbstractRequest
     }
 
     /**
-     * GetCustomerTermOptions
+     * GetCustomerTermsOptions
      *
      * @param int $customerId
      * @return array|string[]
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function getCustomerTermOptions($customerId)
+    public function getCustomerTermsOptions($customerId)
     {
         $customer = $this->customerRepository->getById($customerId);
         $customerAttributeData = $customer->__toArray();

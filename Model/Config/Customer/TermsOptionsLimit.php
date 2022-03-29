@@ -19,7 +19,7 @@ class TermsOptionsLimit extends Value
     {
         $limits = $this->getData('groups/balancepay/fields/terms_option/value') ?? '';
         if (count($limits) > self::TERMS_LIMIT) {
-            throw new LocalizedException(__('Select upto only 3 terms options.'));
+            throw new LocalizedException(__('Select up to only 3 terms options.'));
         }
     }
 }
