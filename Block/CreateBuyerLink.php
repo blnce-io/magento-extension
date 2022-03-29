@@ -7,8 +7,7 @@ use Balancepay\Balancepay\Helper\Data as BalancepayHelper;
 
 /**
  * Class CreateBuyerLink
- *
- * Balancepay\Balancepay\Block
+ * @package Balancepay\Balancepay\Block
  */
 class CreateBuyerLink extends \Magento\Framework\View\Element\Template
 {
@@ -23,6 +22,8 @@ class CreateBuyerLink extends \Magento\Framework\View\Element\Template
     protected $balancepayHelper;
 
     /**
+     * CreateBuyerLink constructor.
+     *
      * @param Template\Context $context
      * @param BalancepayHelper $balancepayHelper
      * @param array $data

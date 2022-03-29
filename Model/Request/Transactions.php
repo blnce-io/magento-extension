@@ -118,20 +118,22 @@ class Transactions extends AbstractRequest
      */
     protected function getParams()
     {
-        $termsOptions = [];
         $quote = $this->_checkoutSession->getQuote();
         $quote->collectTotals();
         $requiresShipping = $quote->getShippingAddress() !== null ? 1 : 0;
         $quoteTotals = $this->_cartTotalRepository->get($quote->getId());
+
         $customerId = $this->customerSession->getCustomer()->getId();
-        if ($customerId) {
-            $termsOptions = $this->getTermOptions($customerId);
-        }
+        $termsOptions = $this->_balancepayConfig->getMerchantTermsOptions();
         $options = [];
-        if (!empty($termsOptions)) {
-            foreach ($termsOptions as $terms) {
-                $options[$terms] = $terms;
-            }
+
+        if ($customerId) {
+            $customerTermsOptions = $this->getCustomerTermsOptions($customerId);
+            $termsOptions = !empty($customerTermsOptions) ? $customerTermsOptions : $termsOptions;
+        }
+
+        foreach ($termsOptions as $terms) {
+            $options[$terms] = $terms;
         }
 
         return array_replace_recursive(
@@ -178,14 +180,14 @@ class Transactions extends AbstractRequest
     }
 
     /**
-     * GetTermOptions
+     * GetCustomerTermsOptions
      *
      * @param int $customerId
      * @return array|string[]
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function getTermOptions($customerId)
+    public function getCustomerTermsOptions($customerId)
     {
         $customer = $this->customerRepository->getById($customerId);
         $customerAttributeData = $customer->__toArray();

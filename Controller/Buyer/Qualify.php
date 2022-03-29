@@ -120,12 +120,11 @@ class Qualify extends Action
     {
         try {
             if (!empty($data)) {
-                $response = $this->requestFactory
+                return $this->requestFactory
                     ->create(RequestFactory::BUYER_REQUEST_METHOD)
                     ->setRequestMethod('qualification/' . $data)
                     ->setTopic('qualification')
                     ->process();
-                return $response;
             }
         } catch (Exception $e) {
             $this->balancepayConfig->log('Qualification Link [Exception: ' .
