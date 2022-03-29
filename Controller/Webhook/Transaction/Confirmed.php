@@ -11,7 +11,6 @@
 
 namespace Balancepay\Balancepay\Controller\Webhook\Transaction;
 
-use Balancepay\Balancepay\Model\BalancepayMethod;
 use Balancepay\Balancepay\Model\Config as BalancepayConfig;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Magento\Framework\App\Action\Action;
@@ -22,12 +21,9 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
-use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Phrase;
 use Magento\Framework\Serialize\Serializer\Json;
-use Magento\Sales\Model\Order;
+use Balancepay\Balancepay\Model\WebhookProcessor;
 use Magento\Sales\Model\OrderFactory;
-use Symfony\Component\Console\Input\ArrayInputFactory;
 use Balancepay\Balancepay\Helper\Data;
 
 /**
@@ -68,6 +64,11 @@ class Confirmed extends Action implements CsrfAwareActionInterface
     private $helperData;
 
     /**
+     * @var WebhookProcessor
+     */
+    private $webhookProcessor;
+
+    /**
      * Confirmed constructor.
      *
      * @param Context $context
@@ -77,6 +78,7 @@ class Confirmed extends Action implements CsrfAwareActionInterface
      * @param Json $json
      * @param OrderFactory $orderFactory
      * @param Data $helperData
+     * @param WebhookProcessor $webhookProcessor
      */
     public function __construct(
         Context $context,
@@ -85,7 +87,8 @@ class Confirmed extends Action implements CsrfAwareActionInterface
         RequestFactory $requestFactory,
         Json $json,
         OrderFactory $orderFactory,
-        Data $helperData
+        Data $helperData,
+        WebhookProcessor $webhookProcessor
     ) {
         parent::__construct($context);
         $this->jsonResultFactory = $jsonResultFactory;
@@ -94,6 +97,7 @@ class Confirmed extends Action implements CsrfAwareActionInterface
         $this->json = $json;
         $this->orderFactory = $orderFactory;
         $this->helperData = $helperData;
+        $this->webhookProcessor = $webhookProcessor;
     }
 
     /**
@@ -109,11 +113,12 @@ class Confirmed extends Action implements CsrfAwareActionInterface
         }
         $content = $this->getRequest()->getContent();
         $headers = $this->getRequest()->getHeaders()->toArray();
+
         $this->balancepayConfig->log('Webhook\Checkout\Confirmed::execute() ', 'debug', [
             'content' => $content,
             'headers' => $headers,
         ]);
-        $this->helperData->processWebhook($content, $headers, self::WEBHOOK_CONFIRMED_NAME);
+        $this->webhookProcessor->processWebhook($content, $headers, self::WEBHOOK_CONFIRMED_NAME);
     }
 
     /**

@@ -11,8 +11,6 @@
 
 namespace Balancepay\Balancepay\Controller\Webhook\Checkout;
 
-use Balancepay\Balancepay\Helper\Data;
-use Balancepay\Balancepay\Model\BalancepayMethod;
 use Balancepay\Balancepay\Model\Config as BalancepayConfig;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Magento\Framework\App\Action\Action;
@@ -23,12 +21,9 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
-use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Phrase;
+use Balancepay\Balancepay\Model\WebhookProcessor;
 use Magento\Framework\Serialize\Serializer\Json;
-use Magento\Sales\Model\Order;
 use Magento\Sales\Model\OrderFactory;
-use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 
 /**
  * Balancepay checkout/charged webhook.
@@ -63,9 +58,9 @@ class Charged extends Action implements CsrfAwareActionInterface
     private $orderFactory;
 
     /**
-     * @var Data
+     * @var WebhookProcessor
      */
-    private $helperData;
+    private $webhookProcessor;
 
     /**
      * Charged constructor.
@@ -76,7 +71,7 @@ class Charged extends Action implements CsrfAwareActionInterface
      * @param RequestFactory $requestFactory
      * @param Json $json
      * @param OrderFactory $orderFactory
-     * @param Data $helperData
+     * @param WebhookProcessor $webhookProcessor
      */
     public function __construct(
         Context $context,
@@ -85,7 +80,7 @@ class Charged extends Action implements CsrfAwareActionInterface
         RequestFactory $requestFactory,
         Json $json,
         OrderFactory $orderFactory,
-        Data $helperData
+        WebhookProcessor $webhookProcessor
     ) {
         parent::__construct($context);
         $this->jsonResultFactory = $jsonResultFactory;
@@ -93,7 +88,7 @@ class Charged extends Action implements CsrfAwareActionInterface
         $this->requestFactory = $requestFactory;
         $this->json = $json;
         $this->orderFactory = $orderFactory;
-        $this->helperData = $helperData;
+        $this->webhookProcessor = $webhookProcessor;
     }
 
     /**
@@ -114,7 +109,7 @@ class Charged extends Action implements CsrfAwareActionInterface
             'content' => $content,
             'headers' => $headers,
         ]);
-        $this->helperData->processWebhook($content, $headers, self::WEBHOOK_CHARGED_NAME);
+        $this->webhookProcessor->processWebhook($content, $headers, self::WEBHOOK_CHARGED_NAME);
     }
 
     /**

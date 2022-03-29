@@ -2,19 +2,13 @@
 
 namespace Balancepay\Balancepay\Cron;
 
-use Balancepay\Balancepay\Helper\Data;
 use Balancepay\Balancepay\Model\WebhookFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Serialize\Serializer\Json;
-use Balancepay\Balancepay\Model\Config as BalancepayConfig;
+use Balancepay\Balancepay\Model\WebhookProcessor;
 
 class Webhook
 {
-
-    /**
-     * @var Data
-     */
-    private $helperData;
 
     /**
      * @var WebhookFactory
@@ -27,9 +21,9 @@ class Webhook
     private $json;
 
     /**
-     * @var BalancepayConfig
+     * @var WebhookProcessor
      */
-    private $balancepayConfig;
+    private $webhookProcessor;
 
     /**
      * Webhook constructor.
@@ -37,14 +31,12 @@ class Webhook
      * @param Data $helperData
      * @param WebhookFactory $webhookFactory
      * @param Json $json
-     * @param BalancepayConfig $balancepayConfig
      */
-    public function __construct(Data $helperData, WebhookFactory $webhookFactory, Json $json, BalancepayConfig $balancepayConfig)
+    public function __construct(WebhookProcessor $webhookProcessor, WebhookFactory $webhookFactory, Json $json)
     {
-        $this->helperData = $helperData;
+        $this->webhookProcessor = $webhookProcessor;
         $this->webhookFactory = $webhookFactory;
         $this->json = $json;
-        $this->balancepayConfig = $balancepayConfig;
     }
 
     /**
@@ -57,9 +49,8 @@ class Webhook
         foreach ($webhookCollection as $webhook) {
             $params = (array)$this->json->unserialize($webhook->getPayload());
             try {
-                $this->helperData->processWebhookCron($params, $webhook);
+                $this->webhookProcessor->processWebhookCron($params, $webhook);
             } catch (LocalizedException $e) {
-                $this->balancepayConfig->log($e->getMessage());
             }
         }
     }

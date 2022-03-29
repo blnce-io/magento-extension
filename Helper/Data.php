@@ -2,9 +2,6 @@
 
 namespace Balancepay\Balancepay\Helper;
 
-use Balancepay\Balancepay\Controller\Webhook\Checkout\Charged;
-use Balancepay\Balancepay\Controller\Webhook\Transaction\Confirmed;
-use Balancepay\Balancepay\Model\BalancepayMethod;
 use Balancepay\Balancepay\Model\Config as BalancepayConfig;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Balancepay\Balancepay\Model\ResourceModel\BalancepayProduct\CollectionFactory as MpProductCollection;
@@ -13,15 +10,8 @@ use Magento\Customer\Model\Session;
 use Magento\Framework\App\Cache\TypeListInterface;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Http\Context;
-use Magento\Framework\Controller\Result\JsonFactory;
-use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Message\ManagerInterface as MessageManagerInterface;
-use Magento\Framework\Phrase;
 use Magento\Framework\Pricing\Helper\Data as PricingHelper;
-use Magento\Framework\Serialize\Serializer\Json;
-use Magento\Framework\Webapi\Response;
-use Magento\Sales\Model\Order;
-use Magento\Sales\Model\OrderFactory;
 use Balancepay\Balancepay\Model\WebhookFactory;
 
 class Data extends AbstractHelper
@@ -50,12 +40,6 @@ class Data extends AbstractHelper
      * @var Context
      */
     protected $appContext;
-
-    /**
-     * @var OrderFactory
-     */
-    private $orderFactory;
-
 
     /**
      * @var Session
@@ -88,47 +72,26 @@ class Data extends AbstractHelper
     public $ccIcons;
 
     /**
-     * @var Json
-     */
-    private $json;
-
-    /**
-     * @var JsonFactory
-     */
-    private $jsonResultFactory;
-
-    /**
      * Data constructor.
      *
      * @param MpProductCollection $mpProductCollectionFactory
-     * @param TypeListInterface $cacheTypeList
-     * @param MessageManagerInterface $messageManager
      * @param Context $appContext
      * @param Session $customerSession
      * @param CustomerRepositoryInterface $customerRepositoryInterface
      * @param RequestFactory $requestFactory
      * @param BalancepayConfig $balancepayConfig
      * @param PricingHelper $pricingHelper
-     * @param Json $json
-     * @param OrderFactory $orderFactory
-     * @param WebhookFactory $webhookFactory
-     * @param JsonFactory $jsonResultFactory
      */
     public function __construct(
         MpProductCollection $mpProductCollectionFactory,
-        TypeListInterface $cacheTypeList,
-        MessageManagerInterface $messageManager,
         Context $appContext,
         Session $customerSession,
         CustomerRepositoryInterface $customerRepositoryInterface,
         RequestFactory $requestFactory,
         BalancepayConfig $balancepayConfig,
-        PricingHelper $pricingHelper,
-        Json $json,
-        OrderFactory $orderFactory,
-        WebhookFactory $webhookFactory,
-        JsonFactory $jsonResultFactory
-    ) {
+        PricingHelper $pricingHelper
+    )
+    {
         $this->ccIcons = [
             'visa' => 'vi',
             'discover' => 'di',
@@ -136,18 +99,12 @@ class Data extends AbstractHelper
             'maestro' => 'mi'
         ];
         $this->_mpProductCollectionFactory = $mpProductCollectionFactory;
-        $this->jsonResultFactory = $jsonResultFactory;
-        $this->cacheTypeList = $cacheTypeList;
-        $this->messageManager = $messageManager;
         $this->appContext = $appContext;
         $this->customerSession = $customerSession;
         $this->customerRepositoryInterface = $customerRepositoryInterface;
         $this->requestFactory = $requestFactory;
         $this->balancepayConfig = $balancepayConfig;
         $this->pricingHelper = $pricingHelper;
-        $this->json = $json;
-        $this->orderFactory = $orderFactory;
-        $this->webhookFactory = $webhookFactory;
     }
 
     /**
@@ -176,220 +133,6 @@ class Data extends AbstractHelper
     }
 
     /**
-     * @param $content
-     * @param $headers
-     * @param $webhookName
-     * @return \Magento\Framework\Controller\Result\Json
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     */
-    public function processWebhook($content, $headers, $webhookName)
-    {
-        $resBody = [];
-        try {
-            $params = $this->validateSignature($content, $headers, $webhookName);
-            $externalReferenceId = (string)$params['externalReferenceId'];
-            $order = $this->orderFactory->create()->loadByIncrementId($externalReferenceId);
-
-            if (!$order || !$order->getId()) {
-                $this->addWebhookQue($params, $webhookName);
-                throw new LocalizedException(new Phrase("No matching order!"));
-            }
-
-            if ($webhookName == Confirmed::WEBHOOK_CONFIRMED_NAME) {
-                $this->processConfirmedWebhook($params, $order);
-            } elseif ($webhookName == Charged::WEBHOOK_CHARGED_NAME) {
-                $this->processChargedWebhook($params, $order);
-            }
-
-            $resBody = [
-                "error" => 0,
-                "message" => "Success",
-                "order" => $order->getIncrementId()
-            ];
-        } catch (\Exception $e) {
-            $this->balancepayConfig->log('Webhook
-            [Exception: ' . $e->getMessage() . "]\n" . $e->getTraceAsString(), 'error');
-            $resBody = [
-                "error" => 1,
-                "message" => $e->getMessage(),
-            ];
-            if ($this->balancepayConfig->isDebugEnabled()) {
-                $resBody["trace"] = $e->getTraceAsString();
-            }
-        }
-
-        return $this->jsonResultFactory->create()
-            ->setHttpResponseCode(Response::HTTP_OK)
-            ->setData($resBody);
-    }
-
-    /**
-     * @param $params
-     * @param $name
-     * @throws \Exception
-     */
-    public function addWebhookQue($params, $name)
-    {
-        $webhookModel = $this->webhookFactory->create();
-        $webhookModel->setData([
-            'payload' => $this->json->serialize($params),
-            'name' => $name,
-            'attempts' => 1
-        ]);
-        $webhookModel->save();
-    }
-
-    /**
-     * @param $params
-     * @param $order
-     */
-    public function processConfirmedWebhook($params, $order)
-    {
-        try {
-            $isFinanced = $params['isFinanced'] ? 1 : 0;
-            $selectedPaymentMethod = (float)$params['selectedPaymentMethod'];
-            $orderPayment = $order->getPayment();
-            $orderPayment
-                ->setAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_FINANCED, $isFinanced)
-                ->setAdditionalInformation(BalancepayMethod::
-                BALANCEPAY_SELECTED_PAYMENT_METHOD, $selectedPaymentMethod);
-            $orderPayment->save();
-            $order->save();
-            return true;
-        } catch (\Exception $e) {
-            $this->balancepayConfig->log($e->getMessage());
-        }
-    }
-
-    /**
-     * @param $params
-     * @param $order
-     * @return void
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     */
-    public function processChargedWebhook($params, $order)
-    {
-        try {
-            $chargeId = (string)$params['chargeId'];
-            $amount = (float)$params['amount'];
-            $orderPayment = $order->getPayment();
-
-            if (\strpos($orderPayment
-                    ->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID), $chargeId) === false) {
-                if (!$orderPayment
-                        ->getAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_AUTH_CHECKOUT)
-                    && round((float)$order->getBaseGrandTotal()) !== round($amount)) {
-                    $orderPayment->setIsFraudDetected(true)->save();
-                    $order->setStatus(Order::STATUS_FRAUD)->save();
-                    throw new LocalizedException(new Phrase("The charged amount doesn't match the order total!"));
-                }
-
-                $orderPayment
-                    ->setTransactionId($orderPayment
-                        ->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHECKOUT_TRANSACTION_ID))
-                    ->setIsTransactionPending(false)
-                    ->setIsTransactionClosed(true)
-                    ->setAdditionalInformation(
-                        BalancepayMethod::BALANCEPAY_CHARGE_ID,
-                        $orderPayment->getAdditionalInformation(
-                            BalancepayMethod::BALANCEPAY_CHARGE_ID,
-                            $chargeId
-                        ) . " \n" . $chargeId
-                    );
-
-                if (!$orderPayment
-                    ->getAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_AUTH_CHECKOUT)) {
-                    $orderPayment->capture(null);
-                }
-                $orderPayment->save();
-                $order->save();
-                return true;
-            } elseif ($chargeId !== (string)$order->getPayment()
-                    ->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID)) {
-                throw new LocalizedException(new Phrase("Charge ID mismatch!"));
-            }
-        } catch (\Exception $e) {
-            $this->balancepayConfig->log($e->getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * @param $content
-     * @return array
-     * @throws LocalizedException
-     */
-    public function validateSignature($content, $headers, $webhookName): array
-    {
-        $requiredKeys = [];
-        $signature = hash_hmac("sha256", $content, $this->balancepayConfig->getWebhookSecret());
-        if ($signature !== $headers['X-Blnce-Signature']) {
-            throw new LocalizedException(new Phrase("Signature is doesn't match!"));
-        }
-        $params = (array)$this->json->unserialize($content);
-
-        if ($webhookName == Confirmed::WEBHOOK_CONFIRMED_NAME) {
-            $requiredKeys = ['externalReferenceId', 'isFinanced', 'selectedPaymentMethod'];
-        } elseif ($webhookName == Charged::WEBHOOK_CHARGED_NAME) {
-            $requiredKeys = ['externalReferenceId', 'chargeId', 'amount'];
-        }
-
-        $bodyKeys = array_keys($params);
-        $diff = array_diff($requiredKeys, $bodyKeys);
-        if (!empty($diff)) {
-            throw new LocalizedException(
-                new Phrase(
-                    'Balancepay webhook required fields are missing: %1.',
-                    [implode(', ', $diff)]
-                )
-            );
-        }
-        return $params;
-    }
-
-    /**
-     * @param $content
-     * @param $headers
-     * @return \Magento\Framework\Controller\Result\Json
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     */
-    public function checkoutProcess($content, $headers)
-    {
-        try {
-            $params = $this->validateSignature($content, $headers);
-            $externalReferenceId = (string)$params['externalReferenceId'];
-
-            $order = $this->orderFactory->create()->loadByIncrementId($externalReferenceId);
-
-            if (!$order || !$order->getId()) {
-                $this->addWebhookQue($params, 'checkout/charged');
-                throw new LocalizedException(new Phrase("No matching order!"));
-            }
-            $this->processChargedWebhook($params, $order);
-            $resBody = [
-                "error" => 0,
-                "message" => "Success",
-                "order" => $order->getIncrementId()
-            ];
-        } catch (\Exception $e) {
-            $this->balancepayConfig
-                ->log('Webhook\Checkout\Charged::execute() [Exception: ' .
-                    $e->getMessage() . "]\n" . $e->getTraceAsString(), 'error');
-            $resBody = [
-                "error" => 1,
-                "message" => $e->getMessage(),
-            ];
-            if ($this->balancepayConfig->isDebugEnabled()) {
-                $resBody["trace"] = $e->getTraceAsString();
-            }
-        }
-
-        return $this->jsonResultFactory->create()
-            ->setHttpResponseCode(Response::HTTP_OK)
-            ->setData($resBody);
-    }
-
-    /**
      * GetCustomerSessionId
      *
      * @return mixed
@@ -397,30 +140,6 @@ class Data extends AbstractHelper
     public function getCustomerSessionId()
     {
         return $this->appContext->getValue('customer_id');
-    }
-
-    /**
-     * UpdateAttempts
-     *
-     * @param $id
-     * @param $field
-     * @param $value
-     * @return bool
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     */
-    public function updateAttempts($id, $field, $value): bool
-    {
-        try {
-            $webhookModel = $this->webhookFactory->create()->load($id, 'entity_id');
-            $entityId = $webhookModel->getEntityId();
-            $webhookModel->setData([
-                'entity_id' => $entityId,
-                $field => $value
-            ])->save();
-        } catch (\Exception $e) {
-            $this->balancepayConfig->log($e->getMessage());
-        }
-        return true;
     }
 
     /**
@@ -492,30 +211,5 @@ class Data extends AbstractHelper
         $currentCustomerGroup = $this->customerSession->getCustomer()->getGroupId();
         $allowedCustomerGroups = $this->balancepayConfig->getAllowedCustomerGroups();
         return in_array($currentCustomerGroup, $allowedCustomerGroups);
-    }
-
-    /**
-     * @param $params
-     * @param $webhook
-     * @throws LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     */
-    public function processWebhookCron($params, $webhook)
-    {
-        $isTransactionSuccess = false;
-        $order = $this->orderFactory->create()->loadByIncrementId((string)$params['externalReferenceId']);
-        if (!$order || !$order->getId()) {
-            $attempts = $webhook->getAttempts() + 1;
-            $this->updateAttempts($webhook->getEntityId(), 'attempts', $attempts);
-            throw new LocalizedException(new Phrase("No matching order!"));
-        }
-        if ($webhook->getName() == Confirmed::WEBHOOK_CONFIRMED_NAME) {
-            $isTransactionSuccess = $this->processConfirmedWebhook($params, $order);
-        } elseif ($webhook->getName() == Charged::WEBHOOK_CHARGED_NAME) {
-            $isTransactionSuccess = $this->processChargedWebhook($params, $order);
-        }
-        if ($isTransactionSuccess) {
-            $webhook->delete();
-        }
     }
 }
