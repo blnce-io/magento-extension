@@ -28,6 +28,8 @@ class TermsOptions extends Template
     protected $customerRepository;
 
     /**
+     * TermsOptions constructor.
+     *
      * @param Template\Context $context
      * @param Config $balancepayConfig
      * @param CustomerRepositoryInterface $customerRepository
