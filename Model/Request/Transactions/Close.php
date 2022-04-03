@@ -51,8 +51,8 @@ class Close extends AbstractRequest
         parent::__construct(
             $balancepayConfig,
             $curl,
-            $helper,
             $responseFactory,
+            $helper,
             $accountManagement,
             $region
         );
