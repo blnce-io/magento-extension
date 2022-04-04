@@ -402,6 +402,19 @@ class Config
     }
 
     /**
+     * GetMerchantTermsOptions
+     *
+     * @param string $scope
+     * @param int $storeId
+     * @return array|string[]
+     */
+    public function getMerchantTermsOptions($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
+    {
+        return (($merchantTermsOptions = $this->getConfigValue('terms_option', $scope, $storeId)) && is_string($merchantTermsOptions))
+            ? explode(',', $merchantTermsOptions) : [];
+    }
+
+    /**
      * GetCurrentStore
      *
      * @return \Magento\Store\Api\Data\StoreInterface

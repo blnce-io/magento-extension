@@ -1,4 +1,5 @@
 <?php
+
 namespace Balancepay\Balancepay\Helper;
 
 use Balancepay\Balancepay\Model\Config as BalancepayConfig;
@@ -11,6 +12,7 @@ use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Http\Context;
 use Magento\Framework\Message\ManagerInterface as MessageManagerInterface;
 use Magento\Framework\Pricing\Helper\Data as PricingHelper;
+use Balancepay\Balancepay\Model\WebhookFactory;
 
 class Data extends AbstractHelper
 {
@@ -23,6 +25,11 @@ class Data extends AbstractHelper
      * @var TypeListInterface
      */
     protected $cacheTypeList;
+
+    /**
+     * @var WebhookFactory
+     */
+    protected $webhookFactory;
 
     /**
      * @var MessageManagerInterface
@@ -68,8 +75,6 @@ class Data extends AbstractHelper
      * Data constructor.
      *
      * @param MpProductCollection $mpProductCollectionFactory
-     * @param TypeListInterface $cacheTypeList
-     * @param MessageManagerInterface $messageManager
      * @param Context $appContext
      * @param Session $customerSession
      * @param CustomerRepositoryInterface $customerRepositoryInterface
@@ -79,15 +84,14 @@ class Data extends AbstractHelper
      */
     public function __construct(
         MpProductCollection $mpProductCollectionFactory,
-        TypeListInterface $cacheTypeList,
-        MessageManagerInterface $messageManager,
         Context $appContext,
         Session $customerSession,
         CustomerRepositoryInterface $customerRepositoryInterface,
         RequestFactory $requestFactory,
         BalancepayConfig $balancepayConfig,
         PricingHelper $pricingHelper
-    ) {
+    )
+    {
         $this->ccIcons = [
             'visa' => 'vi',
             'discover' => 'di',
@@ -95,8 +99,6 @@ class Data extends AbstractHelper
             'maestro' => 'mi'
         ];
         $this->_mpProductCollectionFactory = $mpProductCollectionFactory;
-        $this->cacheTypeList = $cacheTypeList;
-        $this->messageManager = $messageManager;
         $this->appContext = $appContext;
         $this->customerSession = $customerSession;
         $this->customerRepositoryInterface = $customerRepositoryInterface;

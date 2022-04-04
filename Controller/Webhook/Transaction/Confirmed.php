@@ -11,7 +11,6 @@
 
 namespace Balancepay\Balancepay\Controller\Webhook\Transaction;
 
-use Balancepay\Balancepay\Model\BalancepayMethod;
 use Balancepay\Balancepay\Model\Config as BalancepayConfig;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Magento\Framework\App\Action\Action;
@@ -22,18 +21,18 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
-use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Phrase;
 use Magento\Framework\Serialize\Serializer\Json;
-use Magento\Sales\Model\Order;
+use Balancepay\Balancepay\Model\WebhookProcessor;
 use Magento\Sales\Model\OrderFactory;
-use Symfony\Component\Console\Input\ArrayInputFactory;
+use Balancepay\Balancepay\Helper\Data;
 
 /**
  * Balancepay transaction/confirmed webhook.
  */
 class Confirmed extends Action implements CsrfAwareActionInterface
 {
+    public const WEBHOOK_CONFIRMED_NAME = 'transaction/confirmed';
+
     /**
      * @var JsonFactory
      */
@@ -60,13 +59,26 @@ class Confirmed extends Action implements CsrfAwareActionInterface
     private $orderFactory;
 
     /**
-     * @method __construct
-     * @param  Context                $context
-     * @param  JsonFactory            $jsonResultFactory
-     * @param  BalancepayConfig       $balancepayConfig
-     * @param  RequestFactory         $requestFactory
-     * @param  Json                   $json
-     * @param  OrderFactory           $orderFactory
+     * @var Data
+     */
+    private $helperData;
+
+    /**
+     * @var WebhookProcessor
+     */
+    private $webhookProcessor;
+
+    /**
+     * Confirmed constructor.
+     *
+     * @param Context $context
+     * @param JsonFactory $jsonResultFactory
+     * @param BalancepayConfig $balancepayConfig
+     * @param RequestFactory $requestFactory
+     * @param Json $json
+     * @param OrderFactory $orderFactory
+     * @param Data $helperData
+     * @param WebhookProcessor $webhookProcessor
      */
     public function __construct(
         Context $context,
@@ -74,7 +86,9 @@ class Confirmed extends Action implements CsrfAwareActionInterface
         BalancepayConfig $balancepayConfig,
         RequestFactory $requestFactory,
         Json $json,
-        OrderFactory $orderFactory
+        OrderFactory $orderFactory,
+        Data $helperData,
+        WebhookProcessor $webhookProcessor
     ) {
         parent::__construct($context);
         $this->jsonResultFactory = $jsonResultFactory;
@@ -82,105 +96,29 @@ class Confirmed extends Action implements CsrfAwareActionInterface
         $this->requestFactory = $requestFactory;
         $this->json = $json;
         $this->orderFactory = $orderFactory;
+        $this->helperData = $helperData;
+        $this->webhookProcessor = $webhookProcessor;
     }
 
     /**
      * Execute
      *
-     * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\Result\Json|ResultInterface
+     * @return \Magento\Framework\App\ResponseInterface|ResultInterface
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function execute()
     {
-        sleep(15);// phpcs:ignore
         if (!$this->balancepayConfig->isActive()) {
             return $this->resultFactory->create(ResultFactory::TYPE_FORWARD)->forward('noroute');
         }
+        $content = $this->getRequest()->getContent();
+        $headers = $this->getRequest()->getHeaders()->toArray();
 
-        $resBody = [];
-
-        try {
-            $content = $this->getRequest()->getContent();
-            $headers = $this->getRequest()->getHeaders()->toArray();
-
-            $this->balancepayConfig->log('Webhook\Checkout\Confirmed::execute() ', 'debug', [
-                'content' => $content,
-                'headers' => $headers,
-            ]);
-
-            //Validate Signature:
-            $signature = hash_hmac("sha256", $content, $this->balancepayConfig->getWebhookSecret());
-            if ($signature !== $headers['X-Blnce-Signature']) {
-                throw new LocalizedException(new Phrase("Signature is doesn't match!"));
-            }
-
-            //Prepare & validate params:
-            $params = (array) $this->json->unserialize($content);
-            $this->validateParams($params);
-            $externalReferenceId = (string) $params['externalReferenceId'];
-            $isFinanced = $params['isFinanced'] ? 1 : 0;
-            $selectedPaymentMethod = (float) $params['selectedPaymentMethod'];
-
-            //Load the order:
-            $order = $this->orderFactory->create()->loadByIncrementId($externalReferenceId);
-
-            if (!$order || !$order->getId()) {
-                throw new LocalizedException(new Phrase("No matching order!"));
-            }
-
-            $orderPayment = $order->getPayment();
-
-            $orderPayment
-                ->setAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_FINANCED, $isFinanced)
-                ->setAdditionalInformation(BalancepayMethod::
-                BALANCEPAY_SELECTED_PAYMENT_METHOD, $selectedPaymentMethod);
-
-            $orderPayment->save();
-            $order->save();
-
-            $resBody = [
-                "error" => 0,
-                "message" => "Success",
-                "order" => $order->getIncrementId()
-            ];
-        } catch (\Exception $e) {
-            $this->balancepayConfig->log('Webhook\Transaction\Confirmed::execute()
-            [Exception: ' . $e->getMessage() . "]\n" . $e->getTraceAsString(), 'error');
-            $resBody = [
-                "error" => 1,
-                "message" => $e->getMessage(),
-            ];
-            if ($this->balancepayConfig->isDebugEnabled()) {
-                $resBody["trace"] = $e->getTraceAsString();
-            }
-        }
-
-        return $this->jsonResultFactory->create()
-            ->setHttpResponseCode(\Magento\Framework\Webapi\Response::HTTP_OK)
-            ->setData($resBody);
-    }
-
-    /**
-     * ValidateParams
-     *
-     * @param string|Array $params
-     * @return $this
-     */
-    private function validateParams($params)
-    {
-        $requiredKeys = ['externalReferenceId', 'isFinanced', 'selectedPaymentMethod'];
-        $bodyKeys = array_keys($params);
-
-        $diff = array_diff($requiredKeys, $bodyKeys);
-        if (!empty($diff)) {
-            throw new LocalizedException(
-                new Phrase(
-                    'Balancepay webhook required fields are missing: %1.',
-                    [implode(', ', $diff)]
-                )
-            );
-        }
-        return $this;
+        $this->balancepayConfig->log('Webhook\Checkout\Confirmed::execute() ', 'debug', [
+            'content' => $content,
+            'headers' => $headers,
+        ]);
+        $this->webhookProcessor->processWebhook($content, $headers, self::WEBHOOK_CONFIRMED_NAME);
     }
 
     /**
@@ -189,7 +127,7 @@ class Confirmed extends Action implements CsrfAwareActionInterface
      * @param RequestInterface $request
      * @return InvalidRequestException|null
      */
-    public function createCsrfValidationException(RequestInterface $request): ? InvalidRequestException
+    public function createCsrfValidationException(RequestInterface $request): ?InvalidRequestException
     {
         return null;
     }
