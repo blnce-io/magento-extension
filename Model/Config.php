@@ -78,13 +78,13 @@ class Config
 
     /**
      * @method __construct
-     * @param  ScopeConfigInterface  $scopeConfig
-     * @param  ResourceConfig        $resourceConfig
-     * @param  StoreManagerInterface $storeManager
-     * @param  EncryptorInterface    $encryptor
-     * @param  LoggerInterface       $logger
-     * @param  UrlInterface          $urlBuilder
-     * @param  DateTime              $dateTime
+     * @param ScopeConfigInterface $scopeConfig
+     * @param ResourceConfig $resourceConfig
+     * @param StoreManagerInterface $storeManager
+     * @param EncryptorInterface $encryptor
+     * @param LoggerInterface $logger
+     * @param UrlInterface $urlBuilder
+     * @param DateTime $dateTime
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
@@ -118,11 +118,26 @@ class Config
      * Update Balance Pay status
      *
      * @param string $scope
-     * @param mixed $value
      * @param int $storeId
-     * @return void
      */
-    public function updateCustomerGroup($scope = ScopeInterface::SCOPE_STORE, $value = '', int $storeId = 0)
+    public function updateBalancePayStatus($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
+    {
+        $this->resourceConfig->saveConfig(
+            $this->getConfigPath() . 'active',
+            0,
+            $scope,
+            $storeId
+        );
+    }
+
+    /**
+     * Update Customer Group
+     *
+     * @param string $scope
+     * @param string $value
+     * @param int $storeId
+     */
+    public function updateCustomerGroup($scope = ScopeInterface::SCOPE_STORE, $value = 0, int $storeId = 0)
     {
         $this->resourceConfig->saveConfig(
             $this->getConfigPath() . 'allowed_customer_groups',
@@ -282,7 +297,7 @@ class Config
             return '';
         }
         return $this->storeManager->getStore()
-            ->getBaseUrl(UrlInterface::URL_TYPE_MEDIA) . 'balancepay/' . $logoImage;
+                ->getBaseUrl(UrlInterface::URL_TYPE_MEDIA) . 'balancepay/' . $logoImage;
     }
 
     /**
@@ -405,6 +420,20 @@ class Config
         }
         return [];
     }
+
+    /**
+     * GetMerchantTermsOptions
+     *
+     * @param string $scope
+     * @param int $storeId
+     * @return array|string[]
+     */
+    public function getMerchantTermsOptions($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
+    {
+        return (($merchantTermsOptions = $this->getConfigValue('terms_option', $scope, $storeId)) && is_string($merchantTermsOptions))
+            ? explode(',', $merchantTermsOptions) : [];
+    }
+
 
     /**
      * GetBalanceDashboardUrl

@@ -8,11 +8,6 @@ use Balancepay\Balancepay\Helper\Data as BalancepayHelper;
 use Magento\Setup\Exception;
 use Webkul\Marketplace\Helper\Data;
 
-/**
- * Class CreateBuyerLink
- *
- * Balancepay\Balancepay\Block
- */
 class CreateBuyerLink extends Link
 {
     /**
