@@ -63,7 +63,7 @@ class AssignVendor extends AbstractModifier
      */
     public function modifyMeta(array $meta)
     {
-        if (!($this->isModuleEnable())) {
+        if (!($this->isWebkulEnabled())) {
             $meta = array_replace_recursive(
                 $meta,
                 [
@@ -169,7 +169,7 @@ class AssignVendor extends AbstractModifier
     /**
      * @return mixed
      */
-    public function isModuleEnable()
+    public function isWebkulEnabled()
     {
         return $this->_moduleManager->isEnabled('Webkul_Marketplace');
     }
