@@ -1,4 +1,5 @@
 <?php
+
 namespace Balancepay\Balancepay\Ui\DataProvider\Product\Form\Modifier;
 
 use \Magento\Framework\Registry;
@@ -9,27 +10,38 @@ use Magento\Ui\Component\Form\Field;
 use Magento\Ui\Component\Form\Element\Select;
 use Magento\Ui\Component\Form\Element\DataType\Text;
 use Balancepay\Balancepay\Model\ResourceModel\BalancepayProduct\CollectionFactory as MpProductCollection;
+use \Magento\Framework\Module\Manager;
 
 class AssignVendor extends AbstractModifier
 {
     /**
-     * @var \Magento\Framework\Registry
+     * @var Registry
      */
     protected $coreRegistry;
 
     /**
+     * @var Manager
+     */
+    private $_moduleManager;
+
+    /**
+     * AssignVendor constructor.
+     *
      * @param Registry $coreRegistry
      * @param MpProductCollection $mpProductCollectionFactory
      * @param RequestFactory $requestFactory
+     * @param Manager $moduleManager
      */
     public function __construct(
         Registry $coreRegistry,
         MpProductCollection $mpProductCollectionFactory,
-        RequestFactory $requestFactory
+        RequestFactory $requestFactory,
+        Manager $moduleManager
     ) {
         $this->coreRegistry = $coreRegistry;
         $this->_mpProductCollectionFactory = $mpProductCollectionFactory;
         $this->requestFactory = $requestFactory;
+        $this->_moduleManager = $moduleManager;
     }
 
     /**
@@ -51,27 +63,31 @@ class AssignVendor extends AbstractModifier
      */
     public function modifyMeta(array $meta)
     {
-        $meta = array_replace_recursive(
-            $meta,
-            [
-                'assign_vendor' => [
-                    'arguments' => [
-                        'data' => [
-                            'config' => [
-                                'label' => __('Assign Product to Vendor'),
-                                'componentType' => Fieldset::NAME,
-                                'dataScope' => 'data.product.assign_vendor',
-                                'collapsible' => false,
-                                'sortOrder' => 5,
+        if (!($this->isWebkulEnabled())) {
+            $meta = array_replace_recursive(
+                $meta,
+                [
+                    'assign_vendor' => [
+                        'arguments' => [
+                            'data' => [
+                                'config' => [
+                                    'label' => __('Assign Product to Vendor'),
+                                    'componentType' => Fieldset::NAME,
+                                    'dataScope' => 'data.product.assign_vendor',
+                                    'collapsible' => false,
+                                    'sortOrder' => 5,
+                                ],
                             ],
                         ],
-                    ],
-                    'children' => [
-                        'assignseller_field' => $this->getSellerField()
-                    ],
+                        'children' => [
+                            'assignseller_field' => $this->getSellerField()
+                        ],
+                    ]
                 ]
-            ]
-        );
+            );
+            return $meta;
+        }
+        $meta = array_replace_recursive($meta, []);
         return $meta;
     }
 
@@ -148,5 +164,13 @@ class AssignVendor extends AbstractModifier
             $options[] = ['label' => $value['businessName'], 'value' => $value['id']];
         }
         return $options;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function isWebkulEnabled()
+    {
+        return $this->_moduleManager->isEnabled('Webkul_Marketplace');
     }
 }
