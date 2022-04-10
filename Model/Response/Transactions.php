@@ -29,6 +29,11 @@ class Transactions extends AbstractResponse
     protected $_transactionId;
 
     /**
+     * @var mixed|null
+     */
+    private $_buyerId;
+
+    /**
      * Process
      *
      * @return AbstractResponse
@@ -39,8 +44,9 @@ class Transactions extends AbstractResponse
         parent::process();
 
         $body = $this->getBody();
-        $this->_token = $body['token'];
+        $this->_token = isset($body['token']) ? $body['token'] : '';
         $this->_transactionId = isset($body['id']) ? $body['id'] : null;
+        $this->_buyerId = isset($body['buyer']['id']) ? $body['buyer']['id'] : null;
 
         return $this;
     }
@@ -52,10 +58,7 @@ class Transactions extends AbstractResponse
      */
     protected function getRequiredResponseDataKeys()
     {
-        if ($this->_balancepayConfig->getIsAuth()) {
-            return ['token', 'id'];
-        }
-        return ['token'];
+        return [];
     }
 
     /**
@@ -76,5 +79,15 @@ class Transactions extends AbstractResponse
     public function getTransactionId()
     {
         return $this->_transactionId;
+    }
+
+    /**
+     * GetTransactionId
+     *
+     * @return string|null
+     */
+    public function getBuyerId()
+    {
+        return $this->_buyerId;
     }
 }

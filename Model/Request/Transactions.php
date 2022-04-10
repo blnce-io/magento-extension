@@ -51,6 +51,16 @@ class Transactions extends AbstractRequest
     private $customerSession;
 
     /**
+     * @var string
+     */
+    protected $_topic;
+
+    /**
+     * @var string
+     */
+    private $requestMethod;
+
+    /**
      * Transactions constructor.
      *
      * @param Config $balancepayConfig
@@ -84,21 +94,11 @@ class Transactions extends AbstractRequest
             $accountManagement,
             $region
         );
-
+        $this->helper = $helper;
         $this->_checkoutSession = $checkoutSession;
         $this->_cartTotalRepository = $cartTotalRepository;
         $this->customerRepository = $customerRepository;
         $this->customerSession = $customerSession;
-    }
-
-    /**
-     * @inheritdoc
-     *
-     * @return string
-     */
-    protected function getRequestMethod()
-    {
-        return RequestFactory::TRANSACTIONS_REQUEST_METHOD;
     }
 
     /**
@@ -112,12 +112,76 @@ class Transactions extends AbstractRequest
     }
 
     /**
+     * Set topic
+     *
+     * @param string $topic
+     * @return $this
+     */
+    public function setTopic($topic)
+    {
+        $this->_topic = (string)$topic;
+        return $this;
+    }
+
+    /**
+     * GetCurlMethod
+     *
+     * @return string
+     * @throws PaymentException
+     */
+    protected function getCurlMethod()
+    {
+        if ($this->_topic == 'gettransactionid') {
+            return 'get';
+        }
+        return 'post';
+    }
+
+    /**
+     * Get request method
+     *
+     * @return string
+     */
+    public function getRequestMethod()
+    {
+        return $this->requestMethod;
+    }
+
+    /**
+     * Set curl method
+     *
+     * @param string $requestMethod
+     * @return mixed|string
+     */
+    public function setRequestMethod($requestMethod)
+    {
+        $this->requestMethod = $requestMethod;
+        return $this;
+    }
+
+    /**
+     * Get topic
+     *
+     * @return string
+     */
+    public function getTopic()
+    {
+        return $this->_topic;
+    }
+
+    /**
      * Return request params.
      *
      * @return array
      */
     protected function getParams()
     {
+        if ($this->_topic == 'gettransactionid') {
+            return array_replace_recursive(
+                parent::getParams(),
+                []
+            );
+        }
         $quote = $this->_checkoutSession->getQuote();
         $quote->collectTotals();
         $requiresShipping = $quote->getShippingAddress() !== null ? 1 : 0;
@@ -147,35 +211,44 @@ class Transactions extends AbstractRequest
                     "planType" => "invoice",
                     "chargeDate" => date('Y-m-d', strtotime($this->_balancepayConfig->getGmtDate())),
                 ],
-                "financingConfig" => !empty($options) ? [ "financingNetDaysOptions" => array_keys($options), ] : [],
+                "financingConfig" => !empty($options) ? ["financingNetDaysOptions" => array_keys($options),] : [],
                 'lines' => $this->getLinesParams($quote, $quoteTotals->getBaseShippingAmount()),
                 'shippingLines' => $this->getShippingLinesParams($quote),
                 'totalDiscount' => abs($this->amountFormat($quoteTotals->getBaseDiscountAmount())),
                 'billingAddress' => $this->getBillingAddressParams($quote),
                 'shippingAddress' => $this->getShippingAddressParams($quote),
                 'allowedPaymentMethods' => $this->_balancepayConfig->getAllowedPaymentMethods(),
+                'allowedTermsPaymentMethods' => $this->_balancepayConfig->getAllowedTermsPaymentMethods(),
             ]
         );
     }
 
     /**
-     * Get Buyer params
+     * GetBuyerParams
      *
      * @param Quote $quote
      * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     protected function getBuyerParams(Quote $quote)
     {
         $params = [];
-
         if (($billing = $quote->getBillingAddress()) !== null && $billing->getEmail()) {
-            $params['email'] = $billing->getEmail();
+            $email = $billing->getEmail();
         } else {
-            $params['email'] = $quote->getCustomerEmail() ?: $this->getFallbackEmail();
+            $email = $quote->getCustomerEmail() ?: $this->getFallbackEmail();
         }
-
-        $params['isRegistered'] = $quote->getCustomerIsGuest() ? false : true;
-
+        if ($quote->getCustomerIsGuest()) {
+            $params['email'] = $email;
+            $params['isRegistered'] = false;
+        } elseif ($this->customerSession->isLoggedIn() && empty($this->helper->getBuyerId())) {
+            $params['email'] = $email;
+            $params['isRegistered'] = false;
+        } elseif ($this->customerSession->isLoggedIn() && $this->helper->getBuyerId() != null) {
+            $params['id'] = $this->helper->getBuyerId($quote->getCustomerId());
+            $params['isRegistered'] = true;
+        }
         return $params;
     }
 
