@@ -11,7 +11,7 @@
 
 namespace Balancepay\Balancepay\Controller\Payment\Checkout;
 
-use Balancepay\Balancepay\Helper\Data as HelperData;
+use Balancepay\Balancepay\Model\BalanceBuyer;
 use Balancepay\Balancepay\Model\Config as BalancepayConfig;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Magento\Checkout\Model\Session as CheckoutSession;
@@ -48,13 +48,14 @@ class Token extends Action
     private $checkoutSession;
 
     /**
-     * @var HelperData
-     */
-    private $helper;
-    /**
      * @var Session
      */
     private $customerSession;
+
+    /**
+     * @var BalanceBuyer
+     */
+    private $balanceBuyer;
 
     /**
      * Token constructor.
@@ -65,7 +66,7 @@ class Token extends Action
      * @param RequestFactory $requestFactory
      * @param CheckoutSession $checkoutSession
      * @param Session $customerSession
-     * @param HelperData $helper
+     * @param BalanceBuyer $balanceBuyer
      */
     public function __construct(
         Context $context,
@@ -74,7 +75,7 @@ class Token extends Action
         RequestFactory $requestFactory,
         CheckoutSession $checkoutSession,
         Session $customerSession,
-        HelperData $helper
+        BalanceBuyer $balanceBuyer
     ) {
         parent::__construct($context);
         $this->jsonResultFactory = $jsonResultFactory;
@@ -82,7 +83,7 @@ class Token extends Action
         $this->requestFactory = $requestFactory;
         $this->checkoutSession = $checkoutSession;
         $this->customerSession = $customerSession;
-        $this->helper = $helper;
+        $this->balanceBuyer = $balanceBuyer;
     }
 
     /**
@@ -116,7 +117,12 @@ class Token extends Action
             $token = $result->getToken();
             $transactionId = $result->getTransactionId();
 
-            $this->createBuyer($transactionId);
+            if ($transactionId &&
+                $this->customerSession->isLoggedIn() &&
+                empty($this->balanceBuyer->getCustomerBalanceBuyerId())
+            ) {
+                $this->balanceBuyer->getBuyerFromTransaction($transactionId);
+            }
 
             $this->checkoutSession->setBalanceCheckoutToken($token);
             $this->checkoutSession->setBalanceCheckoutTransactionId($transactionId);
@@ -140,29 +146,5 @@ class Token extends Action
         return $this->jsonResultFactory->create()
             ->setHttpResponseCode(\Magento\Framework\Webapi\Response::HTTP_OK)
             ->setData($resBody);
-    }
-
-    /**
-     * CreateBuyer
-     *
-     * @param $transactionId
-     */
-    public function createBuyer($transactionId)
-    {
-        try {
-            if ($this->customerSession->isLoggedIn() && empty($this->helper->getBuyerId()) && $transactionId) {
-                $response = $this->requestFactory
-                    ->create(RequestFactory::TRANSACTIONS_REQUEST_METHOD)
-                    ->setRequestMethod('transactions/' . $transactionId)
-                    ->setTopic('gettransactionid')
-                    ->process();
-                if (!empty($response->getBuyerId())) {
-                    $this->helper->updateBuyerId($response->getBuyerId());
-                }
-            }
-        } catch (\Exception $e) {
-
-        }
-        return;
     }
 }

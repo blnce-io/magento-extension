@@ -24,6 +24,7 @@ use Magento\Quote\Model\Cart\CartTotalRepository;
 use Magento\Quote\Model\Quote;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\Session;
+use Balancepay\Balancepay\Model\BalanceBuyer;
 
 /**
  * Balancepay transactions request model.
@@ -61,8 +62,11 @@ class Transactions extends AbstractRequest
     private $requestMethod;
 
     /**
-     * Transactions constructor.
-     *
+     * @var BalanceBuyer
+     */
+    private $balanceBuyer;
+
+    /**
      * @param Config $balancepayConfig
      * @param Curl $curl
      * @param ResponseFactory $responseFactory
@@ -73,6 +77,7 @@ class Transactions extends AbstractRequest
      * @param RegionFactory $region
      * @param CustomerRepositoryInterface $customerRepository
      * @param Session $customerSession
+     * @param BalanceBuyer $balanceBuyer
      */
     public function __construct(
         Config $balancepayConfig,
@@ -84,7 +89,8 @@ class Transactions extends AbstractRequest
         AccountManagementInterface $accountManagement,
         RegionFactory $region,
         CustomerRepositoryInterface $customerRepository,
-        Session $customerSession
+        Session $customerSession,
+        BalanceBuyer $balanceBuyer
     ) {
         parent::__construct(
             $balancepayConfig,
@@ -94,11 +100,11 @@ class Transactions extends AbstractRequest
             $accountManagement,
             $region
         );
-        $this->helper = $helper;
         $this->_checkoutSession = $checkoutSession;
         $this->_cartTotalRepository = $cartTotalRepository;
         $this->customerRepository = $customerRepository;
         $this->customerSession = $customerSession;
+        $this->balanceBuyer = $balanceBuyer;
     }
 
     /**
@@ -242,12 +248,11 @@ class Transactions extends AbstractRequest
         if ($quote->getCustomerIsGuest()) {
             $params['email'] = $email;
             $params['isRegistered'] = false;
-        } elseif ($this->customerSession->isLoggedIn() && empty($this->helper->getBuyerId())) {
+        } elseif ($this->customerSession->isLoggedIn() && empty($this->balanceBuyer->getCustomerBalanceBuyerId())) {
             $params['email'] = $email;
             $params['isRegistered'] = false;
-        } elseif ($this->customerSession->isLoggedIn() && $this->helper->getBuyerId() != null) {
-            $params['id'] = $this->helper->getBuyerId($quote->getCustomerId());
-            $params['isRegistered'] = true;
+        } elseif ($this->customerSession->isLoggedIn() && $this->balanceBuyer->getCustomerBalanceBuyerId() != null) {
+            $params['id'] = $this->balanceBuyer->getCustomerBalanceBuyerId($quote->getCustomerId());
         }
         return $params;
     }
