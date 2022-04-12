@@ -20,6 +20,8 @@ use Balancepay\Balancepay\Model\Response\Factory as ResponseFactory;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Customer\Api\AccountManagementInterface;
 use Magento\Directory\Model\RegionFactory;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Model\Cart\CartTotalRepository;
 use Magento\Quote\Model\Quote;
 use Magento\Customer\Api\CustomerRepositoryInterface;
@@ -234,12 +236,15 @@ class Transactions extends AbstractRequest
      *
      * @param Quote $quote
      * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
     protected function getBuyerParams(Quote $quote)
     {
         $params = [];
+        $customerBuyerId = $this->balanceBuyer->getCustomerBalanceBuyerId();
+        $isLoggedIn = $this->customerSession->isLoggedIn();
+
         if (($billing = $quote->getBillingAddress()) !== null && $billing->getEmail()) {
             $email = $billing->getEmail();
         } else {
@@ -248,11 +253,11 @@ class Transactions extends AbstractRequest
         if ($quote->getCustomerIsGuest()) {
             $params['email'] = $email;
             $params['isRegistered'] = false;
-        } elseif ($this->customerSession->isLoggedIn() && empty($this->balanceBuyer->getCustomerBalanceBuyerId())) {
+        } elseif ($isLoggedIn && empty($customerBuyerId)) {
             $params['email'] = $email;
             $params['isRegistered'] = false;
-        } elseif ($this->customerSession->isLoggedIn() && $this->balanceBuyer->getCustomerBalanceBuyerId() != null) {
-            $params['id'] = $this->balanceBuyer->getCustomerBalanceBuyerId($quote->getCustomerId());
+        } elseif ($isLoggedIn && $customerBuyerId != null) {
+            $params['id'] = $customerBuyerId;
         }
         return $params;
     }
@@ -262,8 +267,8 @@ class Transactions extends AbstractRequest
      *
      * @param int $customerId
      * @return array|string[]
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
     public function getCustomerTermsOptions($customerId)
     {

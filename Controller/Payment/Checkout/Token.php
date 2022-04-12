@@ -18,9 +18,12 @@ use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Customer\Model\Session;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
+use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\Webapi\Response;
 
 /**
  * Balancepay get checkout token.
@@ -89,7 +92,7 @@ class Token extends Action
     /**
      * Execute
      *
-     * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\Result\Json|ResultInterface
+     * @return ResponseInterface|Json|ResultInterface
      */
     public function execute()
     {
@@ -144,7 +147,7 @@ class Token extends Action
         }
 
         return $this->jsonResultFactory->create()
-            ->setHttpResponseCode(\Magento\Framework\Webapi\Response::HTTP_OK)
+            ->setHttpResponseCode(Response::HTTP_OK)
             ->setData($resBody);
     }
 }

@@ -12,6 +12,7 @@
 namespace Balancepay\Balancepay\Model\Response;
 
 use Balancepay\Balancepay\Model\AbstractResponse;
+use Magento\Framework\Exception\LocalizedException;
 
 /**
  * Balancepay transactions response model.
@@ -37,7 +38,7 @@ class Transactions extends AbstractResponse
      * Process
      *
      * @return AbstractResponse
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function process()
     {
@@ -82,7 +83,7 @@ class Transactions extends AbstractResponse
     }
 
     /**
-     * GetTransactionId
+     * Get Buyer Id
      *
      * @return string|null
      */

@@ -8,6 +8,8 @@ use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\Customer;
 use Magento\Customer\Model\Session;
 use Magento\Customer\Model\ResourceModel\CustomerFactory;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Psr\Log\LoggerInterface;
 
 class BalanceBuyer
@@ -80,15 +82,13 @@ class BalanceBuyer
     public function getBuyerFromTransaction($transactionId)
     {
         try {
-            if ($this->customerSession->isLoggedIn() && empty($this->getCustomerBalanceBuyerId()) && $transactionId) {
-                $response = $this->requestFactory
-                    ->create(RequestFactory::TRANSACTIONS_REQUEST_METHOD)
-                    ->setRequestMethod('transactions/' . $transactionId)
-                    ->setTopic('gettransactionid')
-                    ->process();
-                if (!empty($response->getBuyerId())) {
-                    $this->updateCustomerBalanceBuyerId($response->getBuyerId());
-                }
+            $response = $this->requestFactory
+                ->create(RequestFactory::TRANSACTIONS_REQUEST_METHOD)
+                ->setRequestMethod('transactions/' . $transactionId)
+                ->setTopic('gettransactionid')
+                ->process();
+            if (!empty($response->getBuyerId())) {
+                $this->updateCustomerBalanceBuyerId($response->getBuyerId());
             }
         } catch (\Exception $e) {
             $this->logger->error('There is an while fetching Buyer Id from transaction.');
@@ -114,8 +114,8 @@ class BalanceBuyer
      * GetCustomerBalanceBuyerId
      *
      * @return mixed|string
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
     public function getCustomerBalanceBuyerId()
     {
