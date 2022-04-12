@@ -250,14 +250,11 @@ class Transactions extends AbstractRequest
         } else {
             $email = $quote->getCustomerEmail() ?: $this->getFallbackEmail();
         }
-        if ($quote->getCustomerIsGuest()) {
-            $params['email'] = $email;
-            $params['isRegistered'] = false;
-        } elseif ($isLoggedIn && empty($customerBuyerId)) {
-            $params['email'] = $email;
-            $params['isRegistered'] = false;
-        } elseif ($isLoggedIn && $customerBuyerId != null) {
+        if ($isLoggedIn && $customerBuyerId != null) {
             $params['id'] = $customerBuyerId;
+        } else {
+            $params['email'] = $email;
+            $params['isRegistered'] = false;
         }
         return $params;
     }

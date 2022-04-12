@@ -11,6 +11,7 @@ use Magento\Customer\Model\ResourceModel\CustomerFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Psr\Log\LoggerInterface;
+use Balancepay\Balancepay\Model\Config;
 
 class BalanceBuyer
 {
@@ -45,9 +46,16 @@ class BalanceBuyer
     /**
      * @var LoggerInterface
      */
-    private LoggerInterface $logger;
+    private $logger;
 
     /**
+     * @var Config
+     */
+    private $balancepayConfig;
+
+    /**
+     * BalanceBuyer constructor.
+     *
      * @param RequestFactory $requestFactory
      * @param HelperData $helper
      * @param Customer $customer
@@ -55,6 +63,7 @@ class BalanceBuyer
      * @param Session $customerSession
      * @param CustomerRepositoryInterface $customerRepositoryInterface
      * @param LoggerInterface $logger
+     * @param Config $balancepayConfig
      */
     public function __construct(
         RequestFactory $requestFactory,
@@ -63,7 +72,8 @@ class BalanceBuyer
         CustomerFactory $customerFactory,
         Session $customerSession,
         CustomerRepositoryInterface $customerRepositoryInterface,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        Config $balancepayConfig
     ) {
         $this->requestFactory = $requestFactory;
         $this->customerSession = $customerSession;
@@ -72,6 +82,7 @@ class BalanceBuyer
         $this->customerFactory = $customerFactory;
         $this->customerRepositoryInterface = $customerRepositoryInterface;
         $this->logger = $logger;
+        $this->balancepayConfig = $balancepayConfig;
     }
 
     /**
@@ -91,7 +102,10 @@ class BalanceBuyer
                 $this->updateCustomerBalanceBuyerId($response->getBuyerId());
             }
         } catch (\Exception $e) {
-            $this->logger->error('There is an while fetching Buyer Id from transaction.');
+            $this->balancepayConfig->log('Could not attach buyer id to the customer', 'debug', [
+                'ExceptionMessage' => $e->getMessage(),
+                'TraceAsString' => $e->getTraceAsString()
+            ]);
         }
     }
 
