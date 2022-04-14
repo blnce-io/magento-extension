@@ -11,14 +11,19 @@
 
 namespace Balancepay\Balancepay\Controller\Payment\Checkout;
 
+use Balancepay\Balancepay\Model\BalanceBuyer;
 use Balancepay\Balancepay\Model\Config as BalancepayConfig;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Customer\Model\Session;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
+use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\Webapi\Response;
 
 /**
  * Balancepay get checkout token.
@@ -46,32 +51,48 @@ class Token extends Action
     private $checkoutSession;
 
     /**
-     * @method __construct
-     * @param  Context                 $context
-     * @param  JsonFactory             $jsonResultFactory
-     * @param  BalancepayConfig        $balancepayConfig
-     * @param  RequestFactory          $requestFactory
-     * @param  CheckoutSession         $checkoutSession
+     * @var Session
+     */
+    private $customerSession;
+
+    /**
+     * @var BalanceBuyer
+     */
+    private $balanceBuyer;
+
+    /**
+     * Token constructor.
+     *
+     * @param Context $context
+     * @param JsonFactory $jsonResultFactory
+     * @param BalancepayConfig $balancepayConfig
+     * @param RequestFactory $requestFactory
+     * @param CheckoutSession $checkoutSession
+     * @param Session $customerSession
+     * @param BalanceBuyer $balanceBuyer
      */
     public function __construct(
         Context $context,
         JsonFactory $jsonResultFactory,
         BalancepayConfig $balancepayConfig,
         RequestFactory $requestFactory,
-        CheckoutSession $checkoutSession
+        CheckoutSession $checkoutSession,
+        Session $customerSession,
+        BalanceBuyer $balanceBuyer
     ) {
         parent::__construct($context);
         $this->jsonResultFactory = $jsonResultFactory;
         $this->balancepayConfig = $balancepayConfig;
         $this->requestFactory = $requestFactory;
         $this->checkoutSession = $checkoutSession;
+        $this->customerSession = $customerSession;
+        $this->balanceBuyer = $balanceBuyer;
     }
+
     /**
      * Execute
      *
-     * @return ResultInterface
-     * @throws \InvalidArgumentException
-     * @throws \Exception
+     * @return ResponseInterface|Json|ResultInterface
      */
     public function execute()
     {
@@ -93,11 +114,18 @@ class Token extends Action
 
             $result = $this->requestFactory
                 ->create(RequestFactory::TRANSACTIONS_REQUEST_METHOD)
+                ->setRequestMethod('transactions')
                 ->setFallbackEmail($fallbackEmail)
                 ->process();
-
             $token = $result->getToken();
             $transactionId = $result->getTransactionId();
+
+            if ($transactionId &&
+                $this->customerSession->isLoggedIn() &&
+                empty($this->balanceBuyer->getCustomerBalanceBuyerId())
+            ) {
+                $this->balanceBuyer->getBuyerFromTransaction($transactionId);
+            }
 
             $this->checkoutSession->setBalanceCheckoutToken($token);
             $this->checkoutSession->setBalanceCheckoutTransactionId($transactionId);
@@ -119,7 +147,7 @@ class Token extends Action
         }
 
         return $this->jsonResultFactory->create()
-            ->setHttpResponseCode(\Magento\Framework\Webapi\Response::HTTP_OK)
+            ->setHttpResponseCode(Response::HTTP_OK)
             ->setData($resBody);
     }
 }

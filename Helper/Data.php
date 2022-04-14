@@ -90,8 +90,7 @@ class Data extends AbstractHelper
         RequestFactory $requestFactory,
         BalancepayConfig $balancepayConfig,
         PricingHelper $pricingHelper
-    )
-    {
+    ) {
         $this->ccIcons = [
             'visa' => 'vi',
             'discover' => 'di',

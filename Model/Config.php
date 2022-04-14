@@ -335,6 +335,19 @@ class Config
     }
 
     /**
+     * Get AllowedTermsPaymentMethods
+     *
+     * @param string $scope
+     * @param int $storeId
+     * @return array|string[]
+     */
+    public function getAllowedTermsPaymentMethods($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
+    {
+        return (($apm = $this->getConfigValue('net_terms_allowed_payment_methods', $scope, $storeId)) && is_string($apm))
+            ? explode(',', $apm) : [];
+    }
+
+    /**
      * Return bool value depends of that if payment method debug mode
      *
      * @return bool
