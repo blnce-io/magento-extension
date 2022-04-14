@@ -78,7 +78,7 @@
                 <field id="net_terms_allowed_payment_methods" translate="label" type="multiselect" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                     <label>Allowed Payment Methods: Terms</label>
                     <comment>Payment methods enabled when the buyer is paying on net terms.</comment>
-                    <source_model>Balancepay\Balancepay\Model\Adminhtml\Source\AllowedPaymentMethods</source_model>
+                    <source_model>Balancepay\Balancepay\Model\Adminhtml\Source\NetTermsPaymentMethods</source_model>
                     <config_path>payment/balancepay/net_terms_allowed_payment_methods</config_path>
                 </field>
                 <field id="terms_option" translate="label" type="multiselect" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">

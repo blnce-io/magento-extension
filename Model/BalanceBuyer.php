@@ -134,9 +134,12 @@ class BalanceBuyer
     public function getCustomerBalanceBuyerId()
     {
         $customerId = $this->customerSession->getCustomer()->getId();
-        $customer = $this->customerRepositoryInterface->getById($customerId);
-        $customerAttributeData = $customer->__toArray();
-        return isset($customerAttributeData['custom_attributes']['buyer_id']) ?
-            $customerAttributeData['custom_attributes']['buyer_id']['value'] : '';
+        if ($customerId) {
+            $customer = $this->customerRepositoryInterface->getById($customerId);
+            $customerAttributeData = $customer->__toArray();
+            return isset($customerAttributeData['custom_attributes']['buyer_id']) ?
+                $customerAttributeData['custom_attributes']['buyer_id']['value'] : '';
+        }
+        return null;
     }
 }
