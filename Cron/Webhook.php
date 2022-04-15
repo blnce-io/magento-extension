@@ -46,6 +46,7 @@ class Webhook
     public function execute()
     {
         $webhookCollection = $this->webhookFactory->create()->getCollection();
+        $webhookCollection->addFieldToFilter('status', array('eq' => WebhookProcessor::Pending));
         foreach ($webhookCollection as $webhook) {
             $params = (array)$this->json->unserialize($webhook->getPayload());
             try {

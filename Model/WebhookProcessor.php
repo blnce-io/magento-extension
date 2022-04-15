@@ -1,4 +1,5 @@
 <?php
+
 namespace Balancepay\Balancepay\Model;
 
 use Balancepay\Balancepay\Controller\Webhook\Checkout\Charged;
@@ -53,6 +54,27 @@ class WebhookProcessor
     protected $confirmedProcessor;
 
     /**
+     * Pending
+     */
+    public const Pending = 0;
+
+    /**
+     * Success
+     */
+    public const Success = 2;
+
+    /**
+     * Inprogress
+     */
+    public const In_Progress = 1;
+
+    /**
+     * Failed
+     */
+    public const Failed = 3;
+
+
+    /**
      * WebhookProcessor constructor.
      *
      * @param OrderFactory $orderFactory
@@ -71,8 +93,7 @@ class WebhookProcessor
         JsonFactory $jsonResultFactory,
         ChargedProcessor $chargedProcessor,
         ConfirmedProcessor $confirmedProcessor
-    )
-    {
+    ) {
         $this->orderFactory = $orderFactory;
         $this->webhookFactory = $webhookFactory;
         $this->json = $json;
@@ -196,9 +217,15 @@ class WebhookProcessor
     {
         $isTransactionSuccess = false;
         $order = $this->orderFactory->create()->loadByIncrementId((string)$params['externalReferenceId']);
+        $this->updateWebhookQueue($webhook->getEntityId(), 'status', self::In_Progress);
         if (!$order || !$order->getId()) {
-            $attempts = $webhook->getAttempts() + 1;
-            $this->updateAttempts($webhook->getEntityId(), 'attempts', $attempts);
+            if ($webhook->getAttempts() >= 3) {
+                $this->updateWebhookQueue($webhook->getEntityId(), 'status', self::Failed);
+            } else {
+                $this->updateWebhookQueue($webhook->getEntityId(), 'status', self::Pending);
+                $attempts = $webhook->getAttempts() + 1;
+                $this->updateWebhookQueue($webhook->getEntityId(), 'attempts', $attempts);
+            }
             throw new LocalizedException(new Phrase("No matching order!"));
         }
         if ($webhook->getName() == Confirmed::WEBHOOK_CONFIRMED_NAME) {
@@ -207,12 +234,12 @@ class WebhookProcessor
             $isTransactionSuccess = $this->chargedProcessor->processChargedWebhook($params, $order);
         }
         if ($isTransactionSuccess) {
-            $webhook->delete();
+            $this->updateWebhookQueue($webhook->getEntityId(), 'status', self::Success);
         }
     }
 
     /**
-     * UpdateAttempts
+     * UpdateWebhookQueue
      *
      * @param $id
      * @param $field
@@ -220,7 +247,7 @@ class WebhookProcessor
      * @return bool
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function updateAttempts($id, $field, $value): bool
+    public function updateWebhookQueue($id, $field, $value)
     {
         try {
             $webhookModel = $this->webhookFactory->create()->load($id, 'entity_id');
