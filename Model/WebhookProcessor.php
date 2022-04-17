@@ -10,6 +10,7 @@ use Balancepay\Balancepay\Model\ChargedProcessor;
 use Balancepay\Balancepay\Model\ConfirmedProcessor;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Phrase;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\Webapi\Response;
@@ -56,23 +57,22 @@ class WebhookProcessor
     /**
      * Pending
      */
-    public const Pending = 0;
+    public const PENDING = 0;
 
     /**
      * Success
      */
-    public const Success = 2;
+    public const SUCCESS = 2;
 
     /**
      * Inprogress
      */
-    public const In_Progress = 1;
+    public const IN_PROGRESS = 1;
 
     /**
      * Failed
      */
-    public const Failed = 3;
-
+    public const FAILED = 3;
 
     /**
      * WebhookProcessor constructor.
@@ -106,11 +106,11 @@ class WebhookProcessor
     /**
      * ProcessWebhook
      *
-     * @param $content
-     * @param $headers
-     * @param $webhookName
+     * @param mixed $content
+     * @param mixed $headers
+     * @param string $webhookName
      * @return \Magento\Framework\Controller\Result\Json
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws NoSuchEntityException
      */
     public function processWebhook($content, $headers, $webhookName)
     {
@@ -157,9 +157,9 @@ class WebhookProcessor
     /**
      * ValidateSignature
      *
-     * @param $content
-     * @param $headers
-     * @param $webhookName
+     * @param mixed $content
+     * @param mixed $headers
+     * @param string $webhookName
      * @return array
      * @throws LocalizedException
      */
@@ -192,8 +192,8 @@ class WebhookProcessor
     /**
      * EnqueueWebhook
      *
-     * @param $params
-     * @param $name
+     * @param array $params
+     * @param string $name
      * @throws \Exception
      */
     public function enqueueWebhook($params, $name)
@@ -208,21 +208,23 @@ class WebhookProcessor
     }
 
     /**
-     * @param $params
-     * @param $webhook
+     * ProcessWebhookCron
+     *
+     * @param array $params
+     * @param mixed $webhook
      * @throws LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws NoSuchEntityException
      */
     public function processWebhookCron($params, $webhook)
     {
         $isTransactionSuccess = false;
         $order = $this->orderFactory->create()->loadByIncrementId((string)$params['externalReferenceId']);
-        $this->updateWebhookQueue($webhook->getEntityId(), 'status', self::In_Progress);
+        $this->updateWebhookQueue($webhook->getEntityId(), 'status', self::IN_PROGRESS);
         if (!$order || !$order->getId()) {
             if ($webhook->getAttempts() >= 3) {
-                $this->updateWebhookQueue($webhook->getEntityId(), 'status', self::Failed);
+                $this->updateWebhookQueue($webhook->getEntityId(), 'status', self::FAILED);
             } else {
-                $this->updateWebhookQueue($webhook->getEntityId(), 'status', self::Pending);
+                $this->updateWebhookQueue($webhook->getEntityId(), 'status', self::PENDING);
                 $attempts = $webhook->getAttempts() + 1;
                 $this->updateWebhookQueue($webhook->getEntityId(), 'attempts', $attempts);
             }
@@ -234,18 +236,18 @@ class WebhookProcessor
             $isTransactionSuccess = $this->chargedProcessor->processChargedWebhook($params, $order);
         }
         if ($isTransactionSuccess) {
-            $this->updateWebhookQueue($webhook->getEntityId(), 'status', self::Success);
+            $this->updateWebhookQueue($webhook->getEntityId(), 'status', self::SUCCESS);
         }
     }
 
     /**
      * UpdateWebhookQueue
      *
-     * @param $id
-     * @param $field
-     * @param $value
+     * @param int $id
+     * @param mixed $field
+     * @param mixed $value
      * @return bool
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws NoSuchEntityException
      */
     public function updateWebhookQueue($id, $field, $value)
     {
@@ -261,5 +263,4 @@ class WebhookProcessor
         }
         return true;
     }
-
 }

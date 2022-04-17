@@ -26,8 +26,10 @@ class ChargedProcessor
     }
 
     /**
-     * @param $params
-     * @param $order
+     * ProcessChargedWebhook
+     *
+     * @param array $params
+     * @param mixed $order
      * @return bool
      * @throws NoSuchEntityException
      */
@@ -52,7 +54,6 @@ class ChargedProcessor
                     throw new LocalizedException(new Phrase("The charged amount doesn't match the order total!"));
                 }
 
-
                 $orderPayment
                     ->setTransactionId($orderPayment
                         ->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHECKOUT_TRANSACTION_ID))
@@ -65,7 +66,6 @@ class ChargedProcessor
                             $chargeId
                         ) . " \n" . $chargeId
                     );
-
 
                 if (!$isBalancepayAuthCheckout) {
                     $orderPayment->capture(null);

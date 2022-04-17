@@ -20,14 +20,15 @@ class ConfirmedProcessor
      */
     public function __construct(
         BalancepayConfig $balancepayConfig
-    )
-    {
+    ) {
         $this->balancepayConfig = $balancepayConfig;
     }
 
     /**
-     * @param $params
-     * @param $order
+     * ProcessConfirmedWebhook
+     *
+     * @param array $params
+     * @param mixed $order
      * @return bool
      * @throws NoSuchEntityException
      */
