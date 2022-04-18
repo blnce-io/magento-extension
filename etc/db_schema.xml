@@ -14,7 +14,7 @@
             <column name="product_id"/>
         </index>
     </table>
-    <table name="webhook_queue" resource="default" engine="innodb" comment="Webhook Queue">
+    <table name="balance_queue" resource="default" engine="innodb" comment="Balance Queue">
         <column xsi:type="int" name="entity_id" unsigned="false" nullable="false" identity="true" comment="Entity Id"/>
         <column xsi:type="int" name="attempts" nullable="true" comment="Attempts"/>
         <column xsi:type="text" name="payload" nullable="true" comment="Payload"/>

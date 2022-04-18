@@ -12,6 +12,6 @@ class Webhook extends AbstractDb
      */
     protected function _construct()
     {
-        $this->_init('webhook_queue', 'entity_id');
+        $this->_init('balance_queue', 'entity_id');
     }
 }

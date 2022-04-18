@@ -60,11 +60,6 @@ class WebhookProcessor
     public const PENDING = 0;
 
     /**
-     * Success
-     */
-    public const SUCCESS = 2;
-
-    /**
      * Inprogress
      */
     public const IN_PROGRESS = 1;
@@ -236,7 +231,7 @@ class WebhookProcessor
             $isTransactionSuccess = $this->chargedProcessor->processChargedWebhook($params, $order);
         }
         if ($isTransactionSuccess) {
-            $this->updateWebhookQueue($webhook->getEntityId(), 'status', self::SUCCESS);
+            $webhook->delete();
         }
     }
 
