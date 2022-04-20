@@ -2,9 +2,9 @@
 namespace Balancepay\Balancepay\Model;
 
 use Magento\Framework\Model\AbstractModel;
-use Balancepay\Balancepay\Model\ResourceModel\Webhook as WebhookResourceModel;
+use Balancepay\Balancepay\Model\ResourceModel\Queue as QueueResourceModel;
 
-class Webhook extends AbstractModel
+class Queue extends AbstractModel
 {
     /**
      * Construct function
@@ -13,6 +13,6 @@ class Webhook extends AbstractModel
      */
     protected function _construct()
     {
-        $this->_init(WebhookResourceModel::class);
+        $this->_init(QueueResourceModel::class);
     }
 }

@@ -82,16 +82,12 @@ class WebhookProcessor
      */
     public function __construct(
         OrderFactory $orderFactory,
-        WebhookFactory $webhookFactory,
-        Json $json,
         Config $balancepayConfig,
         JsonFactory $jsonResultFactory,
         ChargedProcessor $chargedProcessor,
         ConfirmedProcessor $confirmedProcessor
     ) {
         $this->orderFactory = $orderFactory;
-        $this->webhookFactory = $webhookFactory;
-        $this->json = $json;
         $this->balancepayConfig = $balancepayConfig;
         $this->jsonResultFactory = $jsonResultFactory;
         $this->chargedProcessor = $chargedProcessor;
@@ -117,7 +113,7 @@ class WebhookProcessor
             $order = $this->orderFactory->create()->loadByIncrementId($externalReferenceId);
 
             if (!$order || !$order->getId()) {
-                $this->enqueueWebhook($params, $webhookName);
+                $this->addToQueue($params, $webhookName);
                 throw new LocalizedException(new Phrase("No matching order!"));
             }
 
@@ -182,24 +178,6 @@ class WebhookProcessor
             );
         }
         return $params;
-    }
-
-    /**
-     * EnqueueWebhook
-     *
-     * @param array $params
-     * @param string $name
-     * @throws \Exception
-     */
-    public function enqueueWebhook($params, $name)
-    {
-        $webhookModel = $this->webhookFactory->create();
-        $webhookModel->setData([
-            'payload' => $this->json->serialize($params),
-            'name' => $name,
-            'attempts' => 1
-        ]);
-        $webhookModel->save();
     }
 
     /**
