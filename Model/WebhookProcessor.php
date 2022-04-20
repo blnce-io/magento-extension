@@ -5,7 +5,6 @@ namespace Balancepay\Balancepay\Model;
 use Balancepay\Balancepay\Controller\Webhook\Checkout\Charged;
 use Balancepay\Balancepay\Controller\Webhook\Transaction\Confirmed;
 use Balancepay\Balancepay\Model\Config;
-use Balancepay\Balancepay\Model\WebhookFactory;
 use Balancepay\Balancepay\Model\ChargedProcessor;
 use Balancepay\Balancepay\Model\ConfirmedProcessor;
 use Magento\Framework\Controller\Result\JsonFactory;
@@ -15,6 +14,7 @@ use Magento\Framework\Phrase;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\Webapi\Response;
 use Magento\Sales\Model\OrderFactory;
+use Balancepay\Balancepay\Model\QueueProcessor;
 
 class WebhookProcessor
 {
@@ -23,11 +23,6 @@ class WebhookProcessor
      * @var OrderFactory
      */
     protected $orderFactory;
-
-    /**
-     * @var \Balancepay\Balancepay\Model\WebhookFactory
-     */
-    protected $webhookFactory;
 
     /**
      * @var Json
@@ -55,43 +50,34 @@ class WebhookProcessor
     protected $confirmedProcessor;
 
     /**
-     * Pending
+     * @var \Balancepay\Balancepay\Model\QueueProcessor
      */
-    public const PENDING = 0;
-
-    /**
-     * Inprogress
-     */
-    public const IN_PROGRESS = 1;
-
-    /**
-     * Failed
-     */
-    public const FAILED = 3;
+    private $queueProcessor;
 
     /**
      * WebhookProcessor constructor.
      *
      * @param OrderFactory $orderFactory
-     * @param \Balancepay\Balancepay\Model\WebhookFactory $webhookFactory
-     * @param Json $json
      * @param \Balancepay\Balancepay\Model\Config $balancepayConfig
      * @param JsonFactory $jsonResultFactory
      * @param \Balancepay\Balancepay\Model\ChargedProcessor $chargedProcessor
      * @param \Balancepay\Balancepay\Model\ConfirmedProcessor $confirmedProcessor
+     * @param \Balancepay\Balancepay\Model\QueueProcessor $queueProcessor
      */
     public function __construct(
         OrderFactory $orderFactory,
         Config $balancepayConfig,
         JsonFactory $jsonResultFactory,
         ChargedProcessor $chargedProcessor,
-        ConfirmedProcessor $confirmedProcessor
+        ConfirmedProcessor $confirmedProcessor,
+        QueueProcessor $queueProcessor
     ) {
         $this->orderFactory = $orderFactory;
         $this->balancepayConfig = $balancepayConfig;
         $this->jsonResultFactory = $jsonResultFactory;
         $this->chargedProcessor = $chargedProcessor;
         $this->confirmedProcessor = $confirmedProcessor;
+        $this->queueProcessor = $queueProcessor;
     }
 
     /**
@@ -113,7 +99,7 @@ class WebhookProcessor
             $order = $this->orderFactory->create()->loadByIncrementId($externalReferenceId);
 
             if (!$order || !$order->getId()) {
-                $this->addToQueue($params, $webhookName);
+                $this->queueProcessor->addToQueue($params, $webhookName);
                 throw new LocalizedException(new Phrase("No matching order!"));
             }
 
@@ -178,62 +164,5 @@ class WebhookProcessor
             );
         }
         return $params;
-    }
-
-    /**
-     * ProcessWebhookCron
-     *
-     * @param array $params
-     * @param mixed $webhook
-     * @throws LocalizedException
-     * @throws NoSuchEntityException
-     */
-    public function processWebhookCron($params, $webhook)
-    {
-        $isTransactionSuccess = false;
-        $order = $this->orderFactory->create()->loadByIncrementId((string)$params['externalReferenceId']);
-        $this->updateWebhookQueue($webhook->getEntityId(), 'status', self::IN_PROGRESS);
-        if (!$order || !$order->getId()) {
-            if ($webhook->getAttempts() >= 3) {
-                $this->updateWebhookQueue($webhook->getEntityId(), 'status', self::FAILED);
-            } else {
-                $this->updateWebhookQueue($webhook->getEntityId(), 'status', self::PENDING);
-                $attempts = $webhook->getAttempts() + 1;
-                $this->updateWebhookQueue($webhook->getEntityId(), 'attempts', $attempts);
-            }
-            throw new LocalizedException(new Phrase("No matching order!"));
-        }
-        if ($webhook->getName() == Confirmed::WEBHOOK_CONFIRMED_NAME) {
-            $isTransactionSuccess = $this->confirmedProcessor->processConfirmedWebhook($params, $order);
-        } elseif ($webhook->getName() == Charged::WEBHOOK_CHARGED_NAME) {
-            $isTransactionSuccess = $this->chargedProcessor->processChargedWebhook($params, $order);
-        }
-        if ($isTransactionSuccess) {
-            $webhook->delete();
-        }
-    }
-
-    /**
-     * UpdateWebhookQueue
-     *
-     * @param int $id
-     * @param mixed $field
-     * @param mixed $value
-     * @return bool
-     * @throws NoSuchEntityException
-     */
-    public function updateWebhookQueue($id, $field, $value)
-    {
-        try {
-            $webhookModel = $this->webhookFactory->create()->load($id, 'entity_id');
-            $entityId = $webhookModel->getEntityId();
-            $webhookModel->setData([
-                'entity_id' => $entityId,
-                $field => $value
-            ])->save();
-        } catch (\Exception $e) {
-            $this->balancepayConfig->log($e->getMessage());
-        }
-        return true;
     }
 }

@@ -3,29 +3,23 @@
 namespace Balancepay\Balancepay\Cron;
 
 use Balancepay\Balancepay\Model\Config;
-use Balancepay\Balancepay\Model\WebhookFactory;
+use Balancepay\Balancepay\Model\QueueFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Serialize\Serializer\Json;
-use Balancepay\Balancepay\Model\WebhookProcessor;
+use Balancepay\Balancepay\Model\QueueProcessor;
 
-class Webhook
+class BalanceQueue
 {
-
-    /**
-     * @var WebhookFactory
-     */
-    protected $webhookFactory;
-
     /**
      * @var Json
      */
     private $json;
 
     /**
-     * @var WebhookProcessor
+     * @var QueueProcessor
      */
-    private $webhookProcessor;
+    private $queueProcessor;
 
     /**
      * @var Config
@@ -33,19 +27,26 @@ class Webhook
     protected $balancepayConfig;
 
     /**
-     * @param WebhookProcessor $webhookProcessor
-     * @param WebhookFactory $webhookFactory
+     * @var QueueFactory
+     */
+    private $queueFactory;
+
+    /**
+     * Queue constructor.
+     *
+     * @param QueueProcessor $queueProcessor
+     * @param QueueFactory $queueFactory
      * @param Json $json
      * @param Config $balancepayConfig
      */
     public function __construct(
-        WebhookProcessor $webhookProcessor,
-        WebhookFactory $webhookFactory,
+        QueueProcessor $queueProcessor,
+        QueueFactory $queueFactory,
         Json $json,
         Config $balancepayConfig
     ) {
-        $this->webhookProcessor = $webhookProcessor;
-        $this->webhookFactory = $webhookFactory;
+        $this->queueProcessor = $queueProcessor;
+        $this->queueFactory = $queueFactory;
         $this->json = $json;
         $this->balancepayConfig = $balancepayConfig;
     }
@@ -58,12 +59,12 @@ class Webhook
      */
     public function execute()
     {
-        $webhookCollection = $this->webhookFactory->create()->getCollection();
-        $webhookCollection->addFieldToFilter('status', ['eq' => WebhookProcessor::PENDING]);
-        foreach ($webhookCollection as $webhook) {
-            $params = (array)$this->json->unserialize($webhook->getPayload());
+        $queueCollection = $this->queueFactory->create()->getCollection();
+        $queueCollection->addFieldToFilter('status', ['eq' => QueueProcessor::PENDING]);
+        foreach ($queueCollection as $queue) {
+            $params = (array)$this->json->unserialize($queue->getPayload());
             try {
-                $this->webhookProcessor->processWebhookCron($params, $webhook);
+                $this->queueProcessor->processQueueCron($params, $queue);
             } catch (LocalizedException $e) {
                 $this->balancepayConfig->log($e->getMessage());
             }
