@@ -1,17 +1,12 @@
 <?php
-
 namespace Balancepay\Balancepay\Model;
 
 use Balancepay\Balancepay\Controller\Webhook\Checkout\Charged;
 use Balancepay\Balancepay\Controller\Webhook\Transaction\Confirmed;
-use Balancepay\Balancepay\Model\QueueFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Balancepay\Balancepay\Model\ChargedProcessor;
-use Balancepay\Balancepay\Model\ConfirmedProcessor;
 use Magento\Framework\Phrase;
 use Magento\Framework\Serialize\Serializer\Json;
-use Balancepay\Balancepay\Model\Config;
 use Magento\Sales\Model\OrderFactory;
 
 class QueueProcessor
@@ -19,17 +14,17 @@ class QueueProcessor
     /**
      * Pending
      */
-    public const PENDING = 0;
+    public const PENDING = 'pending';
 
     /**
      * Inprogress
      */
-    public const IN_PROGRESS = 1;
+    public const IN_PROGRESS = 'in_progress';
 
     /**
      * Failed
      */
-    public const FAILED = 3;
+    public const FAILED = 'failed';
 
     /**
      * @var \Balancepay\Balancepay\Model\QueueFactory
@@ -45,14 +40,17 @@ class QueueProcessor
      * @var Config
      */
     private $balancepayConfig;
+
     /**
      * @var OrderFactory
      */
     private $orderFactory;
+
     /**
      * @var ChargedProcessor
      */
     private $chargedProcessor;
+
     /**
      * @var ConfirmedProcessor
      */
@@ -87,8 +85,9 @@ class QueueProcessor
     /**
      * AddToQueue
      *
-     * @param array $params
-     * @param string $name
+     * @param $params
+     * @param $name
+     * @return void
      * @throws \Exception
      */
     public function addToQueue($params, $name)

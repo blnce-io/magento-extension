@@ -15,7 +15,6 @@ use Balancepay\Balancepay\Helper\Data as HelperData;
 use Balancepay\Balancepay\Lib\Http\Client\Curl;
 use Balancepay\Balancepay\Model\AbstractRequest;
 use Balancepay\Balancepay\Model\Config;
-use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Balancepay\Balancepay\Model\Response\Factory as ResponseFactory;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Customer\Api\AccountManagementInterface;
