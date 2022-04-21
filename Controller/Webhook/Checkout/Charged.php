@@ -107,7 +107,7 @@ class Charged extends Action implements CsrfAwareActionInterface
             'content' => $content,
             'headers' => $headers,
         ]);
-        return $this->webhookProcessor->processWebhook($content, $headers, self::WEBHOOK_CHARGED_NAME);
+        return $this->webhookRequestProcessor->process($content, $headers, self::WEBHOOK_CHARGED_NAME);
     }
 
     /**

@@ -99,7 +99,7 @@ class Confirmed extends Action implements CsrfAwareActionInterface
         $this->json = $json;
         $this->orderFactory = $orderFactory;
         $this->helperData = $helperData;
-        $this->webhookProcessor = $webhookProcessor;
+        $this->webhookRequestProcessor = $webhookRequestProcessor;
     }
 
     /**
@@ -120,7 +120,7 @@ class Confirmed extends Action implements CsrfAwareActionInterface
             'content' => $content,
             'headers' => $headers,
         ]);
-        return $this->webhookProcessor->processWebhook($content, $headers, self::WEBHOOK_CONFIRMED_NAME);
+        return $this->webhookRequestProcessor->process($content, $headers, self::WEBHOOK_CONFIRMED_NAME);
     }
 
     /**
