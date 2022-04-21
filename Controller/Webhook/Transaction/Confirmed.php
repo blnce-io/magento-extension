@@ -24,7 +24,7 @@ use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Serialize\Serializer\Json;
-use Balancepay\Balancepay\Model\WebhookProcessor;
+use Balancepay\Balancepay\Model\WebhookRequestProcessor;
 use Magento\Sales\Model\OrderFactory;
 use Balancepay\Balancepay\Helper\Data;
 

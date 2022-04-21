@@ -21,7 +21,7 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
-use Balancepay\Balancepay\Model\WebhookProcessor;
+use Balancepay\Balancepay\Model\WebhookRequestProcessor;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Sales\Model\OrderFactory;
 
