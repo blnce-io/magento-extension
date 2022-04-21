@@ -35,50 +35,45 @@ class ChargedProcessor
      */
     public function processChargedWebhook($params, $order)
     {
-        try {
-            $chargeId = (string)$params['chargeId'];
-            $amount = (float)$params['amount'];
-            $orderPayment = $order->getPayment();
+        $chargeId = (string)$params['chargeId'];
+        $amount = (float)$params['amount'];
+        $orderPayment = $order->getPayment();
 
-            $balancepayChargeId = $orderPayment
-                ->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID);
+        $balancepayChargeId = $orderPayment
+            ->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID);
 
-            $isBalancepayAuthCheckout = $orderPayment
-                ->getAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_AUTH_CHECKOUT);
+        $isBalancepayAuthCheckout = $orderPayment
+            ->getAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_AUTH_CHECKOUT);
 
-            if (\strpos($balancepayChargeId, $chargeId) === false) {
-                if (!$isBalancepayAuthCheckout
-                    && round((float)$order->getBaseGrandTotal()) !== round($amount)) {
-                    $orderPayment->setIsFraudDetected(true)->save();
-                    $order->setStatus(Order::STATUS_FRAUD)->save();
-                    throw new LocalizedException(new Phrase("The charged amount doesn't match the order total!"));
-                }
-
-                $orderPayment
-                    ->setTransactionId($orderPayment
-                        ->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHECKOUT_TRANSACTION_ID))
-                    ->setIsTransactionPending(false)
-                    ->setIsTransactionClosed(true)
-                    ->setAdditionalInformation(
-                        BalancepayMethod::BALANCEPAY_CHARGE_ID,
-                        $orderPayment->getAdditionalInformation(
-                            BalancepayMethod::BALANCEPAY_CHARGE_ID,
-                            $chargeId
-                        ) . " \n" . $chargeId
-                    );
-
-                if (!$isBalancepayAuthCheckout) {
-                    $orderPayment->capture(null);
-                }
-                $orderPayment->save();
-                $order->save();
-                return true;
-            } elseif ($chargeId !== (string) $balancepayChargeId) {
-                throw new LocalizedException(new Phrase("Charge ID mismatch!"));
+        if (\strpos($balancepayChargeId, $chargeId) === false) {
+            if (!$isBalancepayAuthCheckout
+                && round((float)$order->getBaseGrandTotal()) !== round($amount)) {
+                $orderPayment->setIsFraudDetected(true)->save();
+                $order->setStatus(Order::STATUS_FRAUD)->save();
+                throw new LocalizedException(new Phrase("The charged amount doesn't match the order total!"));
             }
-        } catch (\Exception $e) {
-            $this->balancepayConfig->log($e->getMessage());
-            return false;
+
+            $orderPayment
+                ->setTransactionId($orderPayment
+                    ->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHECKOUT_TRANSACTION_ID))
+                ->setIsTransactionPending(false)
+                ->setIsTransactionClosed(true)
+                ->setAdditionalInformation(
+                    BalancepayMethod::BALANCEPAY_CHARGE_ID,
+                    $orderPayment->getAdditionalInformation(
+                        BalancepayMethod::BALANCEPAY_CHARGE_ID,
+                        $chargeId
+                    ) . " \n" . $chargeId
+                );
+
+            if (!$isBalancepayAuthCheckout) {
+                $orderPayment->capture(null);
+            }
+            $orderPayment->save();
+            $order->save();
+            return true;
+        } elseif ($chargeId !== (string) $balancepayChargeId) {
+            throw new LocalizedException(new Phrase("Charge ID mismatch!"));
         }
     }
 }

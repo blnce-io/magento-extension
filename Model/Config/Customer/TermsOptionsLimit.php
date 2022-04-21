@@ -12,6 +12,8 @@ class TermsOptionsLimit extends Value
     public const TERMS_LIMIT = 3;
 
     /**
+     * BeforeSave
+     *
      * @return TermsOptionsLimit|void
      * @throws LocalizedException
      */

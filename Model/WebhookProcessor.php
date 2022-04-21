@@ -16,7 +16,7 @@ use Magento\Framework\Webapi\Response;
 use Magento\Sales\Model\OrderFactory;
 use Balancepay\Balancepay\Model\QueueProcessor;
 
-class WebhookProcessor
+class WebhookRequestProcessor
 {
 
     /**
@@ -89,46 +89,17 @@ class WebhookProcessor
      * @return \Magento\Framework\Controller\Result\Json
      * @throws NoSuchEntityException
      */
-    public function processWebhook($content, $headers, $webhookName)
+    public function process($content, $headers, $webhookName)
     {
-        $resBody = [];
         try {
             $params = $this->validateSignature($content, $headers, $webhookName);
-            $externalReferenceId = (string)$params['externalReferenceId'];
-
-            $order = $this->orderFactory->create()->loadByIncrementId($externalReferenceId);
-
-            if (!$order || !$order->getId()) {
-                $this->queueProcessor->addToQueue($params, $webhookName);
-                throw new LocalizedException(new Phrase("No matching order!"));
-            }
-
-            if ($webhookName == Confirmed::WEBHOOK_CONFIRMED_NAME) {
-                $this->confirmedProcessor->processConfirmedWebhook($params, $order);
-            } elseif ($webhookName == Charged::WEBHOOK_CHARGED_NAME) {
-                $this->chargedProcessor->processChargedWebhook($params, $order);
-            }
-
-            $resBody = [
-                "error" => 0,
-                "message" => "Success",
-                "order" => $order->getIncrementId()
-            ];
-
+            $this->queueProcessor->addToQueue($params, $webhookName);
+            return $this->jsonResultFactory->create()->setHttpResponseCode(Response::HTTP_OK);
         } catch (\Exception $e) {
             $this->balancepayConfig->log('Webhook
             [Exception: ' . $e->getMessage() . "]\n" . $e->getTraceAsString(), 'error');
-            $resBody = [
-                "error" => 1,
-                "message" => $e->getMessage(),
-            ];
-            if ($this->balancepayConfig->isDebugEnabled()) {
-                $resBody["trace"] = $e->getTraceAsString();
-            }
+            return $this->jsonResultFactory->create()->setHttpResponseCode(Response::STATUS_CODE_400);
         }
-        return $this->jsonResultFactory->create()
-            ->setHttpResponseCode(Response::HTTP_OK)
-            ->setData($resBody);
     }
 
     /**

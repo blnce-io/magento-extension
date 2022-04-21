@@ -105,9 +105,9 @@ class QueueProcessor
     /**
      * UpdateWebhookQueue
      *
-     * @param $id
-     * @param $field
-     * @param $value
+     * @param int $id
+     * @param string $field
+     * @param mixed $value
      * @return bool
      * @throws NoSuchEntityException
      */
@@ -127,35 +127,43 @@ class QueueProcessor
     }
 
     /**
-     * ProcessQueueCron
+     * ProcessJob
      *
-     * @param $params
-     * @param $queue
-     * @throws LocalizedException
+     * @param string $job
+     * @return void
      * @throws NoSuchEntityException
      */
-    public function processQueueCron($params, $queue)
+    public function processJob($job)
     {
-        $isTransactionSuccess = false;
-        $order = $this->orderFactory->create()->loadByIncrementId((string)$params['externalReferenceId']);
-        $this->updateWebhookQueue($queue->getEntityId(), 'status', self::IN_PROGRESS);
-        if (!$order || !$order->getId()) {
-            if ($queue->getAttempts() >= 3) {
-                $this->updateWebhookQueue($queue->getEntityId(), 'status', self::FAILED);
-            } else {
-                $this->updateWebhookQueue($queue->getEntityId(), 'status', self::PENDING);
-                $attempts = $queue->getAttempts() + 1;
-                $this->updateWebhookQueue($queue->getEntityId(), 'attempts', $attempts);
+        try {
+            $isJobComplete = false;
+            $jobName = $job->getName();
+            $jobAttempts = $job->getAttempts();
+            $jobEntityId = $job->getEntityId();
+            $jobPayload = $job->getPayload();
+            $params = (array)$this->json->unserialize($jobPayload);
+            $order = $this->orderFactory->create()->loadByIncrementId((string)$params['externalReferenceId']);
+            if (!$order || !$order->getId()) {
+                throw new LocalizedException(new Phrase("No matching order!"));
             }
-            throw new LocalizedException(new Phrase("No matching order!"));
-        }
-        if ($queue->getName() == Confirmed::WEBHOOK_CONFIRMED_NAME) {
-            $isTransactionSuccess = $this->confirmedProcessor->processConfirmedWebhook($params, $order);
-        } elseif ($queue->getName() == Charged::WEBHOOK_CHARGED_NAME) {
-            $isTransactionSuccess = $this->chargedProcessor->processChargedWebhook($params, $order);
-        }
-        if ($isTransactionSuccess) {
-            $queue->delete();
+            $this->updateWebhookQueue($jobEntityId, 'status', self::IN_PROGRESS);
+            if ($jobName == Confirmed::WEBHOOK_CONFIRMED_NAME) {
+                $isJobComplete = $this->confirmedProcessor->processConfirmedWebhook($params, $order);
+            } elseif ($jobName == Charged::WEBHOOK_CHARGED_NAME) {
+                $isJobComplete = $this->chargedProcessor->processChargedWebhook($params, $order);
+            }
+            if ($isJobComplete) {
+                $job->delete();
+            }
+        } catch (\Exception $e) {
+            $this->balancepayConfig->log($jobName.' Job Failed, Attempts - '.$jobAttempts.'
+            [Exception: ' . $e->getMessage() . "]\n" . $e->getTraceAsString(), 'error');
+            if ($jobAttempts >= 3) {
+                $this->updateWebhookQueue($jobEntityId, 'status', self::FAILED);
+            } else {
+                $this->updateWebhookQueue($jobEntityId, 'status', self::PENDING);
+                $this->updateWebhookQueue($jobEntityId, 'attempts', $jobAttempts + 1);
+            }
         }
     }
 }

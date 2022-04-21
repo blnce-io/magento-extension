@@ -61,13 +61,8 @@ class BalanceQueue
     {
         $queueCollection = $this->queueFactory->create()->getCollection();
         $queueCollection->addFieldToFilter('status', ['eq' => QueueProcessor::PENDING]);
-        foreach ($queueCollection as $queue) {
-            $params = (array)$this->json->unserialize($queue->getPayload());
-            try {
-                $this->queueProcessor->processQueueCron($params, $queue);
-            } catch (LocalizedException $e) {
-                $this->balancepayConfig->log($e->getMessage());
-            }
+        foreach ($queueCollection as $job) {
+            $this->queueProcessor->processJob($job);
         }
     }
 }
