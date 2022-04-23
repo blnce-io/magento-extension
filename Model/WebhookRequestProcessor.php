@@ -54,23 +54,15 @@ class WebhookRequestProcessor
      */
     private $queueProcessor;
 
-    /**
-     * WebhookProcessor constructor.
-     *
-     * @param OrderFactory $orderFactory
-     * @param \Balancepay\Balancepay\Model\Config $balancepayConfig
-     * @param JsonFactory $jsonResultFactory
-     * @param \Balancepay\Balancepay\Model\ChargedProcessor $chargedProcessor
-     * @param \Balancepay\Balancepay\Model\ConfirmedProcessor $confirmedProcessor
-     * @param \Balancepay\Balancepay\Model\QueueProcessor $queueProcessor
-     */
+    
     public function __construct(
         OrderFactory $orderFactory,
         Config $balancepayConfig,
         JsonFactory $jsonResultFactory,
         ChargedProcessor $chargedProcessor,
         ConfirmedProcessor $confirmedProcessor,
-        QueueProcessor $queueProcessor
+        QueueProcessor $queueProcessor,
+        Json $json
     ) {
         $this->orderFactory = $orderFactory;
         $this->balancepayConfig = $balancepayConfig;
@@ -78,6 +70,7 @@ class WebhookRequestProcessor
         $this->chargedProcessor = $chargedProcessor;
         $this->confirmedProcessor = $confirmedProcessor;
         $this->queueProcessor = $queueProcessor;
+        $this->json = $json;
     }
 
     /**
