@@ -326,8 +326,8 @@ class Config
      */
     public function getAllowedTermsPaymentMethods($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
-        return (($apm = $this->getConfigValue('net_terms_allowed_payment_methods', $scope, $storeId)) && is_string($apm))
-            ? explode(',', $apm) : [];
+        return (($allowedTerms = $this->getConfigValue('net_terms_allowed_payment_methods', $scope, $storeId))
+            && is_string($allowedTerms)) ? explode(',', $allowedTerms) : [];
     }
 
     /**
@@ -406,8 +406,8 @@ class Config
      */
     public function getMerchantTermsOptions($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
-        return (($merchantTermsOptions = $this->getConfigValue('terms_option', $scope, $storeId)) && is_string($merchantTermsOptions))
-            ? explode(',', $merchantTermsOptions) : [];
+        return (($merchantTermsOptions = $this->getConfigValue('terms_option', $scope, $storeId)) &&
+            is_string($merchantTermsOptions)) ? explode(',', $merchantTermsOptions) : [];
     }
 
     /**

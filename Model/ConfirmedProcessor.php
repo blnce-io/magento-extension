@@ -20,33 +20,29 @@ class ConfirmedProcessor
      */
     public function __construct(
         BalancepayConfig $balancepayConfig
-    )
-    {
+    ) {
         $this->balancepayConfig = $balancepayConfig;
     }
 
     /**
-     * @param $params
-     * @param $order
+     * ProcessConfirmedWebhook
+     *
+     * @param array $params
+     * @param mixed $order
      * @return bool
      * @throws NoSuchEntityException
      */
     public function processConfirmedWebhook($params, $order)
     {
-        try {
-            $isFinanced = $params['isFinanced'] ? 1 : 0;
-            $selectedPaymentMethod = (float)$params['selectedPaymentMethod'];
-            $orderPayment = $order->getPayment();
-            $orderPayment
-                ->setAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_FINANCED, $isFinanced)
-                ->setAdditionalInformation(BalancepayMethod::
-                BALANCEPAY_SELECTED_PAYMENT_METHOD, $selectedPaymentMethod);
-            $orderPayment->save();
-            $order->save();
-            return true;
-        } catch (\Exception $e) {
-            $this->balancepayConfig->log($e->getMessage());
-            return false;
-        }
+        $isFinanced = $params['isFinanced'] ? 1 : 0;
+        $selectedPaymentMethod = (float)$params['selectedPaymentMethod'];
+        $orderPayment = $order->getPayment();
+        $orderPayment
+            ->setAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_FINANCED, $isFinanced)
+            ->setAdditionalInformation(BalancepayMethod::
+            BALANCEPAY_SELECTED_PAYMENT_METHOD, $selectedPaymentMethod);
+        $orderPayment->save();
+        $order->save();
+        return true;
     }
 }

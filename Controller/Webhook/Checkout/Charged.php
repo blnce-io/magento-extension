@@ -21,7 +21,7 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
-use Balancepay\Balancepay\Model\WebhookProcessor;
+use Balancepay\Balancepay\Model\WebhookRequestProcessor;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Sales\Model\OrderFactory;
 
@@ -58,20 +58,18 @@ class Charged extends Action implements CsrfAwareActionInterface
     private $orderFactory;
 
     /**
-     * @var WebhookProcessor
+     * @var WebhookRequestProcessor
      */
-    private $webhookProcessor;
+    private $webhookRequestProcessor;
 
     /**
-     * Charged constructor.
-     *
      * @param Context $context
      * @param JsonFactory $jsonResultFactory
      * @param BalancepayConfig $balancepayConfig
      * @param RequestFactory $requestFactory
      * @param Json $json
      * @param OrderFactory $orderFactory
-     * @param WebhookProcessor $webhookProcessor
+     * @param WebhookRequestProcessor $webhookRequestProcessor
      */
     public function __construct(
         Context $context,
@@ -80,7 +78,7 @@ class Charged extends Action implements CsrfAwareActionInterface
         RequestFactory $requestFactory,
         Json $json,
         OrderFactory $orderFactory,
-        WebhookProcessor $webhookProcessor
+        WebhookRequestProcessor $webhookRequestProcessor
     ) {
         parent::__construct($context);
         $this->jsonResultFactory = $jsonResultFactory;
@@ -88,7 +86,7 @@ class Charged extends Action implements CsrfAwareActionInterface
         $this->requestFactory = $requestFactory;
         $this->json = $json;
         $this->orderFactory = $orderFactory;
-        $this->webhookProcessor = $webhookProcessor;
+        $this->webhookRequestProcessor = $webhookRequestProcessor;
     }
 
     /**
@@ -109,7 +107,7 @@ class Charged extends Action implements CsrfAwareActionInterface
             'content' => $content,
             'headers' => $headers,
         ]);
-        $this->webhookProcessor->processWebhook($content, $headers, self::WEBHOOK_CHARGED_NAME);
+        return $this->webhookRequestProcessor->process($content, $headers, self::WEBHOOK_CHARGED_NAME);
     }
 
     /**

@@ -18,11 +18,13 @@ use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\CsrfAwareActionInterface;
 use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\App\RequestInterface;
+use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Serialize\Serializer\Json;
-use Balancepay\Balancepay\Model\WebhookProcessor;
+use Balancepay\Balancepay\Model\WebhookRequestProcessor;
 use Magento\Sales\Model\OrderFactory;
 use Balancepay\Balancepay\Helper\Data;
 
@@ -64,9 +66,9 @@ class Confirmed extends Action implements CsrfAwareActionInterface
     private $helperData;
 
     /**
-     * @var WebhookProcessor
+     * @var WebhookRequestProcessor
      */
-    private $webhookProcessor;
+    private $webhookRequestProcessor;
 
     /**
      * Confirmed constructor.
@@ -78,7 +80,7 @@ class Confirmed extends Action implements CsrfAwareActionInterface
      * @param Json $json
      * @param OrderFactory $orderFactory
      * @param Data $helperData
-     * @param WebhookProcessor $webhookProcessor
+     * @param WebhookRequestProcessor $webhookRequestProcessor
      */
     public function __construct(
         Context $context,
@@ -88,7 +90,7 @@ class Confirmed extends Action implements CsrfAwareActionInterface
         Json $json,
         OrderFactory $orderFactory,
         Data $helperData,
-        WebhookProcessor $webhookProcessor
+        WebhookRequestProcessor $webhookRequestProcessor
     ) {
         parent::__construct($context);
         $this->jsonResultFactory = $jsonResultFactory;
@@ -97,14 +99,14 @@ class Confirmed extends Action implements CsrfAwareActionInterface
         $this->json = $json;
         $this->orderFactory = $orderFactory;
         $this->helperData = $helperData;
-        $this->webhookProcessor = $webhookProcessor;
+        $this->webhookRequestProcessor = $webhookRequestProcessor;
     }
 
     /**
      * Execute
      *
-     * @return \Magento\Framework\App\ResponseInterface|ResultInterface
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @return ResponseInterface|ResultInterface
+     * @throws NoSuchEntityException
      */
     public function execute()
     {
@@ -118,7 +120,7 @@ class Confirmed extends Action implements CsrfAwareActionInterface
             'content' => $content,
             'headers' => $headers,
         ]);
-        $this->webhookProcessor->processWebhook($content, $headers, self::WEBHOOK_CONFIRMED_NAME);
+        return $this->webhookRequestProcessor->process($content, $headers, self::WEBHOOK_CONFIRMED_NAME);
     }
 
     /**

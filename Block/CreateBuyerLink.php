@@ -5,10 +5,6 @@ use Magento\Backend\Block\Template;
 use Magento\Framework\View\Element\Html\Link;
 use Balancepay\Balancepay\Helper\Data as BalancepayHelper;
 
-/**
- * Class CreateBuyerLink
- * @package Balancepay\Balancepay\Block
- */
 class CreateBuyerLink extends \Magento\Framework\View\Element\Template
 {
     /**

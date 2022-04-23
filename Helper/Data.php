@@ -12,7 +12,6 @@ use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Http\Context;
 use Magento\Framework\Message\ManagerInterface as MessageManagerInterface;
 use Magento\Framework\Pricing\Helper\Data as PricingHelper;
-use Balancepay\Balancepay\Model\WebhookFactory;
 
 class Data extends AbstractHelper
 {
@@ -25,11 +24,6 @@ class Data extends AbstractHelper
      * @var TypeListInterface
      */
     protected $cacheTypeList;
-
-    /**
-     * @var WebhookFactory
-     */
-    protected $webhookFactory;
 
     /**
      * @var MessageManagerInterface

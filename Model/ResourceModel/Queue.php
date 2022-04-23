@@ -3,7 +3,7 @@ namespace Balancepay\Balancepay\Model\ResourceModel;
 
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 
-class Webhook extends AbstractDb
+class Queue extends AbstractDb
 {
     /**
      * Construct function
@@ -12,6 +12,6 @@ class Webhook extends AbstractDb
      */
     protected function _construct()
     {
-        $this->_init('webhook_queue', 'entity_id');
+        $this->_init('balance_queue', 'entity_id');
     }
 }
