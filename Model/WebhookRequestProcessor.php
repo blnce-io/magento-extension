@@ -54,7 +54,15 @@ class WebhookRequestProcessor
      */
     private $queueProcessor;
 
-    
+    /**
+     * @param OrderFactory $orderFactory
+     * @param Config $balancepayConfig
+     * @param JsonFactory $jsonResultFactory
+     * @param ChargedProcessor $chargedProcessor
+     * @param ConfirmedProcessor $confirmedProcessor
+     * @param QueueProcessor $queueProcessor
+     * @param Json $json
+     */
     public function __construct(
         OrderFactory $orderFactory,
         Config $balancepayConfig,
