@@ -85,8 +85,8 @@ class QueueProcessor
     /**
      * AddToQueue
      *
-     * @param $params
-     * @param $name
+     * @param array $params
+     * @param string $name
      * @return void
      * @throws \Exception
      */
