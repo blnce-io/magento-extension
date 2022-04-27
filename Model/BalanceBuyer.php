@@ -86,30 +86,6 @@ class BalanceBuyer
     }
 
     /**
-     * GetBuyerFromTransaction
-     *
-     * @param mixed $transactionId
-     */
-    public function getBuyerFromTransaction($transactionId)
-    {
-        try {
-            $response = $this->requestFactory
-                ->create(RequestFactory::TRANSACTIONS_REQUEST_METHOD)
-                ->setRequestMethod('transactions/' . $transactionId)
-                ->setTopic('gettransactionid')
-                ->process();
-            if (!empty($response->getBuyerId())) {
-                $this->updateCustomerBalanceBuyerId($response->getBuyerId());
-            }
-        } catch (\Exception $e) {
-            $this->balancepayConfig->log('Could not attach buyer id to the customer', 'debug', [
-                'ExceptionMessage' => $e->getMessage(),
-                'TraceAsString' => $e->getTraceAsString()
-            ]);
-        }
-    }
-
-    /**
      * Update Buyer Id
      *
      * @param mixed $buyerId

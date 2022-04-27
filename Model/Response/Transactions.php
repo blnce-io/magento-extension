@@ -47,7 +47,7 @@ class Transactions extends AbstractResponse
         $body = $this->getBody();
         $this->_token = isset($body['token']) ? $body['token'] : '';
         $this->_transactionId = isset($body['id']) ? $body['id'] : null;
-        $this->_buyerId = isset($body['buyer']['id']) ? $body['buyer']['id'] : null;
+        $this->_buyerId = isset($body['buyerId']) ? $body['buyerId'] : null;
 
         return $this;
     }

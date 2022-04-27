@@ -119,12 +119,13 @@ class Token extends Action
                 ->process();
             $token = $result->getToken();
             $transactionId = $result->getTransactionId();
+            $buyerId = $result->getBuyerId();
 
-            if ($transactionId &&
+            if ($buyerId &&
                 $this->customerSession->isLoggedIn() &&
                 empty($this->balanceBuyer->getCustomerBalanceBuyerId())
             ) {
-                $this->balanceBuyer->getBuyerFromTransaction($transactionId);
+                $this->balanceBuyer->updateCustomerBalanceBuyerId($buyerId);
             }
 
             $this->checkoutSession->setBalanceCheckoutToken($token);
