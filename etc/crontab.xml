@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
+    <group id="balancepay_balancequeues">
+        <job instance="Balancepay\Balancepay\Cron\BalanceQueue" method="execute" name="balance_queue_cron">
+            <schedule>* * * * *</schedule>
+        </job>
+    </group>
+</config>
