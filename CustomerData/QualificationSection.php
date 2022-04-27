@@ -49,7 +49,7 @@ class QualificationSection implements SectionSourceInterface
         $showButton = true;
         $showCredit = false;
         $creditLimit = '$0.00';
-        $buyerResponse = $this->balancepayHelper->getBuyerDetails();
+        $buyerResponse = $this->balancepayHelper->getBuyerAmount();
         if (!empty($buyerResponse['qualificationStatus']) && $buyerResponse['qualificationStatus'] == 'completed') {
             $status = true;
             $showButton = false;

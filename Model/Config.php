@@ -94,7 +94,8 @@ class Config
         LoggerInterface $logger,
         UrlInterface $urlBuilder,
         DateTime $dateTime
-    ) {
+    )
+    {
         $this->scopeConfig = $scopeConfig;
         $this->resourceConfig = $resourceConfig;
         $this->storeManager = $storeManager;
@@ -145,6 +146,19 @@ class Config
             $scope,
             $storeId
         );
+    }
+
+    /**
+     * Get AllowedTermsPaymentMethods
+     *
+     * @param string $scope
+     * @param int $storeId
+     * @return array|string[]
+     */
+    public function getAllowedTermsPaymentMethods($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
+    {
+        return (($apm = $this->getConfigValue('net_terms_allowed_payment_methods', $scope, $storeId)) && is_string($apm))
+            ? explode(',', $apm) : [];
     }
 
     /**

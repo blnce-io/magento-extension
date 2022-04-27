@@ -22,7 +22,10 @@ use Magento\Customer\Api\AccountManagementInterface;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\Session;
 use Magento\Directory\Model\RegionFactory;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Model\Cart\CartTotalRepository;
+use Balancepay\Balancepay\Model\BalanceBuyer;
 use Magento\Quote\Model\Quote;
 
 /**
@@ -51,6 +54,23 @@ class Transactions extends AbstractRequest
     protected $customerSession;
 
     /**
+     * @var topic
+     */
+    private $_topic;
+
+    /**
+     * @var string
+     */
+    private $requestMethod;
+
+    /**
+     * @var BalanceBuyer
+     */
+    private $balanceBuyer;
+
+    /**
+     * Transactions constructor.
+     *
      * @param Config $balancepayConfig
      * @param Curl $curl
      * @param ResponseFactory $responseFactory
@@ -61,6 +81,7 @@ class Transactions extends AbstractRequest
      * @param RegionFactory $region
      * @param CustomerRepositoryInterface $customerRepository
      * @param Session $customerSession
+     * @param BalanceBuyer $balanceBuyer
      */
     public function __construct(
         Config $balancepayConfig,
@@ -72,7 +93,8 @@ class Transactions extends AbstractRequest
         AccountManagementInterface $accountManagement,
         RegionFactory $region,
         CustomerRepositoryInterface $customerRepository,
-        Session $customerSession
+        Session $customerSession,
+        BalanceBuyer $balanceBuyer
     ) {
         parent::__construct(
             $balancepayConfig,
@@ -87,16 +109,39 @@ class Transactions extends AbstractRequest
         $this->_cartTotalRepository = $cartTotalRepository;
         $this->customerRepository = $customerRepository;
         $this->customerSession = $customerSession;
+        $this->balanceBuyer = $balanceBuyer;
     }
 
     /**
-     * @inheritdoc
+     * GetRequestMethod
      *
      * @return string
      */
-    protected function getRequestMethod()
+    public function getRequestMethod()
     {
-        return RequestFactory::TRANSACTIONS_REQUEST_METHOD;
+        return $this->requestMethod;
+    }
+
+    /**
+     * Set curl method
+     *
+     * @param string $requestMethod
+     * @return mixed|string
+     */
+    public function setRequestMethod($requestMethod)
+    {
+        $this->requestMethod = $requestMethod;
+        return $this;
+    }
+
+    /**
+     * Get topic
+     *
+     * @return string
+     */
+    public function getTopic()
+    {
+        return $this->_topic;
     }
 
     /**
@@ -110,13 +155,44 @@ class Transactions extends AbstractRequest
     }
 
     /**
+     * Set topic
+     *
+     * @param string $topic
+     * @return $this
+     */
+    public function setTopic($topic)
+    {
+        $this->_topic = (string)$topic;
+        return $this;
+    }
+
+    /**
+     * GetCurlMethod
+     *
+     * @return string
+     * @throws PaymentException
+     */
+    protected function getCurlMethod()
+    {
+        if ($this->_topic == 'gettransactionid') {
+            return 'get';
+        }
+        return 'post';
+    }
+
+    /**
      * Return request params.
      *
      * @return array
      */
     protected function getParams()
     {
-        $termsOptions = [];
+        if ($this->_topic == 'gettransactionid') {
+            return array_replace_recursive(
+                parent::getParams(),
+                []
+            );
+        }
         $quote = $this->_checkoutSession->getQuote();
         $quote->collectTotals();
         $requiresShipping = $quote->getShippingAddress() !== null ? 1 : 0;
@@ -152,6 +228,7 @@ class Transactions extends AbstractRequest
                 'billingAddress' => $this->getBillingAddressParams($quote),
                 'shippingAddress' => $this->getShippingAddressParams($quote),
                 'allowedPaymentMethods' => $this->_balancepayConfig->getAllowedPaymentMethods(),
+                'allowedTermsPaymentMethods' => $this->_balancepayConfig->getAllowedTermsPaymentMethods(),
             ]
         );
     }
@@ -165,15 +242,20 @@ class Transactions extends AbstractRequest
     protected function getBuyerParams(Quote $quote)
     {
         $params = [];
+        $customerBuyerId = $this->balanceBuyer->getCustomerBalanceBuyerId();
+        $isLoggedIn = $this->customerSession->isLoggedIn();
 
         if (($billing = $quote->getBillingAddress()) !== null && $billing->getEmail()) {
-            $params['email'] = $billing->getEmail();
+            $email = $billing->getEmail();
         } else {
-            $params['email'] = $quote->getCustomerEmail() ?: $this->getFallbackEmail();
+            $email = $quote->getCustomerEmail() ?: $this->getFallbackEmail();
         }
-
-        $params['isRegistered'] = $quote->getCustomerIsGuest() ? false : true;
-
+        if ($isLoggedIn && $customerBuyerId != null) {
+            $params['id'] = $customerBuyerId;
+        } else {
+            $params['email'] = $email;
+            $params['isRegistered'] = false;
+        }
         return $params;
     }
 
@@ -182,8 +264,8 @@ class Transactions extends AbstractRequest
      *
      * @param int $customerId
      * @return array|string[]
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
     public function getCustomerTermsOptions($customerId)
     {

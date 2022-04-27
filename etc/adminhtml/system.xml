@@ -10,35 +10,43 @@
  * @author   Company: Girit-Interactive (https://www.girit-tech.com/)
  */
 -->
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
     <system>
         <section id="payment">
-            <group id="balancepay" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+            <group id="balancepay" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1"
+                   showInStore="1">
                 <label>Balance Payments</label>
-                <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1"
+                       showInStore="1" canRestore="1">
                     <label>Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <config_path>payment/balancepay/active</config_path>
                 </field>
-                <field id="payments_terms" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                <field id="payments_terms" translate="label" type="select" sortOrder="10" showInDefault="1"
+                       showInWebsite="1" showInStore="1" canRestore="1">
                     <label>Payments Terms</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <config_path>payment/balancepay/payments_terms</config_path>
                 </field>
-                <field id="module_version" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="module_version" translate="label" type="text" sortOrder="15" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
                     <label>Module Version</label>
                     <frontend_model>Balancepay\Balancepay\Block\Adminhtml\System\Config\ModuleVersion</frontend_model>
                 </field>
-                <field id="title" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                <field id="title" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1"
+                       showInStore="1" canRestore="1">
                     <label>Title</label>
                     <config_path>payment/balancepay/title</config_path>
                 </field>
-                <field id="mode" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                <field id="mode" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1"
+                       showInStore="1" canRestore="1">
                     <label>Mode</label>
                     <source_model>Balancepay\Balancepay\Model\Adminhtml\Source\Mode</source_model>
                     <config_path>payment/balancepay/mode</config_path>
                 </field>
-                <field id="api_key" translate="label comment" type="obscure" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                <field id="api_key" translate="label comment" type="obscure" sortOrder="40" showInDefault="1"
+                       showInWebsite="1" showInStore="1" canRestore="1">
                     <label>API Key</label>
                     <comment>Value provided by Balance.</comment>
                     <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
@@ -47,7 +55,8 @@
                         <field id="mode">live</field>
                     </depends>
                 </field>
-                <field id="sandbox_api_key" translate="label comment" type="obscure" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                <field id="sandbox_api_key" translate="label comment" type="obscure" sortOrder="50" showInDefault="1"
+                       showInWebsite="1" showInStore="1" canRestore="1">
                     <label>Sandbox API Key</label>
                     <comment>Value provided by Balance.</comment>
                     <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
@@ -56,59 +65,77 @@
                         <field id="mode">sandbox</field>
                     </depends>
                 </field>
-                <field id="logo_image" translate="label" type="image" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="logo_image" translate="label" type="image" sortOrder="60" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
                     <label>Logo Image</label>
                     <backend_model>Magento\Config\Model\Config\Backend\Image</backend_model>
                     <config_path>payment/balancepay/logo_image</config_path>
                     <upload_dir config="system/filesystem/media" scope_info="1">balancepay</upload_dir>
                     <base_url type="media" scope_info="1">balancepay</base_url>
                 </field>
-                <field id="is_auth" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                <field id="is_auth" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="1"
+                       showInStore="1" canRestore="1">
                     <label>Use Auth/Capture (isAuth)</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <config_path>payment/balancepay/is_auth</config_path>
                 </field>
-                <field id="allowed_customer_groups" translate="label" type="multiselect" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                <field id="allowed_customer_groups" translate="label" type="multiselect" sortOrder="80"
+                       showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                     <label>Allowed Customer Groups</label>
                     <comment>Customer Groups that are allowed to use Balance payment method.</comment>
                     <source_model>Magento\Customer\Model\Config\Source\Group\Multiselect</source_model>
                     <config_path>payment/balancepay/allowed_customer_groups</config_path>
                 </field>
-                <field id="allowed_payment_methods" translate="label" type="multiselect" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                <field id="allowed_payment_methods" translate="label" type="multiselect" sortOrder="80"
+                       showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                     <label>Allowed Payment Methods</label>
                     <comment>Payment methods that should be displayed on the Balance payment popup.</comment>
                     <source_model>Balancepay\Balancepay\Model\Adminhtml\Source\AllowedPaymentMethods</source_model>
                     <config_path>payment/balancepay/allowed_payment_methods</config_path>
                 </field>
-                <field id="terms_option" translate="label" type="multiselect" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="net_terms_allowed_payment_methods" translate="label" type="multiselect" sortOrder="80"
+                       showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Allowed Payment Methods: Terms</label>
+                    <comment>Payment methods enabled when the buyer is paying on net terms.</comment>
+                    <source_model>Balancepay\Balancepay\Model\Adminhtml\Source\NetTermsPaymentMethods</source_model>
+                    <config_path>payment/balancepay/net_terms_allowed_payment_methods</config_path>
+                </field>
+                <field id="terms_option" translate="label" type="multiselect" sortOrder="30" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
                     <label>Terms Options (In Days)</label>
                     <source_model>Balancepay\Balancepay\Model\Config\Customer\TermsOptions</source_model>
                     <backend_model>Balancepay\Balancepay\Model\Config\Customer\TermsOptionsLimit</backend_model>
                 </field>
-                <field id="allowspecific" translate="label" type="allowspecific" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                <field id="allowspecific" translate="label" type="allowspecific" sortOrder="90" showInDefault="1"
+                       showInWebsite="1" showInStore="1" canRestore="1">
                     <label>Payment from Applicable Countries</label>
                     <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
                     <config_path>payment/balancepay/allowspecific</config_path>
                 </field>
-                <field id="specificcountry" translate="label" type="multiselect" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="specificcountry" translate="label" type="multiselect" sortOrder="100" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
                     <label>Payment from Specific Countries</label>
                     <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
                     <config_path>payment/balancepay/specificcountry</config_path>
                 </field>
-                <field id="min_order_total" translate="label" type="text" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="min_order_total" translate="label" type="text" sortOrder="110" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
                     <label>Minimum Order Total</label>
                     <config_path>payment/balancepay/min_order_total</config_path>
                 </field>
-                <field id="max_order_total" translate="label" type="text" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="max_order_total" translate="label" type="text" sortOrder="120" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
                     <label>Maximum Order Total</label>
                     <config_path>payment/balancepay/max_order_total</config_path>
                 </field>
-                <field id="sort_order" translate="label" type="text" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="sort_order" translate="label" type="text" sortOrder="130" showInDefault="1" showInWebsite="1"
+                       showInStore="1">
                     <label>Sort Order</label>
                     <frontend_class>validate-number</frontend_class>
                     <config_path>payment/balancepay/sort_order</config_path>
                 </field>
-                <field id="debug" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                <field id="debug" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="0"
+                       showInStore="0" canRestore="1">
                     <label>Debug</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <config_path>payment/balancepay/debug</config_path>
