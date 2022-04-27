@@ -251,6 +251,8 @@ class Transactions extends AbstractRequest
         }
         if ($isLoggedIn && $customerBuyerId != null) {
             $params['id'] = $customerBuyerId;
+        } elseif ($isLoggedIn && $customerBuyerId == null) {
+            $params['email'] = $email;
         } else {
             $params['email'] = $email;
             $params['isRegistered'] = false;
