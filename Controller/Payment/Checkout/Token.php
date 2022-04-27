@@ -16,11 +16,14 @@ use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
+use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
 use Balancepay\Balancepay\Model\BalanceBuyer;
 use Magento\Customer\Model\Session;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Webapi\Response;
 
 /**
@@ -91,9 +94,8 @@ class Token extends Action
     /**
      * Execute
      *
-     * @return ResultInterface
-     * @throws \InvalidArgumentException
-     * @throws \Exception
+     * @return ResponseInterface|Json|ResultInterface
+     * @throws NoSuchEntityException
      */
     public function execute()
     {

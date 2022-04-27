@@ -238,6 +238,8 @@ class Transactions extends AbstractRequest
      *
      * @param Quote $quote
      * @return array
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
     protected function getBuyerParams(Quote $quote)
     {
@@ -260,7 +262,7 @@ class Transactions extends AbstractRequest
     }
 
     /**
-     * getCustomerTermsOptions
+     * GetCustomerTermsOptions
      *
      * @param int $customerId
      * @return array|string[]
