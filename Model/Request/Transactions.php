@@ -138,9 +138,6 @@ class Transactions extends AbstractRequest
      */
     protected function getCurlMethod()
     {
-        if ($this->_topic == 'gettransactionid') {
-            return 'get';
-        }
         return 'post';
     }
 
@@ -183,12 +180,6 @@ class Transactions extends AbstractRequest
      */
     protected function getParams()
     {
-        if ($this->_topic == 'gettransactionid') {
-            return array_replace_recursive(
-                parent::getParams(),
-                []
-            );
-        }
         $quote = $this->_checkoutSession->getQuote();
         $quote->collectTotals();
         $requiresShipping = $quote->getShippingAddress() !== null ? 1 : 0;
@@ -251,6 +242,8 @@ class Transactions extends AbstractRequest
         }
         if ($isLoggedIn && $customerBuyerId != null) {
             $params['id'] = $customerBuyerId;
+        } elseif ($isLoggedIn && $customerBuyerId == null) {
+            $params['email'] = $email;
         } else {
             $params['email'] = $email;
             $params['isRegistered'] = false;
