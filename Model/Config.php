@@ -132,23 +132,6 @@ class Config
     }
 
     /**
-     * Update Customer Group
-     *
-     * @param string $scope
-     * @param string $value
-     * @param int $storeId
-     */
-    public function updateCustomerGroup($scope = ScopeInterface::SCOPE_STORE, $value = 0, int $storeId = 0)
-    {
-        $this->resourceConfig->saveConfig(
-            $this->getConfigPath() . 'allowed_customer_groups',
-            $value,
-            $scope,
-            $storeId
-        );
-    }
-
-    /**
      * Get AllowedTermsPaymentMethods
      *
      * @param string $scope

@@ -21,7 +21,4 @@
     <type name="Magento\Framework\App\Action\AbstractAction">
         <plugin name="customer-session-data-to-context" type="Balancepay\Balancepay\Plugin\CustomerSessionContext" sortOrder="15"/>
     </type>
-    <type name="Magento\Customer\Controller\Adminhtml\Group\Save">
-        <plugin name="customer_group_plugin" type="Balancepay\Balancepay\Plugin\Customer\Controller\Adminhtml\Group\SavePlugin"/>
-    </type>
 </config>
