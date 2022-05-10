@@ -1,0 +1,99 @@
+<?php
+$buyerIdAvailable = $block->isBuyerIdSet();
+$buyerName = $block->getBuyerId();
+
+?>
+
+<div class="balancepay_link">
+    <div class="admin__field _required">
+        <div class="admin__field-label">
+            <label>
+                <span><?= /* @noEscape */
+                    __("Buyer"); ?></span>
+            </label>
+        </div>
+
+        <div class="admin__field-control">
+            <?= $buyerName ?>
+            <a class="action action-edit-balance" href="javascript:void(0)" title="Edit Balance Buyer"></a>
+        </div>
+    </div>
+</div>
+
+<script>
+    require([
+            "jquery"
+        ],
+        function ($) {
+            "use strict";
+            var vendorIdAvailable = '<?= /* @noEscape */ $buyerIdAvailable; ?>';
+            if (vendorIdAvailable) {
+                setTimeout(function () {
+                    $('.admin__fieldset').find('[data-index="buyer_id"]').hide();
+                }, 10);
+            }
+            $(document).ready(function ($) {
+                $('.action-edit-balance').on('click', function () {
+                    $('.admin__fieldset').find('[data-index="buyer_id"]').show();
+                });
+            });
+            return;
+        });
+</script>
+<style>
+    .balancepay_link {
+        width: 100%;
+        display: inline-block;
+    }
+
+    .balancepay_link .admin__field {
+        margin-left: -30px;
+        clear: both;
+    }
+
+    .balancepay_link .enable {
+        color: #fff;
+        background: #008000b0;
+        max-width: 80px;
+        padding: 0 0;
+        text-align: center;
+        font-weight: 700;
+    }
+
+    .balancepay_link .disable {
+        color: #fff;
+        background: #ea5323;
+        max-width: 80px;
+        padding: 0 0;
+        text-align: center;
+        font-weight: 700;
+    }
+
+
+    .balancepay_link .admin__field-label, .balancepay_link .admin__field-control {
+        width: calc((100%) * .25 - 30px);
+        float: left;
+        margin-left: 30px;
+        line-height: 3.2rem;
+    }
+
+    .balancepay_link .admin__field-control a {
+        font-weight: bold;
+    }
+
+    .action-edit-balance:before {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        font-size: 18px;
+        line-height: 20px;
+        color: #757575;
+        content: '\e601';
+        font-family: 'luma-icons';
+        vertical-align: middle;
+        display: inline-block;
+        font-weight: normal;
+        overflow: hidden;
+        speak: none;
+        text-align: center;
+    }
+</style>

@@ -1,4 +1,5 @@
 <?php
+
 namespace Balancepay\Balancepay\Observer;
 
 use Magento\Customer\Model\Customer;
@@ -6,6 +7,7 @@ use Magento\Customer\Model\ResourceModel\CustomerFactory;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Indexer\Model\IndexerFactory;
+use Balancepay\Balancepay\Model\BalanceBuyer;
 
 class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
 {
@@ -25,20 +27,29 @@ class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
     protected $indexFactory;
 
     /**
+     * @var BalanceBuyer
+     */
+    private $balanceBuyer;
+
+    /**
      * BalanceAdminhtmlCustomerSaveAfterObserver constructor.
      *
      * @param Customer $customer
      * @param CustomerFactory $customerFactory
      * @param IndexerFactory $indexFactory
+     * @param BalanceBuyer $balanceBuyer
      */
     public function __construct(
         Customer $customer,
         CustomerFactory $customerFactory,
-        IndexerFactory $indexFactory
-    ) {
+        IndexerFactory $indexFactory,
+        BalanceBuyer $balanceBuyer
+    )
+    {
         $this->customer = $customer;
         $this->customerFactory = $customerFactory;
         $this->indexFactory = $indexFactory;
+        $this->balanceBuyer = $balanceBuyer;
     }
 
     /**
@@ -52,6 +63,12 @@ class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
         $customerId = $customer->getId();
         $postData = $observer->getRequest()->getPostValue();
         if (!empty($customerId)) {
+            $balanceBuyerId = $postData['buyer']['data'] ?? [];
+            if (!empty($balanceBuyerId)) {
+                if (isset($balanceBuyerId['buyer_id']) && $balanceBuyerId['buyer_id'] != '') {
+                    $this->balanceBuyer->updateBalanceBuyerId($balanceBuyerId['buyer_id'], $customerId);
+                }
+            }
             $termOptions = !empty($postData['buyer']['term_options'])
                 ? implode(',', $postData['buyer']['term_options']) : '';
             $customer = $this->customer->load($customerId);
