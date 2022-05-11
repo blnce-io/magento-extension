@@ -1,5 +1,4 @@
 <?php
-
 namespace Balancepay\Balancepay\Model;
 
 use Balancepay\Balancepay\Helper\Data as HelperData;
@@ -74,8 +73,7 @@ class BalanceBuyer
         CustomerRepositoryInterface $customerRepositoryInterface,
         LoggerInterface $logger,
         Config $balancepayConfig
-    )
-    {
+    ) {
         $this->requestFactory = $requestFactory;
         $this->customerSession = $customerSession;
         $this->helper = $helper;
@@ -102,30 +100,6 @@ class BalanceBuyer
     }
 
     /**
-     * GetBuyerFromTransaction
-     *
-     * @param mixed $transactionId
-     */
-    public function getBuyerFromTransaction($transactionId)
-    {
-        try {
-            $response = $this->requestFactory
-                ->create(RequestFactory::TRANSACTIONS_REQUEST_METHOD)
-                ->setRequestMethod('transactions/' . $transactionId)
-                ->setTopic('gettransactionid')
-                ->process();
-            if (!empty($response->getBuyerId())) {
-                $this->updateCustomerBalanceBuyerId($response->getBuyerId());
-            }
-        } catch (\Exception $e) {
-            $this->balancepayConfig->log('Could not attach buyer id to the customer', 'debug', [
-                'ExceptionMessage' => $e->getMessage(),
-                'TraceAsString' => $e->getTraceAsString()
-            ]);
-        }
-    }
-
-    /**
      * GetCustomerBalanceBuyerId
      *
      * @return mixed|string
@@ -143,39 +117,4 @@ class BalanceBuyer
         }
         return null;
     }
-
-    /**
-     * Update Buyer Id
-     *
-     * @param mixed $buyerId
-     */
-    public function updateBalanceBuyerId($buyerId, $customerId)
-    {
-        $customer = $this->customer->load($customerId);
-        $customerData = $customer->getDataModel();
-        $customerData->setCustomAttribute('buyer_id', $buyerId);
-        $customer->updateData($customerData);
-        $customerResource = $this->customerFactory->create();
-        $customerResource->saveAttribute($customer, 'buyer_id');
-    }
-
-    /**
-     * GetBalanceBuyerId
-     *
-     * @return mixed|string
-     * @throws LocalizedException
-     * @throws NoSuchEntityException
-     */
-    public function getBalanceBuyerId($customerId)
-    {
-        if ($customerId) {
-            $customer = $this->customerRepositoryInterface->getById($customerId);
-            $customerAttributeData = $customer->__toArray();
-            return isset($customerAttributeData['custom_attributes']['buyer_id']) ?
-                $customerAttributeData['custom_attributes']['buyer_id']['value'] : '';
-        }
-        return null;
-    }
-
-
 }
