@@ -1,5 +1,4 @@
 <?php
-
 namespace Balancepay\Balancepay\Observer;
 
 use Magento\Customer\Model\Customer;
@@ -44,8 +43,7 @@ class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
         CustomerFactory $customerFactory,
         IndexerFactory $indexFactory,
         BalanceBuyer $balanceBuyer
-    )
-    {
+    ) {
         $this->customer = $customer;
         $this->customerFactory = $customerFactory;
         $this->indexFactory = $indexFactory;

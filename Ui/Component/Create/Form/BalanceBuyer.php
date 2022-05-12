@@ -42,8 +42,7 @@ class BalanceBuyer implements OptionSourceInterface
         MessageManagerInterface $messageManager,
         \Balancepay\Balancepay\Model\BalanceBuyer $balanceBuyer,
         Http $request
-    )
-    {
+    ) {
         $this->balanceBuyer = $balanceBuyer;
         $this->requestFactory = $requestFactory;
         $this->messageManager = $messageManager;
@@ -70,8 +69,7 @@ class BalanceBuyer implements OptionSourceInterface
                     $options[] = ['label' => $value['email'], 'value' => $value['id']];
                 }
             }
-        } catch
-        (LocalizedException $e) {
+        } catch (LocalizedException $e) {
             $this->messageManager->addErrorMessage($e->getMessage());
         }
         return $options;

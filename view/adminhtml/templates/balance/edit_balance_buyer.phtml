@@ -8,13 +8,12 @@ $buyerName = $block->getBuyerId();
     <div class="admin__field _required">
         <div class="admin__field-label">
             <label>
-                <span><?= /* @noEscape */
-                    __("Buyer"); ?></span>
+                <span><?= /* @noEscape */ __("Buyer"); ?></span>
             </label>
         </div>
 
         <div class="admin__field-control">
-            <?= $buyerName ?>
+            <?= /* @noEscape */ $buyerName ?>
             <a class="action action-edit-balance" href="javascript:void(0)" title="Edit Balance Buyer"></a>
         </div>
     </div>

@@ -1,7 +1,4 @@
 <?php
-/**
- *
- */
 declare(strict_types=1);
 
 namespace Balancepay\Balancepay\Setup\Patch\Data;
@@ -68,8 +65,7 @@ class BuyerCustomerAttributeV2 implements DataPatchInterface
         CustomerSetupFactory $customerSetupFactory,
         SetFactory $attributeSetFactory,
         Attribute $attributeResource
-    )
-    {
+    ) {
         $this->moduleDataSetup = $moduleDataSetup;
         $this->customerSetupFactory = $customerSetupFactory;
         $this->attributeSetFactory = $attributeSetFactory;

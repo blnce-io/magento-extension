@@ -8,6 +8,7 @@ use Magento\Backend\Block\Template;
 use Balancepay\Balancepay\Model\Config;
 use Balancepay\Balancepay\Model\BalanceBuyer;
 use Magento\Framework\App\Request\Http;
+use Magento\Framework\Exception\NoSuchEntityException;
 
 class EditBalanceBuyer extends Template
 {
@@ -38,9 +39,13 @@ class EditBalanceBuyer extends Template
      */
     private $request;
 
-
     /**
-     *
+     * @param Template\Context $context
+     * @param BalanceBuyer $balanceBuyer
+     * @param RequestFactory $requestFactory
+     * @param Config $balancepayConfig
+     * @param Http $request
+     * @param array $data
      */
     public function __construct(
         Template\Context $context,
@@ -49,8 +54,7 @@ class EditBalanceBuyer extends Template
         BalancepayConfig $balancepayConfig,
         Http $request,
         array $data = []
-    )
-    {
+    ) {
         $this->balanceBuyer = $balanceBuyer;
         $this->requestFactory = $requestFactory;
         $this->balancepayConfig = $balancepayConfig;
@@ -59,9 +63,10 @@ class EditBalanceBuyer extends Template
     }
 
     /**
-     * @return mixed|string|null
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * GetBuyerId
+     *
+     * @return mixed|string
+     * @throws NoSuchEntityException
      */
     public function getBuyerId()
     {
@@ -71,9 +76,11 @@ class EditBalanceBuyer extends Template
     }
 
     /**
-     * @param $buyerId
+     * GetBuyerEmail
+     *
+     * @param mixed $buyerId
      * @return array
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws NoSuchEntityException
      */
     public function getBuyerEmail($buyerId)
     {
@@ -94,9 +101,10 @@ class EditBalanceBuyer extends Template
     }
 
     /**
+     * IsBuyerIdSet
+     *
      * @return bool
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws NoSuchEntityException
      */
     public function isBuyerIdSet()
     {
