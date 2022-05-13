@@ -85,13 +85,15 @@ class BalanceBuyer
     }
 
     /**
-     * Update Buyer Id
+     * UpdateCustomerBalanceBuyerId
      *
-     * @param mixed $buyerId
+     * @param $buyerId
+     * @param null $customerId
      */
-    public function updateCustomerBalanceBuyerId($buyerId)
+    public function updateCustomerBalanceBuyerId($buyerId, $customerId = null)
     {
-        $customer = $this->customer->load($this->customerSession->getCustomer()->getId());
+        $customerId = $customerId ?? $this->customerSession->getCustomer()->getId();
+        $customer = $this->customer->load($customerId);
         $customerData = $customer->getDataModel();
         $customerData->setCustomAttribute('buyer_id', $buyerId);
         $customer->updateData($customerData);
@@ -102,13 +104,14 @@ class BalanceBuyer
     /**
      * GetCustomerBalanceBuyerId
      *
-     * @return mixed|string
+     * @param null $customerId
+     * @return mixed|string|null
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function getCustomerBalanceBuyerId()
+    public function getCustomerBalanceBuyerId($customerId = null)
     {
-        $customerId = $this->customerSession->getCustomer()->getId();
+        $customerId = $customerId ?? $this->customerSession->getCustomer()->getId();
         if ($customerId) {
             $customer = $this->customerRepositoryInterface->getById($customerId);
             $customerAttributeData = $customer->__toArray();

@@ -63,7 +63,7 @@ class BalanceBuyer implements OptionSourceInterface
                 ->setRequestMethod('buyers')
                 ->setTopic('getbuyers')
                 ->process();
-            $buyerId = $this->balanceBuyer->getBalanceBuyerId($this->request->getParam('id'));
+            $buyerId = $this->balanceBuyer->getCustomerBalanceBuyerId($this->request->getParam('id'));
             foreach ($response as $value) {
                 if ($value['id'] != $buyerId) {
                     $options[] = ['label' => $value['email'], 'value' => $value['id']];

@@ -64,7 +64,7 @@ class BalanceAdminhtmlCustomerSaveAfterObserver implements ObserverInterface
             $balanceBuyerId = $postData['buyer']['data'] ?? [];
             if (!empty($balanceBuyerId)) {
                 if (isset($balanceBuyerId['buyer_id']) && $balanceBuyerId['buyer_id'] != '') {
-                    $this->balanceBuyer->updateBalanceBuyerId($balanceBuyerId['buyer_id'], $customerId);
+                    $this->balanceBuyer->updateCustomerBalanceBuyerId($balanceBuyerId['buyer_id'], $customerId);
                 }
             }
             $termOptions = !empty($postData['buyer']['term_options'])

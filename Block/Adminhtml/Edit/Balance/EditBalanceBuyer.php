@@ -70,7 +70,7 @@ class EditBalanceBuyer extends Template
      */
     public function getBuyerId()
     {
-        $buyerId = $this->balanceBuyer->getBalanceBuyerId($this->request->getParam('id'));
+        $buyerId = $this->balanceBuyer->getCustomerBalanceBuyerId($this->request->getParam('id'));
         $response = $this->getBuyerEmail($buyerId);
         return $response['email'] ?? '';
     }
