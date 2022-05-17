@@ -408,12 +408,12 @@ class BalancepayMethod extends AbstractMethod
             $balanceVendorId = null;
 
             foreach ($orderItems as $item) {
-                $vendorIdBySellerProduct = $this->helper->getBalanceVendor($item->getProductId());
+                $vendorIdBySellerProduct = $this->helper->getBalanceVendors($item->getProductId());
                 if ($item->getProductType() === 'configurable' && $item->getHasChildren()) {
                     foreach ($item->getChildrenItems() as $child) {
                         $child->getProduct()->load($child->getProductId());
                         if (!$vendorIdBySellerProduct) {
-                            $vendorIdBySellerProduct = $this->helper->getBalanceVendor($child->getProductId());
+                            $vendorIdBySellerProduct = $this->helper->getBalanceVendors($child->getProductId());
                         }
                         continue;
                     }
