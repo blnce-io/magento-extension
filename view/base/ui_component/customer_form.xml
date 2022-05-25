@@ -42,4 +42,11 @@
             </htmlContent>
         </container>
     </fieldset>
+    <fieldset name="customer">
+        <field name="buyer_id" formElement="input">
+            <settings>
+                <disabled>true</disabled>
+            </settings>
+        </field>
+    </fieldset>
 </form>
