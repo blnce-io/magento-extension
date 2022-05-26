@@ -28,7 +28,7 @@ class BuyerCustomerAttributeV2 implements DataPatchInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function apply()
     {
@@ -42,7 +42,7 @@ class BuyerCustomerAttributeV2 implements DataPatchInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public static function getDependencies()
     {
@@ -50,7 +50,7 @@ class BuyerCustomerAttributeV2 implements DataPatchInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function getAliases()
     {
