@@ -97,18 +97,12 @@ class BalanceBuyer
     public function createBuyer($params = [])
     {
         if (!empty($params['email'])) {
-            try {
-                $response = $this->requestFactory
-                    ->create(RequestFactory::BUYER_REQUEST_METHOD)
-                    ->setRequestMethod('buyers')
-                    ->setTopic('buyers')
-                    ->setParams($params)
-                    ->process();
-            } catch (Exception $e) {
-                $this->balancepayConfig->log('Create buyer [Exception: ' .
-                    $e->getMessage() . "]\n" . $e->getTraceAsString(), 'error');
-                return false;
-            }
+            $response = $this->requestFactory
+                ->create(RequestFactory::BUYER_REQUEST_METHOD)
+                ->setRequestMethod('buyers')
+                ->setTopic('buyers')
+                ->setParams($params)
+                ->process();
             $buyerId = $response['id'] ?? '';
             $email = $params['email'];
             $customerId = $this->customerRepositoryInterface->get($email)->getId();
