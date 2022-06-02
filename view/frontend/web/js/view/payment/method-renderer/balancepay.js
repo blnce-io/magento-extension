@@ -148,7 +148,7 @@ define(
                         isAuth: self.getBalanceIsAuth(),
                         hideDueDate: false,
                         allowedPaymentMethods: null,
-                        skipSuccessPage: false,
+                        skipSuccessPage: true,
                         // The token that returned from the server API
                         checkoutToken,
                         url: self.getBalanceIframeUrl(),
