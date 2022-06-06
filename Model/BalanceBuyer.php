@@ -12,7 +12,6 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Setup\Exception;
 use Psr\Log\LoggerInterface;
-use Balancepay\Balancepay\Model\Config;
 
 class BalanceBuyer
 {
@@ -96,22 +95,29 @@ class BalanceBuyer
      */
     public function createBuyer($params = [])
     {
-        if (!empty($params['email'])) {
-            $response = $this->requestFactory
-                ->create(RequestFactory::BUYER_REQUEST_METHOD)
-                ->setRequestMethod('buyers')
-                ->setTopic('buyers')
-                ->setParams($params)
-                ->process();
-            $buyerId = $response['id'] ?? '';
-            $email = $params['email'];
-            $customerId = $this->customerRepositoryInterface->get($email)->getId();
-            $customer = $this->customer->load($customerId);
-            $customerData = $customer->getDataModel();
-            $customerData->setCustomAttribute('buyer_id', $buyerId);
-            $customer->updateData($customerData);
-            $customerResource = $this->customerFactory->create();
-            $customerResource->saveAttribute($customer, 'buyer_id');
+        try {
+            if (!empty($params['email'])) {
+                $response = $this->requestFactory
+                    ->create(RequestFactory::BUYER_REQUEST_METHOD)
+                    ->setRequestMethod('buyers')
+                    ->setTopic('buyers')
+                    ->setParams($params)
+                    ->process();
+                $buyerId = $response['id'] ?? '';
+                $email = $params['email'];
+                $customerId = $this->customerRepositoryInterface->get($email)->getId();
+                $customer = $this->customer->load($customerId);
+                $customerData = $customer->getDataModel();
+                $customerData->setCustomAttribute('buyer_id', $buyerId);
+                $customer->updateData($customerData);
+                $customerResource = $this->customerFactory->create();
+                $customerResource->saveAttribute($customer, 'buyer_id');
+                return $buyerId;
+            }
+        } catch (Exception $e) {
+            $this->balancepayConfig->log('Create buyer [Exception: ' .
+                $e->getMessage() . "]\n" . $e->getTraceAsString(), 'error');
+            return false;
         }
     }
 
