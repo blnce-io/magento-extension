@@ -17,4 +17,8 @@
     <event name="catalog_product_save_after">
         <observer name="balance_webkul_marketplace_catalog_product_save_after_observer" instance="Balancepay\Balancepay\Observer\BalanceProductSaveAfterObserver" />
     </event>
+    <event name="customer_register_success">
+        <observer name="balance_customer_register_success_observer"
+                  instance="Balancepay\Balancepay\Observer\BalanceCustomerRegisterSuccessObserver"/>
+    </event>
 </config>
