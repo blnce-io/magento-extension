@@ -34,11 +34,6 @@ class Buyers extends AbstractRequest
     private $address;
 
     /**
-     * @var array
-     */
-    private $params;
-
-    /**
      * Buyers constructor.
      *
      * @param Config $balancepayConfig
@@ -166,25 +161,13 @@ class Buyers extends AbstractRequest
             'topic' => $this->_topic
         ];
 
-        $params['firstname'] = $this->session->getCustomer()->getFirstname() ?? $this->params['first_name'];
-        $params['lastname'] = $this->session->getCustomer()->getLastname() ?? $this->params['last_name'];
-        $params['email'] = $this->session->getCustomer()->getEmail() ?? $this->params['email'];
+        $params['firstname'] = $this->session->getCustomer()->getFirstname() ?? '';
+        $params['lastname'] = $this->session->getCustomer()->getLastname() ?? '';
+        $params['email'] = $this->session->getCustomer()->getEmail() ?? '';
 
         return array_replace_recursive(
             parent::getParams(),
             $params
         );
-    }
-
-    /**
-     * SetParams
-     *
-     * @param array $params
-     * @return $this
-     */
-    public function setParams($params)
-    {
-        $this->params = $params;
-        return $this;
     }
 }
