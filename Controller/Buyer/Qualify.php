@@ -11,13 +11,10 @@
 
 namespace Balancepay\Balancepay\Controller\Buyer;
 
-use Balancepay\Balancepay\Model\BalanceBuyer;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Balancepay\Balancepay\Model\Config as BalancepayConfig;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
-use Magento\Framework\App\ResponseInterface;
-use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Customer\Model\Customer;
 use Magento\Customer\Model\ResourceModel\CustomerFactory;
@@ -61,11 +58,6 @@ class Qualify extends Action
     private $balancepayConfig;
 
     /**
-     * @var BalanceBuyer
-     */
-    private $balanceBuyer;
-
-    /**
      * Qualify constructor.
      *
      * @param Context $context
@@ -83,8 +75,7 @@ class Qualify extends Action
         CustomerFactory $customerFactory,
         Session $customerSession,
         JsonFactory $resultJsonFactory,
-        BalancepayConfig $balancepayConfig,
-        BalanceBuyer $balanceBuyer
+        BalancepayConfig $balancepayConfig
     ) {
         parent::__construct($context);
         $this->requestFactory = $requestFactory;
@@ -93,22 +84,20 @@ class Qualify extends Action
         $this->customerFactory = $customerFactory;
         $this->customerSession = $customerSession;
         $this->balancepayConfig = $balancepayConfig;
-        $this->balanceBuyer = $balanceBuyer;
     }
 
     /**
      * Execute
      *
-     * @return ResponseInterface|Json|ResultInterface
+     * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\Result\Json|ResultInterface
      */
     public function execute()
     {
         $resultJson = $this->resultJsonFactory->create();
         if ($this->balancepayConfig->isActive()) {
             $buyerId = $this->customerSession->getCustomer()->getBuyerId() ?? '';
-            $email = $this->customerSession->getCustomer()->getEmail();
-            if (empty($buyerId) && $email) {
-                $buyerId = $this->balanceBuyer->createBuyer(['email' => $email]);
+            if (empty($buyerId)) {
+                $buyerId = $this->createBuyer($buyerId);
             }
             $qualificationLink = $this->getQualificationLink($buyerId);
             if (!empty($qualificationLink)) {
@@ -142,5 +131,36 @@ class Qualify extends Action
                 $e->getMessage() . "]\n" . $e->getTraceAsString(), 'error');
         }
         return $data;
+    }
+
+    /**
+     * CreateBuyer
+     *
+     * @param string $buyerId
+     * @return mixed|string
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    private function createBuyer($buyerId)
+    {
+        try {
+            //create buyer
+            $response = $this->requestFactory
+                ->create(RequestFactory::BUYER_REQUEST_METHOD)
+                ->setRequestMethod('buyers')
+                ->setTopic('buyers')
+                ->process();
+        } catch (Exception $e) {
+            $this->balancepayConfig->log('Create buyer [Exception: ' .
+                $e->getMessage() . "]\n" . $e->getTraceAsString(), 'error');
+            return false;
+        }
+        $buyerId = $response['id'] ?? '';
+        $customer = $this->customer->load($this->customerSession->getCustomer()->getId());
+        $customerData = $customer->getDataModel();
+        $customerData->setCustomAttribute('buyer_id', $buyerId);
+        $customer->updateData($customerData);
+        $customerResource = $this->customerFactory->create();
+        $customerResource->saveAttribute($customer, 'buyer_id');
+        return $buyerId;
     }
 }
