@@ -177,6 +177,11 @@ class BalancepayMethod extends AbstractMethod
     protected $customerSession;
 
     /**
+     * @var BalancepayChargeFactory
+     */
+    private $balancepayChargeFactory;
+
+    /**
      * @param Context $context
      * @param Registry $registry
      * @param ExtensionAttributesFactory $extensionFactory
@@ -212,6 +217,7 @@ class BalancepayMethod extends AbstractMethod
         RequestInterface $request,
         HelperData $helper,
         Session $customerSession,
+        BalancepayChargeFactory $balancepayChargeFactory,
         array $data = []
     ) {
         parent::__construct(
@@ -233,6 +239,7 @@ class BalancepayMethod extends AbstractMethod
         $this->requestFactory = $requestFactory;
         $this->request = $request;
         $this->helper = $helper;
+        $this->balancepayChargeFactory = $balancepayChargeFactory;
     }
 
     /**
@@ -403,14 +410,26 @@ class BalancepayMethod extends AbstractMethod
                 }
             }
 
-            $this->requestFactory
+            $response = $this->requestFactory
                 ->create(RequestFactory::CAPTURE_REQUEST_METHOD)
                 ->setPayment($payment)
                 ->setAmount($amount)
                 ->setBalanceVendorId($balanceVendorId)
                 ->process();
-        }
 
+            $charges = $response->getCharges();
+            foreach ($charges as $charge) {
+                $chargeId = $charge->getId();
+                break;
+            }
+            $invoiceId = $payment->getCreatedInvoice()->getId();
+            $balancepayChargeModel = $this->balancepayChargeFactory->create();
+            $balancepayChargeModel->setData([
+                'charge_id' => $chargeId,
+                'invoice_id' => $invoiceId
+            ]);
+            $balancepayChargeModel->save();
+        }
         return $this;
     }
 
