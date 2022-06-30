@@ -28,8 +28,7 @@
         </constraint>
     </table>
     <table name="balance_charges" resource="default" engine="innodb" comment="Balance Charges">
-        <column xsi:type="int" name="entity_id" unsigned="false" nullable="false" identity="true" comment="Entity Id"/>
-        <column xsi:type="int" name="charge_id" nullable="false" comment="Charge Id"/>
+        <column xsi:type="int" name="charge_id" unsigned="true" nullable="false" comment="Charge Id"/>
         <column xsi:type="int" name="invoice_id" unsigned="true"  nullable="false" comment="Invoice Id"/>
         <column xsi:type="timestamp" name="created_at" nullable="false" on_update="false" default="CURRENT_TIMESTAMP"
                 comment="Created At"/>
@@ -37,7 +36,7 @@
                     table="balance_charges" column="invoice_id" referenceTable="sales_invoice"
                     referenceColumn="entity_id" onDelete="CASCADE"/>
         <index referenceId="BALANCE_CHARGES_ENTITY_ID" indexType="btree">
-            <column name="entity_id"/>
+            <column name="charge_id"/>
         </index>
     </table>
 </schema>

@@ -76,6 +76,7 @@ class ChargedProcessor
             if (!$isBalancepayAuthCheckout) {
                 $orderPayment->capture(null);
             }
+            $orderPayment->setTransactionId($chargeId);
             $orderPayment->save();
             $order->save();
 

@@ -218,6 +218,7 @@ class BalancepayMethod extends AbstractMethod
         HelperData $helper,
         Session $customerSession,
         BalancepayChargeFactory $balancepayChargeFactory,
+        \Magento\Sales\Model\Order\Invoice $invoice,
         array $data = []
     ) {
         parent::__construct(
@@ -240,6 +241,7 @@ class BalancepayMethod extends AbstractMethod
         $this->request = $request;
         $this->helper = $helper;
         $this->balancepayChargeFactory = $balancepayChargeFactory;
+        $this->invoice = $invoice;
     }
 
     /**
@@ -410,7 +412,7 @@ class BalancepayMethod extends AbstractMethod
                 }
             }
 
-            $response = $this->requestFactory
+            /*$response = $this->requestFactory
                 ->create(RequestFactory::CAPTURE_REQUEST_METHOD)
                 ->setPayment($payment)
                 ->setAmount($amount)
@@ -418,18 +420,14 @@ class BalancepayMethod extends AbstractMethod
                 ->process();
 
             $charges = $response->getCharges();
-            foreach ($charges as $charge) {
-                $chargeId = $charge->getId();
-                break;
-            }
-            $invoiceId = $payment->getCreatedInvoice()->getId();
-            $balancepayChargeModel = $this->balancepayChargeFactory->create();
-            $balancepayChargeModel->setData([
-                'charge_id' => $chargeId,
-                'invoice_id' => $invoiceId
-            ]);
-            $balancepayChargeModel->save();
+            if (is_array($charges) && isset($charges[0])) {
+                $chargeId = $charges[0]->getId();
+            }*/
+            //$invoiceId = $payment->getCreatedInvoice()->getId();
+            //$invoiceModel = $this->invoice->load($invoiceId);
         }
+        $payment->setTransactionId('1209348756');
+        $payment->save();
         return $this;
     }
 
