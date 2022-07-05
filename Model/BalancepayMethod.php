@@ -27,7 +27,6 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\Context;
 use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Registry;
-use Magento\Payment\Helper\Data;
 use Magento\Payment\Helper\Data as PaymentDataHelper;
 use Magento\Payment\Model\InfoInterface;
 use Magento\Payment\Model\Method\AbstractMethod;
@@ -109,14 +108,14 @@ class BalancepayMethod extends AbstractMethod
      *
      * @var bool
      */
-    protected $_canRefund = false;
+    protected $_canRefund = true;
 
     /**
      * Gateway Method feature.
      *
      * @var bool
      */
-    protected $_canRefundInvoicePartial = false;
+    protected $_canRefundInvoicePartial = true;
 
     /**
      * Gateway Method feature.
@@ -177,11 +176,6 @@ class BalancepayMethod extends AbstractMethod
     protected $customerSession;
 
     /**
-     * @var BalancepayChargeFactory
-     */
-    private $balancepayChargeFactory;
-
-    /**
      * @param Context $context
      * @param Registry $registry
      * @param ExtensionAttributesFactory $extensionFactory
@@ -217,8 +211,6 @@ class BalancepayMethod extends AbstractMethod
         RequestInterface $request,
         HelperData $helper,
         Session $customerSession,
-        BalancepayChargeFactory $balancepayChargeFactory,
-        \Magento\Sales\Model\Order\Invoice $invoice,
         array $data = []
     ) {
         parent::__construct(
@@ -240,8 +232,7 @@ class BalancepayMethod extends AbstractMethod
         $this->requestFactory = $requestFactory;
         $this->request = $request;
         $this->helper = $helper;
-        $this->balancepayChargeFactory = $balancepayChargeFactory;
-        $this->invoice = $invoice;
+        $this->registry = $registry;
     }
 
     /**
@@ -419,16 +410,10 @@ class BalancepayMethod extends AbstractMethod
                 ->setBalanceVendorId($balanceVendorId)
                 ->process();
 
-            $charges = $response->getCharges();
+            $charges = $response['charges'];
             if (is_array($charges) && isset($charges[0])) {
-                $chargeId = $charges[0]->getId();
-                $invoiceId = $payment->getCreatedInvoice()->getId();
-                $balancepayChargeModel = $this->balancepayChargeFactory->create();
-                $balancepayChargeModel->setData([
-                    'charge_id' => $chargeId,
-                    'invoice_id' => $invoiceId
-                ]);
-                $balancepayChargeModel->save();
+                $chargeId = $charges[0]['id'];
+                $this->registry->register('charge_id', $chargeId);
             }
         }
         return $this;

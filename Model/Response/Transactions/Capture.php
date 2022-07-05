@@ -19,6 +19,23 @@ use Balancepay\Balancepay\Model\AbstractResponse;
 class Capture extends AbstractResponse
 {
     /**
+     * @var
+     */
+    private $_charges;
+
+    /**
+     * @return array|Capture
+     * @throws \Magento\Framework\Exception\PaymentException
+     */
+    public function process()
+    {
+        parent::process();
+        $body = $this->getBody();
+        $this->_charges = $body['charges'];
+        return $body;
+    }
+
+    /**
      * Determine if request succeed or failed.
      *
      * @return bool
@@ -41,5 +58,9 @@ class Capture extends AbstractResponse
     protected function getRequiredResponseDataKeys()
     {
         return [];
+    }
+
+    public function getCharges() {
+        return $this->_charges;
     }
 }
