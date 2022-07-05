@@ -39,4 +39,13 @@
             <column name="charge_id"/>
         </index>
     </table>
+    <table name="balance_refunds" resource="default" engine="innodb" comment="Balance Refunds">
+        <column xsi:type="int" name="refund_id" unsigned="true" nullable="false" comment="Refund Id"/>
+        <column xsi:type="int" name="charge_id" unsigned="true"  nullable="false" comment="Charge Id"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" on_update="false" default="CURRENT_TIMESTAMP"
+                comment="Created At"/>
+        <index referenceId="BALANCE_REFUNDS_ENTITY_ID" indexType="btree">
+            <column name="refund_id"/>
+        </index>
+    </table>
 </schema>
