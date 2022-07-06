@@ -35,6 +35,13 @@ class Refunds extends AbstractRequest
     private $address;
 
     /**
+     * @var
+     */
+    private $amount;
+
+    private $chargeId;
+
+    /**
      * Buyers constructor.
      *
      * @param Config $balancepayConfig
@@ -136,6 +143,28 @@ class Refunds extends AbstractRequest
         return $this->requestMethod;
     }
 
+    public function setAmount($amount)
+    {
+        $this->amount = $amount;
+        return $this;
+    }
+
+    public function getAmount()
+    {
+        return $this->amount;
+    }
+
+    public function setChargeId($chargeId)
+    {
+        $this->chargeId = $chargeId;
+        return $this;
+    }
+
+    public function getChargeId()
+    {
+        return $this->chargeId;
+    }
+
     /**
      * Get Response Handler type
      *
@@ -155,7 +184,9 @@ class Refunds extends AbstractRequest
     protected function getParams()
     {
         $params = [
-            'topic' => $this->_topic
+            'topic' => $this->_topic,
+            'amount' => $this->amount,
+            'chargeId' => $this->chargeId
         ];
         return array_replace_recursive(
             parent::getParams(),
