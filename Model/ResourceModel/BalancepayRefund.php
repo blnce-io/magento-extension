@@ -12,6 +12,6 @@ class BalancepayRefund extends AbstractDb
      */
     protected function _construct()
     {
-        $this->_init('balance_refunds', 'refund_id');
+        $this->_init('balance_refund', 'entity_id');
     }
 }

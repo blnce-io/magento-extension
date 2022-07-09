@@ -186,7 +186,8 @@ class Refunds extends AbstractRequest
         $params = [
             'topic' => $this->_topic,
             'amount' => $this->amount,
-            'chargeId' => $this->chargeId
+            'chargeId' => $this->chargeId,
+            'reason' => 'other'
         ];
         return array_replace_recursive(
             parent::getParams(),

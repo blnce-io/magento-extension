@@ -40,19 +40,18 @@ class SalesOrderCreditmemoSaveAfter implements ObserverInterface
         $creditMemoId = $creditMemo->getId();
         $total = $creditMemo->getBaseGrandTotal();
         $invoiceId = $creditMemo->getInvoiceId();
-        $chargeId = $collection->addFieldToFilter('invoice_id', ['eq' => $invoiceId])->getFirstItem->getChargeId();
+        $chargeId = $this->collection->addFieldToFilter('invoice_id', ['eq' => $invoiceId])->getFirstItem()->getChargeId();
         $response = $this->requestFactory
             ->create(RequestFactory::REFUND_REQUEST_METHOD)
-            ->setRequestMethod('charges')
+            ->setRequestMethod('charges/'.$chargeId.'/refunds')
             ->setTopic('refunds')
             ->setAmount($total)
             ->setChargeId($chargeId)
             ->process();
-        $refundId = $response['refund_id'];
-
+        $refundId = $response['id'];
         $balancepayRefundModel = $this->balancepayRefundFactory->create();
         $balancepayRefundModel->setData([
-            'charge_id' => $creditMemoId,
+            'credit_memo_id' => $creditMemoId,
             'refund_id' => $refundId
         ]);
         $balancepayRefundModel->save();
