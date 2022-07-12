@@ -19,11 +19,13 @@ use Balancepay\Balancepay\Model\AbstractResponse;
 class Capture extends AbstractResponse
 {
     /**
-     * @var
+     * @var mixed
      */
     private $charges;
 
     /**
+     * Process
+     *
      * @return array|Capture
      * @throws \Magento\Framework\Exception\PaymentException
      */
@@ -61,9 +63,12 @@ class Capture extends AbstractResponse
     }
 
     /**
+     * Get Charges
+     *
      * @return mixed
      */
-    public function getCharges() {
+    public function getCharges()
+    {
         return $this->charges;
     }
 }

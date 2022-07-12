@@ -30,6 +30,14 @@ class SalesOrderCreditmemoSaveAfter implements ObserverInterface
      */
     private $messageManager;
 
+    /**
+     * Constructor
+     *
+     * @param Collection $collection
+     * @param RequestFactory $requestFactory
+     * @param BalancepayRefundFactory $balancepayRefundFactory
+     * @param ManagerInterface $messageManager
+     */
     public function __construct(
         Collection $collection,
         RequestFactory $requestFactory,
@@ -42,6 +50,13 @@ class SalesOrderCreditmemoSaveAfter implements ObserverInterface
         $this->messageManager = $messageManager;
     }
 
+    /**
+     * Execute
+     *
+     * @param Observer $observer
+     * @return $this|void
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     public function execute(Observer $observer)
     {
         $creditMemo = $observer->getEvent()->getCreditmemo();
@@ -50,7 +65,8 @@ class SalesOrderCreditmemoSaveAfter implements ObserverInterface
         $invoiceId = $creditMemo->getInvoiceId();
         $message = "There's a problem sending a refund request to Balancepay.";
         if ($invoiceId) {
-            $chargeId = $this->collection->addFieldToFilter('invoice_id', ['eq' => $invoiceId])->getFirstItem()->getChargeId();
+            $chargeId = $this->collection->addFieldToFilter('invoice_id', ['eq' => $invoiceId])
+                ->getFirstItem()->getChargeId();
             if ($chargeId) {
                 $response = $this->requestFactory
                     ->create(RequestFactory::REFUND_REQUEST_METHOD)

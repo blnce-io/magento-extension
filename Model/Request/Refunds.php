@@ -35,10 +35,13 @@ class Refunds extends AbstractRequest
     private $address;
 
     /**
-     * @var
+     * @var mixed
      */
     private $amount;
 
+    /**
+     * @var int
+     */
     private $chargeId;
 
     /**
@@ -143,23 +146,45 @@ class Refunds extends AbstractRequest
         return $this->requestMethod;
     }
 
+    /**
+     * Set Amount
+     *
+     * @param mixed $amount
+     * @return $this
+     */
     public function setAmount($amount)
     {
         $this->amount = $amount;
         return $this;
     }
 
+    /**
+     * Get Amount
+     *
+     * @return mixed
+     */
     public function getAmount()
     {
         return $this->amount;
     }
 
+    /**
+     * Set Charge Id
+     *
+     * @param int $chargeId
+     * @return $this
+     */
     public function setChargeId($chargeId)
     {
         $this->chargeId = $chargeId;
         return $this;
     }
 
+    /**
+     * Get Charge Id
+     *
+     * @return int
+     */
     public function getChargeId()
     {
         return $this->chargeId;
