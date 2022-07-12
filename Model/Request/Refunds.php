@@ -81,7 +81,7 @@ class Refunds extends AbstractRequest
     /**
      * @var string
      */
-    protected $_topic;
+    protected $topic;
 
     /**
      * @var string
@@ -96,7 +96,7 @@ class Refunds extends AbstractRequest
      */
     public function setTopic($topic)
     {
-        $this->_topic = (string)$topic;
+        $this->topic = (string)$topic;
         return $this;
     }
 
@@ -118,7 +118,7 @@ class Refunds extends AbstractRequest
      */
     public function getTopic()
     {
-        return $this->_topic;
+        return $this->topic;
     }
 
     /**
@@ -184,7 +184,7 @@ class Refunds extends AbstractRequest
     protected function getParams()
     {
         $params = [
-            'topic' => $this->_topic,
+            'topic' => $this->topic,
             'amount' => $this->amount,
             'chargeId' => $this->chargeId,
             'reason' => 'other'

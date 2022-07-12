@@ -21,7 +21,7 @@ class Capture extends AbstractResponse
     /**
      * @var
      */
-    private $_charges;
+    private $charges;
 
     /**
      * @return array|Capture
@@ -31,7 +31,7 @@ class Capture extends AbstractResponse
     {
         parent::process();
         $body = $this->getBody();
-        $this->_charges = $body['charges'];
+        $this->charges = $body['charges'];
         return $body;
     }
 
@@ -60,7 +60,10 @@ class Capture extends AbstractResponse
         return [];
     }
 
+    /**
+     * @return mixed
+     */
     public function getCharges() {
-        return $this->_charges;
+        return $this->charges;
     }
 }
