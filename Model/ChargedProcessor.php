@@ -7,7 +7,6 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Phrase;
 use Magento\Sales\Model\Order;
-use Balancepay\Balancepay\Model\BalancepayMethod;
 
 class ChargedProcessor
 {
@@ -17,12 +16,20 @@ class ChargedProcessor
     private $balancepayConfig;
 
     /**
+     * @var BalancepayChargeFactory
+     */
+    private $balancepayChargeFactory;
+
+    /**
      * @param Config $balancepayConfig
+     * @param BalancepayChargeFactory $balancepayChargeFactory
      */
     public function __construct(
-        BalancepayConfig $balancepayConfig
+        BalancepayConfig $balancepayConfig,
+        BalancepayChargeFactory $balancepayChargeFactory
     ) {
         $this->balancepayConfig = $balancepayConfig;
+        $this->balancepayChargeFactory = $balancepayChargeFactory;
     }
 
     /**
@@ -69,8 +76,19 @@ class ChargedProcessor
             if (!$isBalancepayAuthCheckout) {
                 $orderPayment->capture(null);
             }
+            $orderPayment->setTransactionId($chargeId);
             $orderPayment->save();
             $order->save();
+
+            if (!$isBalancepayAuthCheckout) {
+                $invoiceId = $orderPayment->getCreatedInvoice()->getId();
+                $balancepayChargeModel = $this->balancepayChargeFactory->create();
+                $balancepayChargeModel->setData([
+                    'charge_id' => $chargeId,
+                    'invoice_id' => $invoiceId
+                ]);
+                $balancepayChargeModel->save();
+            }
             return true;
         } elseif ($chargeId !== (string) $balancepayChargeId) {
             throw new LocalizedException(new Phrase("Charge ID mismatch!"));

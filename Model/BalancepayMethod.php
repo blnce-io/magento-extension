@@ -27,7 +27,6 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\Context;
 use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Registry;
-use Magento\Payment\Helper\Data;
 use Magento\Payment\Helper\Data as PaymentDataHelper;
 use Magento\Payment\Model\InfoInterface;
 use Magento\Payment\Model\Method\AbstractMethod;
@@ -109,14 +108,14 @@ class BalancepayMethod extends AbstractMethod
      *
      * @var bool
      */
-    protected $_canRefund = false;
+    protected $_canRefund = true;
 
     /**
      * Gateway Method feature.
      *
      * @var bool
      */
-    protected $_canRefundInvoicePartial = false;
+    protected $_canRefundInvoicePartial = true;
 
     /**
      * Gateway Method feature.
@@ -233,6 +232,7 @@ class BalancepayMethod extends AbstractMethod
         $this->requestFactory = $requestFactory;
         $this->request = $request;
         $this->helper = $helper;
+        $this->registry = $registry;
     }
 
     /**
@@ -403,14 +403,19 @@ class BalancepayMethod extends AbstractMethod
                 }
             }
 
-            $this->requestFactory
+            $response = $this->requestFactory
                 ->create(RequestFactory::CAPTURE_REQUEST_METHOD)
                 ->setPayment($payment)
                 ->setAmount($amount)
                 ->setBalanceVendorId($balanceVendorId)
                 ->process();
-        }
 
+            $charges = $response['charges'];
+            if (is_array($charges) && isset($charges[0])) {
+                $chargeId = $charges[0]['id'];
+                $this->registry->register('charge_id', $chargeId);
+            }
+        }
         return $this;
     }
 
