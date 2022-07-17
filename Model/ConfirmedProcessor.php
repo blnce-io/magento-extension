@@ -39,7 +39,7 @@ class ConfirmedProcessor
         $orderPayment = $order->getPayment();
         $orderPayment
             ->setAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_FINANCED, $isFinanced);
-        $transactionType = $this->balancepayConfig->getIsAuth() ? 'Authorization' : 'Sale';
+        $transactionType = $this->balancepayConfig->getIsAuth() ? 1 : 0;
         $orderPayment->setAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_AUTH_CHECKOUT, $transactionType);
         $orderPayment
             ->setAdditionalInformation(BalancepayMethod::BALANCEPAY_SELECTED_PAYMENT_METHOD, $selectedPaymentMethod);
