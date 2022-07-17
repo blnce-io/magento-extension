@@ -118,7 +118,6 @@ class SubmitAllAfter implements ObserverInterface
                 );
                 $transactionType = Transaction::TYPE_CAPTURE;
             }
-            $orderPayment->setAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_AUTH_CHECKOUT, $isAuth);
             $orderPayment->setIsTransactionClosed(0);
             $orderPayment->setTransactionId($transactionId);
             $orderPayment->addTransactionCommentsToOrder(
