@@ -92,7 +92,7 @@ class SubmitAllAfter implements ObserverInterface
             if (!$order) {
                 return $this;
             }
-            
+
             /** @var OrderPayment $payment */
             $orderPayment = $order->getPayment();
 
@@ -100,25 +100,33 @@ class SubmitAllAfter implements ObserverInterface
                 return $this;
             }
 
+            $isAuth = $this->balancepayConfig->getIsAuth();
             $transactionId = $orderPayment
                 ->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHECKOUT_TRANSACTION_ID);
-
-            if ($transactionId && $this->balancepayConfig->getIsAuth()) {
+            if ($transactionId && $isAuth) {
                 $message = $this->authorizeCommand->execute(
                     $orderPayment,
                     $order->getBaseGrandTotal(),
                     $order
                 );
-                $orderPayment->setIsTransactionClosed(0);
-                $orderPayment->setTransactionId($transactionId);
-                $orderPayment->addTransactionCommentsToOrder(
-                    $orderPayment->addTransaction(Transaction::TYPE_AUTH),
-                    $orderPayment->prependMessage($message)
+                $transactionType = Transaction::TYPE_AUTH;
+            } else if ($transactionId && !$isAuth) {
+                $message = $this->captureCommand->execute(
+                    $orderPayment,
+                    $order->getBaseGrandTotal(),
+                    $order
                 );
-
-                $orderPayment->save();
-                $order->save();
+                $transactionType = Transaction::TYPE_CAPTURE;
             }
+            $orderPayment->setAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_AUTH_CHECKOUT, $isAuth);
+            $orderPayment->setIsTransactionClosed(0);
+            $orderPayment->setTransactionId($transactionId);
+            $orderPayment->addTransactionCommentsToOrder(
+                $orderPayment->addTransaction($transactionType),
+                $orderPayment->prependMessage($message)
+            );
+            $orderPayment->save();
+            $order->save();
         } catch (\Exception $e) {
             $this->balancepayConfig
                 ->log('SubmitAllAfter::execute() - Exception: '
