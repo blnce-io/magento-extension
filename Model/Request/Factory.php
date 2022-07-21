@@ -25,6 +25,7 @@ class Factory
      * Request methods.
      */
     public const CAPTURE_REQUEST_METHOD = 'capture';
+    public const REFUND_REQUEST_METHOD = 'refund';
     public const CLOSE_REQUEST_METHOD = 'close';
     public const CHECKOUT_REQUEST_METHOD = 'checkout';
     public const TRANSACTIONS_REQUEST_METHOD = 'transactions';
@@ -39,6 +40,7 @@ class Factory
      * @var array
      */
     private $invokableClasses = [
+        self::REFUND_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Refunds::class,
         self::CAPTURE_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Transactions\Capture::class,
         self::CLOSE_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Transactions\Close::class,
         self::CHECKOUT_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Checkout::class,

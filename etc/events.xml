@@ -20,4 +20,7 @@
     <event name="sales_order_invoice_save_after">
         <observer name="balancepay_invoice_save_after" instance="Balancepay\Balancepay\Observer\SalesOrderInvoiceSaveAfter"/>
     </event>
+    <event name="sales_order_creditmemo_save_after">
+        <observer name="balancepay_create_online_refund" instance="Balancepay\Balancepay\Observer\SalesOrderCreditmemoSaveAfter"/>
+    </event>
 </config>
