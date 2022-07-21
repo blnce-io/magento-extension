@@ -1,0 +1,35 @@
+<!--
+         /**
+     * Copyright © Magento, Inc. All rights reserved.
+     * See COPYING.txt for license details.
+     */
+     -->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/6.2/phpunit.xsd" colors="true" beStrictAboutTestsThatDoNotTestAnything="false">
+    <testsuite name="Magento Unit Tests">
+        <directory suffix="Test.php">Test/Unit</directory>
+    </testsuite>
+    <php>
+        <ini name="date.timezone" value="America/Los_Angeles"/>
+        <ini name="xdebug.max_nesting_level" value="200"/>
+    </php>
+    <filter>
+        <whitelist addUncoveredFilesFromWhiteList="true">
+            <directory suffix=".php">./</directory>
+            <exclude>
+                <directory suffix=".phtml">./</directory>
+                <directory suffix="Interface.php">./</directory>
+                <directory suffix="registration.php">./</directory>
+                <directory>./Test</directory>
+                <directory>./Setup</directory>
+                <directory>./vendor</directory>
+                <directory>./dev</directory>
+            </exclude>
+        </whitelist>
+    </filter>
+    <listeners>
+        <listener class="Magento\Framework\TestFramework\Unit\Listener\ReplaceObjectManager"/>
+    </listeners>
+    <logging>
+        <log type="coverage-html" target="../../../var/code-coverage/Balancepay" charset="UTF-8" yui="true" highlight="true"/>
+    </logging>
+</phpunit>
