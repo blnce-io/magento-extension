@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Balancepay\Balancepay\Test\Unit\Observer\Checkout;
 
+use Balancepay\Balancepay\Model\BalancepayMethod;
 use Balancepay\Balancepay\Model\Config;
 use Balancepay\Balancepay\Observer\Checkout\SubmitAllAfter;
 use Magento\Framework\Exception\LocalizedException;
@@ -16,6 +17,7 @@ use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Payment\State\AuthorizeCommand;
 use Magento\Sales\Model\Order\Payment\State\CaptureCommand;
+use Magento\Sales\Model\Order\Payment\Transaction;
 use Magento\Sales\Model\Service\InvoiceService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -99,12 +101,16 @@ class SubmitAllAfterTest extends TestCase
             ->onlyMethods([
                 'execute'
             ])
-            ->getMockForAbstractClass();
+            ->getMock();
 
         $this->observer = $this->getMockBuilder(Observer::class)
             ->disableOriginalConstructor()
             ->onlyMethods(['getEvent'])
-            ->getMockForAbstractClass();
+            ->getMock();
+
+        $this->transaction = $this->getMockBuilder(Transaction::class)
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $this->event = $this->getMockBuilder(Event::class)
             ->disableOriginalConstructor()
@@ -193,14 +199,23 @@ class SubmitAllAfterTest extends TestCase
         $this->order->expects($this->any())->method('getPayment')->willReturn($this->orderpaymentinterface);
         $this->balancepayConfig->expects($this->any())->method('getIsAuth')->willReturn(0);
         $this->orderpaymentinterface->expects($this->any())->method('getMethod')->willReturn('balancepay');
-        $this->orderpaymentinterface->expects($this->any())->method('getAdditionalInformation')->willReturn('string');
+        $this->orderpaymentinterface->expects($this->any())->method('getAdditionalInformation')
+            ->with(BalancepayMethod::BALANCEPAY_CHECKOUT_TRANSACTION_ID)->willReturn('string');
         $this->order->expects($this->any())->method('getBaseGrandTotal')->willReturn(2.56);
-        $this->captureCommand->expects($this->any())->method('execute')->willReturn($this->phrase);
-        $this->orderpaymentinterface->expects($this->any())->method('setIsTransactionClosed')->willReturn($this->orderpaymentinterface);
-        $this->orderpaymentinterface->expects($this->any())->method('setTransactionId')->willReturn($this->orderpaymentinterface);
-        $this->orderpaymentinterface->expects($this->any())->method('addTransactionCommentsToOrder')->willReturn($this->orderpaymentinterface);
-        $this->orderpaymentinterface->expects($this->any())->method('addTransaction')->willReturn(null);
+        $this->captureCommand->expects($this->any())->method('execute')
+            ->with(
+                $this->orderpaymentinterface,
+                2.56,
+                $this->order
+            )->willReturn($this->phrase);
+        $this->orderpaymentinterface->expects($this->any())->method('setIsTransactionClosed')
+            ->with(0)->willReturn($this->orderpaymentinterface);
+        $this->orderpaymentinterface->expects($this->any())->method('setTransactionId')
+            ->with('string')->willReturn($this->orderpaymentinterface);
+        $this->orderpaymentinterface->expects($this->any())->method('addTransaction')->willReturn($this->transaction);
         $this->orderpaymentinterface->expects($this->any())->method('prependMessage')->willReturn('string');
+        $this->orderpaymentinterface->expects($this->any())->method('addTransactionCommentsToOrder')
+            ->with($this->transaction, 'string')->willReturn($this->orderpaymentinterface);
         $this->orderpaymentinterface->expects($this->any())->method('save')->willReturnSelf();
         $this->order->expects($this->any())->method('save')->willReturnSelf();
         $result = $this->testableObject->execute($this->observer);
@@ -219,9 +234,10 @@ class SubmitAllAfterTest extends TestCase
         $this->authorizeCommand->expects($this->any())->method('execute')->willReturn($this->phrase);
         $this->orderpaymentinterface->expects($this->any())->method('setIsTransactionClosed')->willReturn($this->orderpaymentinterface);
         $this->orderpaymentinterface->expects($this->any())->method('setTransactionId')->willReturn($this->orderpaymentinterface);
-        $this->orderpaymentinterface->expects($this->any())->method('addTransactionCommentsToOrder')->willReturn($this->orderpaymentinterface);
-        $this->orderpaymentinterface->expects($this->any())->method('addTransaction')->willReturn(null);
+        $this->orderpaymentinterface->expects($this->any())->method('addTransaction')->willReturn($this->transaction);
         $this->orderpaymentinterface->expects($this->any())->method('prependMessage')->willReturn('string');
+        $this->orderpaymentinterface->expects($this->any())->method('addTransactionCommentsToOrder')
+            ->with($this->transaction, 'string')->willReturn($this->orderpaymentinterface);
         $this->orderpaymentinterface->expects($this->any())->method('save')->willReturnSelf();
         $this->order->expects($this->any())->method('save')->willReturnSelf();
         $result = $this->testableObject->execute($this->observer);
