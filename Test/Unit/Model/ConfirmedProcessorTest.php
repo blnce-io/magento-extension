@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Balancepay\Balancepay\Test\Unit\Model;
 
+use Balancepay\Balancepay\Model\BalancepayMethod;
 use Balancepay\Balancepay\Model\Config;
 use Balancepay\Balancepay\Model\ConfirmedProcessor;
 use Magento\Framework\Phrase;
@@ -57,7 +58,14 @@ class ConfirmedProcessorTest extends TestCase
     {
         $this->order->expects($this->any())->method('getPayment')->willReturn($this->orderPaymentInterface);
         $this->orderPaymentInterface->expects($this->any())->method('save')->willReturnSelf();
-        $this->orderPaymentInterface->expects($this->any())->method('setAdditionalInformation')->willReturnSelf();
+
+        $this->orderPaymentInterface->expects($this->exactly(3))->method('setAdditionalInformation')
+            ->withConsecutive(
+                [BalancepayMethod::BALANCEPAY_IS_FINANCED,1],
+                [BalancepayMethod::BALANCEPAY_IS_AUTH_CHECKOUT, 1],
+                [BalancepayMethod::BALANCEPAY_SELECTED_PAYMENT_METHOD, '0.0']
+            )->willReturnOnConsecutiveCalls($this->orderPaymentInterface, $this->orderPaymentInterface, $this->orderPaymentInterface);
+
         $this->order->expects($this->any())->method('save')->willReturnSelf();
         $this->balancepayConfig->expects($this->any())->method('getIsAuth')->willReturn(1);
         $result = $this->testableObject->processConfirmedWebhook(
