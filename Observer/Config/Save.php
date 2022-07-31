@@ -133,6 +133,21 @@ class Save implements ObserverInterface
                         ->setTopic('transaction/confirmed')
                         ->process();
 
+                    $this->requestFactory
+                        ->create(RequestFactory::WEBHOOKS_REQUEST_METHOD)
+                        ->setTopic('transaction/refund-canceled')
+                        ->process();
+
+                    $this->requestFactory
+                        ->create(RequestFactory::WEBHOOKS_REQUEST_METHOD)
+                        ->setTopic('transaction/refund-successful')
+                        ->process();
+
+                    $this->requestFactory
+                        ->create(RequestFactory::WEBHOOKS_REQUEST_METHOD)
+                        ->setTopic('transaction/refund-failed')
+                        ->process();
+
                     $this->appEmulation->stopEnvironmentEmulation();
                     return $this->messageManager->addSuccess(__('Balance API key is valid!
                     (Webhooks have been successfully registered)'));
