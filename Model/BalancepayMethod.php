@@ -328,6 +328,10 @@ class BalancepayMethod extends AbstractMethod
             self::BALANCEPAY_CHECKOUT_TOKEN,
             $this->checkoutSession->getBalanceCheckoutToken()
         );
+        $payment->setAdditionalInformation(
+            self::BALANCEPAY_CHECKOUT_TRANSACTION_ID,
+            $this->checkoutSession->getBalanceCheckoutTransactionId()
+        );
         $payment->setIsTransactionPending(true);
 
         return $this;

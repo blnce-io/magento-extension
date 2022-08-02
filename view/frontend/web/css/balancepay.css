@@ -70,11 +70,12 @@
     width: 100%;
     top: 0;
     left: 0;
+    min-height: 768px;
 }
 @media screen and (max-width: 1366px) {
     .modal-popup._inner-scroll .modal-inner-wrap {
         height: calc(100% - 35px);
-        overflow: visible;
+        overflow: scroll;
         width: 90%;
         max-height: fit-content;
     }
