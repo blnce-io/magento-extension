@@ -100,16 +100,17 @@ class SubmitAllAfter implements ObserverInterface
                 return $this;
             }
 
+            $isAuth = $this->balancepayConfig->getIsAuth();
             $transactionId = $orderPayment
                 ->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHECKOUT_TRANSACTION_ID);
-            if ($transactionId && $this->balancepayConfig->getIsAuth()) {
+            if ($transactionId && $isAuth) {
                 $message = $this->authorizeCommand->execute(
                     $orderPayment,
                     $order->getBaseGrandTotal(),
                     $order
                 );
                 $transactionType = Transaction::TYPE_AUTH;
-            } else if ($transactionId && !$this->balancepayConfig->getIsAuth()) {
+            } else if ($transactionId && !$isAuth) {
                 $message = $this->captureCommand->execute(
                     $orderPayment,
                     $order->getBaseGrandTotal(),

@@ -89,8 +89,7 @@ class ChargedProcessor
                 $balancepayChargeModel->save();
             }
             return true;
-        } elseif ($chargeId !== (string) $balancepayChargeId) {
-            throw new LocalizedException(new Phrase("Charge ID mismatch!"));
         }
+        return false;
     }
 }
