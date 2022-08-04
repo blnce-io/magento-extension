@@ -3,6 +3,7 @@
 namespace Balancepay\Balancepay\Model;
 
 use Balancepay\Balancepay\Model\Config as BalancepayConfig;
+use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Phrase;
@@ -26,10 +27,12 @@ class ChargedProcessor
      */
     public function __construct(
         BalancepayConfig $balancepayConfig,
-        BalancepayChargeFactory $balancepayChargeFactory
+        BalancepayChargeFactory $balancepayChargeFactory,
+        ResourceConnection $resource
     ) {
         $this->balancepayConfig = $balancepayConfig;
         $this->balancepayChargeFactory = $balancepayChargeFactory;
+        $this->resource = $resource;
     }
 
     /**
@@ -88,8 +91,13 @@ class ChargedProcessor
                     'status' => 'charged'
                 ]);
                 $balancepayChargeModel->save();
+            } else {
+                $connection  = $this->resource->getConnection();
+                $data = ['status'=>'charged'];
+                $where = ['charge_id = ?' => $chargeId];
+                $tableName = $connection->getTableName("balance_charges");
+                $connection->update($tableName, $data, $where);
             }
-            
             return true;
         }
         return false;

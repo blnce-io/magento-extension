@@ -21,11 +21,10 @@ class InvoiceForm implements ArgumentInterface
         if(!$invoiceId) {
             return true;
         }
-        $chargeId = $this->collection->addFieldToFilter('invoice_id', ['eq' => $invoiceId])
-            ->getFirstItem()->getChargeId();
-        if (!$chargeId) {
-            return false;
+        $chargeFlag = $this->collection->getChargeAndStatus($invoiceId);
+        if ($chargeFlag) {
+            return true;
         }
-        return true;
+        return false;
     }
 }

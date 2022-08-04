@@ -27,11 +27,10 @@ class OrderPlugin
         if(!$invoiceId) {
             return true;
         }
-        $chargeId = $this->collection->addFieldToFilter('invoice_id', ['eq' => $invoiceId])
-            ->getFirstItem()->getChargeId();
-        if (!$chargeId) {
-            return false;
+        $chargeFlag = $this->collection->getChargeAndStatus($invoiceId);
+        if ($result && $chargeFlag) {
+            return true;
         }
-        return $result;
+        return false;
     }
 }
