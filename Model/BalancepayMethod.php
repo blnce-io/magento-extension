@@ -417,7 +417,9 @@ class BalancepayMethod extends AbstractMethod
             $charges = $response['charges'];
             if (is_array($charges) && isset($charges[0])) {
                 $chargeId = $charges[0]['id'];
+                $status = $charges[0]['status'];
                 $this->registry->register('charge_id', $chargeId);
+                $this->registry->register('charge_status', $status);
             }
         }
         return $this;

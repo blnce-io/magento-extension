@@ -84,10 +84,12 @@ class ChargedProcessor
                 $balancepayChargeModel = $this->balancepayChargeFactory->create();
                 $balancepayChargeModel->setData([
                     'charge_id' => $chargeId,
-                    'invoice_id' => $invoiceId
+                    'invoice_id' => $invoiceId,
+                    'status' => 'charged'
                 ]);
                 $balancepayChargeModel->save();
             }
+            
             return true;
         }
         return false;

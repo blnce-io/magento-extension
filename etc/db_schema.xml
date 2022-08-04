@@ -30,6 +30,7 @@
     <table name="balance_charges" resource="default" engine="innodb" comment="Balance Charges">
         <column xsi:type="int" name="charge_id" unsigned="true" nullable="false" comment="Charge Id"/>
         <column xsi:type="int" name="invoice_id" unsigned="true"  nullable="false" comment="Invoice Id"/>
+        <column xsi:type="varchar" name="status" nullable="true" default="pending"/>
         <column xsi:type="timestamp" name="created_at" nullable="false" on_update="false" default="CURRENT_TIMESTAMP"
                 comment="Created At"/>
         <constraint xsi:type="foreign" referenceId="BALANCE_CHARGES_FOREIGN_INVOICE_ID"
