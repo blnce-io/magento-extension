@@ -17,4 +17,7 @@
     <type name="Magento\Framework\App\Action\AbstractAction">
         <plugin name="customer-session-data-to-context" type="Balancepay\Balancepay\Plugin\CustomerSessionContext" sortOrder="15"/>
     </type>
+    <type name="Magento\Sales\Model\Order">
+        <plugin name="balancepay_plugin_sales_model_order_can_creditmemo" type="Balancepay\Balancepay\Plugin\Sales\Model\OrderPlugin" sortOrder="15"/>
+    </type>
 </config>
