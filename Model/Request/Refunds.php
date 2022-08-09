@@ -191,6 +191,28 @@ class Refunds extends AbstractRequest
     }
 
     /**
+     * Set Reason
+     *
+     * @param string $reason
+     * @return $this
+     */
+    public function setReason($reason)
+    {
+        $this->reason = $reason;
+        return $this;
+    }
+
+    /**
+     * Get Reason
+     *
+     * @return int
+     */
+    public function getReason()
+    {
+        return $this->reason;
+    }
+
+    /**
      * Get Response Handler type
      *
      * @return string
@@ -212,7 +234,7 @@ class Refunds extends AbstractRequest
             'topic' => $this->topic,
             'amount' => $this->amount,
             'chargeId' => $this->chargeId,
-            'reason' => 'other'
+            'reason' => $this->reason
         ];
         return array_replace_recursive(
             parent::getParams(),
