@@ -61,6 +61,11 @@ class SalesOrderCreditmemoSaveAfter implements ObserverInterface
     {
         $creditMemo = $observer->getEvent()->getCreditmemo();
         $creditMemoId = $creditMemo->getId();
+        $balancepayRefundData = $this->balancepayRefundFactory->create()->getCollection()
+            ->addFieldToFilter('credit_memo_id', ['eq' => $creditMemoId])->getData();
+        if (count($balancepayRefundData)>0) {
+            return;
+        }
         $total = $creditMemo->getBaseGrandTotal();
         $invoiceId = $creditMemo->getInvoiceId();
         $comments = $creditMemo->getComments();

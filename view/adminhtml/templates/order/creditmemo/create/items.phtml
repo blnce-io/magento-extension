@@ -99,10 +99,10 @@ $commentText = $block->getCreditmemo()->getCommentText();
                         <?php if ($isBalancepayMethod): ?>
                             <select id="creditmemo_comment_text" class="required-entry admin__control-select" name="creditmemo[comment_text]">
                                 <option value="">Select Refund Reason</option>
-                                <option value="Duplicate">Duplicate</option>
-                                <option value="Fraudulent">Fraudulent</option>
-                                <option value="Requested by the customer">Requested by the customer</option>
-                                <option value="Other">Other</option>
+                                <option value="duplicate">Duplicate</option>
+                                <option value="fraudulent">Fraudulent</option>
+                                <option value="requested_by_customer">Requested by the customer</option>
+                                <option value="other">Other</option>
                             </select>
                         <?php else: ?>
                         <textarea id="creditmemo_comment_text"
