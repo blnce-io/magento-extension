@@ -16,4 +16,10 @@ class Collection extends AbstractCollection
     {
         $this->_init(BalancepayChargeModel::class, BalancepayChargeResourceModel::class);
     }
+
+    public function getChargeAndStatus($invoiceId) {
+        $chargeItem = $this->addFieldToFilter('invoice_id', ['eq' => $invoiceId])
+            ->getFirstItem();
+        return $chargeItem->getChargeId() && ($chargeItem->getStatus() == 'charged');
+    }
 }

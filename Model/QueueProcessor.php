@@ -1,13 +1,20 @@
 <?php
+
 namespace Balancepay\Balancepay\Model;
 
 use Balancepay\Balancepay\Controller\Webhook\Checkout\Charged;
 use Balancepay\Balancepay\Controller\Webhook\Transaction\Confirmed;
+use Balancepay\Balancepay\Controller\Webhook\Transaction\RefundCanceled;
+use Balancepay\Balancepay\Controller\Webhook\Transaction\RefundFailed;
+use Balancepay\Balancepay\Controller\Webhook\Transaction\RefundSuccessful;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Phrase;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Sales\Model\OrderFactory;
+use Balancepay\Balancepay\Model\RefundCanceledProcessor;
+use Balancepay\Balancepay\Model\RefundSuccessfulProcessor;
+use Balancepay\Balancepay\Model\RefundFailedProcessor;
 
 class QueueProcessor
 {
@@ -57,14 +64,32 @@ class QueueProcessor
     private $confirmedProcessor;
 
     /**
+     * @var \Balancepay\Balancepay\Model\RefundCanceledProcessor
+     */
+    private $refundCanceledProcessor;
+
+    /**
+     * @var \Balancepay\Balancepay\Model\RefundSuccessfulProcessor
+     */
+    private $refundSuccessfulProcessor;
+
+    /**
+     * @var \Balancepay\Balancepay\Model\RefundFailedProcessor
+     */
+    private $refundFailedProcessor;
+
+    /**
      * QueueProcessor constructor.
      *
-     * @param \Balancepay\Balancepay\Model\QueueFactory $queueFactory
+     * @param QueueFactory $queueFactory
      * @param Json $json
-     * @param \Balancepay\Balancepay\Model\Config $balancepayConfig
+     * @param Config $balancepayConfig
      * @param OrderFactory $orderFactory
-     * @param \Balancepay\Balancepay\Model\ChargedProcessor $chargedProcessor
-     * @param \Balancepay\Balancepay\Model\ConfirmedProcessor $confirmedProcessor
+     * @param ChargedProcessor $chargedProcessor
+     * @param ConfirmedProcessor $confirmedProcessor
+     * @param \Balancepay\Balancepay\Model\RefundCanceledProcessor $refundCanceledProcessor
+     * @param \Balancepay\Balancepay\Model\RefundSuccessfulProcessor $refundSuccessfulProcessor
+     * @param \Balancepay\Balancepay\Model\RefundFailedProcessor $refundFailedProcessor
      */
     public function __construct(
         QueueFactory $queueFactory,
@@ -72,7 +97,10 @@ class QueueProcessor
         Config $balancepayConfig,
         OrderFactory $orderFactory,
         ChargedProcessor $chargedProcessor,
-        ConfirmedProcessor $confirmedProcessor
+        ConfirmedProcessor $confirmedProcessor,
+        RefundCanceledProcessor $refundCanceledProcessor,
+        RefundSuccessfulProcessor $refundSuccessfulProcessor,
+        RefundFailedProcessor $refundFailedProcessor
     ) {
         $this->queueFactory = $queueFactory;
         $this->json = $json;
@@ -80,6 +108,9 @@ class QueueProcessor
         $this->orderFactory = $orderFactory;
         $this->chargedProcessor = $chargedProcessor;
         $this->confirmedProcessor = $confirmedProcessor;
+        $this->refundCanceledProcessor = $refundCanceledProcessor;
+        $this->refundSuccessfulProcessor = $refundSuccessfulProcessor;
+        $this->refundFailedProcessor = $refundFailedProcessor;
     }
 
     /**
@@ -141,21 +172,29 @@ class QueueProcessor
             $jobEntityId = $job->getEntityId();
             $jobPayload = $job->getPayload();
             $params = (array)$this->json->unserialize($jobPayload);
-            $order = $this->orderFactory->create()->loadByIncrementId((string)$params['externalReferenceId']);
-            if (!$order || !$order->getId()) {
-                throw new LocalizedException(new Phrase("No matching order!"));
+            if (($jobName == Charged::WEBHOOK_CHARGED_NAME || $jobName == Confirmed::WEBHOOK_CONFIRMED_NAME)) {
+                $order = $this->orderFactory->create()->loadByIncrementId((string)$params['externalReferenceId']);
+                if ((!$order || !$order->getId())) {
+                    throw new LocalizedException(new Phrase("No matching order!"));
+                }
             }
             $this->updateWebhookQueue($jobEntityId, 'status', self::IN_PROGRESS);
             if ($jobName == Confirmed::WEBHOOK_CONFIRMED_NAME) {
                 $isJobComplete = $this->confirmedProcessor->processConfirmedWebhook($params, $order);
             } elseif ($jobName == Charged::WEBHOOK_CHARGED_NAME) {
                 $isJobComplete = $this->chargedProcessor->processChargedWebhook($params, $order);
+            } elseif ($jobName == RefundCanceled::WEBHOOK_CANCELED_NAME) {
+                $isJobComplete = $this->refundCanceledProcessor->processCanceledWebhook($params, $jobName);
+            } elseif ($jobName == RefundSuccessful::WEBHOOK_SUCCESSFUL_NAME) {
+                $isJobComplete = $this->refundSuccessfulProcessor->processSuccessfulWebhook($params, $jobName);
+            } elseif ($jobName == RefundFailed::WEBHOOK_FAILED_NAME) {
+                $isJobComplete = $this->refundFailedProcessor->processFailedWebhook($params, $jobName);
             }
             if ($isJobComplete) {
                 $job->delete();
             }
         } catch (\Exception $e) {
-            $this->balancepayConfig->log($jobName.' Job Failed, Attempts - '.$jobAttempts.'
+            $this->balancepayConfig->log($jobName . ' Job Failed, Attempts - ' . $jobAttempts . '
             [Exception: ' . $e->getMessage() . "]\n" . $e->getTraceAsString(), 'error');
             if ($jobAttempts >= 3) {
                 $this->updateWebhookQueue($jobEntityId, 'status', self::FAILED);

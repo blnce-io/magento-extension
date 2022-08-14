@@ -44,11 +44,13 @@ class SalesOrderInvoiceSaveAfter implements ObserverInterface
         $invoice = $observer->getEvent()->getInvoice();
         $invoiceId = $invoice->getId();
         $chargeId = $this->registry->registry('charge_id');
+        $status = $this->registry->registry('charge_status');
         if ($invoiceId && $chargeId) {
             $balancepayChargeModel = $this->balancepayChargeFactory->create();
             $balancepayChargeModel->setData([
                 'charge_id' => $chargeId,
-                'invoice_id' => $invoiceId
+                'invoice_id' => $invoiceId,
+                'status' => $status
             ]);
             $balancepayChargeModel->save();
         }
