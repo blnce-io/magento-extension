@@ -80,7 +80,7 @@ class RefundCanceledProcessor
             ->getFirstItem()->getCreditMemoId();
         if ($memoId) {
             $memoData = $this->creditmemoRepository->get($memoId);
-            $memoData->addData(['state' => 1]);
+            $memoData->addData(['state' => Creditmemo::STATE_CANCELED]);
             $this->creditmemoRepository->save($memoData);
             return true;
         } else {

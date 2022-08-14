@@ -59,7 +59,7 @@ class RefundSuccessfulProcessor
             ->getFirstItem()->getCreditMemoId();
         if ($memoId) {
             $memoData = $this->creditmemoRepository->get($memoId);
-            $memoData->addData(['state' => 2]);
+            $memoData->addData(['state' => Creditmemo::STATE_REFUNDED]);
             $this->creditmemoRepository->save($memoData);
             return true;
         } else {
