@@ -4,10 +4,10 @@ namespace Balancepay\Balancepay\Model;
 
 use Balancepay\Balancepay\Model\Config as BalancepayConfig;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Phrase;
 use Balancepay\Balancepay\Model\ResourceModel\BalancepayRefund\Collection;
-use Magento\Sales\Model\Order\CreditmemoFactory;
+use Magento\Sales\Api\CreditmemoRepositoryInterface;
+use Magento\Sales\Model\Order\Creditmemo;
 
 class RefundSuccessfulProcessor
 {
@@ -32,13 +32,15 @@ class RefundSuccessfulProcessor
         BalancepayConfig $balancepayConfig,
         BalancepayChargeFactory $balancepayChargeFactory,
         Collection $collection,
-        CreditmemoFactory $creditmemoFactory
+        Creditmemo $creditmemo,
+        CreditmemoRepositoryInterface $creditmemoRepository
     )
     {
         $this->balancepayConfig = $balancepayConfig;
         $this->collection = $collection;
         $this->balancepayChargeFactory = $balancepayChargeFactory;
-        $this->creditmemoFactory = $creditmemoFactory;
+        $this->creditmemo = $creditmemo;
+        $this->creditmemoRepository = $creditmemoRepository;
     }
 
     /**
@@ -47,8 +49,8 @@ class RefundSuccessfulProcessor
      */
     public function processSuccessfulWebhook($params, $jobName)
     {
-        $data = $params[0];
-        $json = !empty($data) ? json_decode($data, true) : [];
+        $data = $params;
+        $json = !empty($data) ? $data : [];
         $refundId = isset($json['data']['refundId']) ? $json['data']['refundId'] : '';
         if (!$refundId) {
             throw new LocalizedException(new Phrase("Refund ID Not Present!"));
@@ -56,12 +58,9 @@ class RefundSuccessfulProcessor
         $memoId = $this->collection->addFieldToFilter('refund_id', ['eq' => $refundId])
             ->getFirstItem()->getCreditMemoId();
         if ($memoId) {
-            $creditmemoModel = $this->creditmemoFactory->create();
-            $creditmemoModel->setData([
-                'entity_id' => $memoId,
-                'creditmemo_status' => 2
-            ]);
-            $creditmemoModel->save();
+            $memoData = $this->creditmemoRepository->get($memoId);
+            $memoData->addData(['state' => 2]);
+            $this->creditmemoRepository->save($memoData);
             return true;
         } else {
             throw new LocalizedException(new Phrase("Memo ID Not Present!"));
