@@ -100,7 +100,6 @@ class Buyers extends AbstractRequest
      */
     protected function getCurlMethod()
     {
-
         if ($this->_topic == 'getbuyers') {
             return 'get';
         }
@@ -160,11 +159,11 @@ class Buyers extends AbstractRequest
         $params = [
             'topic' => $this->_topic
         ];
-
-        $params['firstname'] = $this->session->getCustomer()->getFirstname() ?? '';
-        $params['lastname'] = $this->session->getCustomer()->getLastname() ?? '';
-        $params['email'] = $this->session->getCustomer()->getEmail() ?? '';
-
+        if ($this->_topic !== 'getbuyers') {
+            $params['firstname'] = $this->session->getCustomer()->getFirstname() ?? '';
+            $params['lastname'] = $this->session->getCustomer()->getLastname() ?? '';
+            $params['email'] = $this->session->getCustomer()->getEmail() ?? '';
+        }
         return array_replace_recursive(
             parent::getParams(),
             $params
