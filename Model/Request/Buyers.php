@@ -159,7 +159,7 @@ class Buyers extends AbstractRequest
         $params = [
             'topic' => $this->_topic
         ];
-        if ($this->_topic !== 'getbuyers') {
+        if ($this->_topic == 'buyers') {
             $params['firstname'] = $this->session->getCustomer()->getFirstname() ?? '';
             $params['lastname'] = $this->session->getCustomer()->getLastname() ?? '';
             $params['email'] = $this->session->getCustomer()->getEmail() ?? '';
