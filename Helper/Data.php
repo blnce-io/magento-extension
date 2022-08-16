@@ -141,11 +141,13 @@ class Data extends AbstractHelper
      * @return array
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function getBuyerAmount()
+    public function getBuyerAmount($buyerId = '')
     {
         $response = [];
         try {
-            $buyerId = $this->getCustomerSessionBuyerId();
+            if (!$buyerId) {
+                $buyerId = $this->getCustomerSessionBuyerId();
+            }
             if (!empty($buyerId)) {
                 $response = $this->requestFactory
                     ->create(RequestFactory::BUYER_REQUEST_METHOD)

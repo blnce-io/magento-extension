@@ -96,8 +96,22 @@ class Qualify extends Action
         $resultJson = $this->resultJsonFactory->create();
         if ($this->balancepayConfig->isActive()) {
             $buyerId = $this->customerSession->getCustomer()->getBuyerId() ?? '';
+            $email = $this->customerSession->getCustomer()->getEmail() ?? '';
+
+            if (!empty($email)) {
+                //Buyer email search
+                $response = $this->requestFactory
+                    ->create(RequestFactory::BUYER_REQUEST_METHOD)
+                    ->setRequestMethod('buyers/search')
+                    ->setTopic('searchbuyer')
+                    ->process();
+                if (isset($response['data']['id'])){
+                    $buyerId = $response['data']['id'];
+                }
+            }
+
             if (empty($buyerId)) {
-                $buyerId = $this->createBuyer($buyerId);
+                $buyerId = $this->createBuyer();
             }
             $qualificationLink = $this->getQualificationLink($buyerId);
             if (!empty($qualificationLink)) {
@@ -136,11 +150,11 @@ class Qualify extends Action
     /**
      * CreateBuyer
      *
-     * @param string $buyerId
-     * @return mixed|string
+     * @return false|mixed|string
      * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    private function createBuyer($buyerId)
+    private function createBuyer()
     {
         try {
             //create buyer
