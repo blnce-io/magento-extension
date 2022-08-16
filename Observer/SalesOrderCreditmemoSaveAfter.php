@@ -61,8 +61,19 @@ class SalesOrderCreditmemoSaveAfter implements ObserverInterface
     {
         $creditMemo = $observer->getEvent()->getCreditmemo();
         $creditMemoId = $creditMemo->getId();
+        $balancepayRefundData = $this->balancepayRefundFactory->create()->getCollection()
+            ->addFieldToFilter('credit_memo_id', ['eq' => $creditMemoId])->getData();
+        if (count($balancepayRefundData)>0) {
+            return;
+        }
         $total = $creditMemo->getBaseGrandTotal();
         $invoiceId = $creditMemo->getInvoiceId();
+        $comments = $creditMemo->getComments();
+        $reason = 'Other';
+        foreach ($comments as $comment) {
+            $reason = $comment->getComment();
+            break;
+        }
         $message = "We cannot automatically initiate a refund on Balance as this is a offline refund request. Please initiate a refund directly from the Balance dashboard.";
         if ($invoiceId) {
             $chargeId = $this->collection->addFieldToFilter('invoice_id', ['eq' => $invoiceId])
@@ -74,6 +85,7 @@ class SalesOrderCreditmemoSaveAfter implements ObserverInterface
                     ->setRequestMethod('charges/' . $chargeId . '/refunds')
                     ->setTopic('refunds')
                     ->setAmount($total)
+                    ->setReason($reason)
                     ->setChargeId($chargeId)
                     ->process();
                 $refundId = $response['id'];
