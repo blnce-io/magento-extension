@@ -157,14 +157,11 @@ class Buyers extends AbstractRequest
      */
     protected function getParams()
     {
-        $params = [
-            'topic' => $this->_topic
-        ];
-
-        $params['firstname'] = $this->session->getCustomer()->getFirstname() ?? '';
-        $params['lastname'] = $this->session->getCustomer()->getLastname() ?? '';
-        $params['email'] = $this->session->getCustomer()->getEmail() ?? '';
-
+        if ($this->_topic == 'buyers') {
+            $params['firstname'] = $this->session->getCustomer()->getFirstname() ?? '';
+            $params['lastname'] = $this->session->getCustomer()->getLastname() ?? '';
+            $params['email'] = $this->session->getCustomer()->getEmail() ?? '';
+        }
         return array_replace_recursive(
             parent::getParams(),
             $params
