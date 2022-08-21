@@ -103,7 +103,7 @@ class CreditmemoService extends SalesCreditmemoService
         PriceCurrencyInterface $priceCurrency,
         ManagerInterface $eventManager
     ) {
-        parent::construct(
+        parent::__construct(
             $creditmemoRepository,
             $creditmemoCommentRepository,
             $searchCriteriaBuilder,
