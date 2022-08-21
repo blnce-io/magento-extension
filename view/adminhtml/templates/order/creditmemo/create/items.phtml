@@ -163,6 +163,18 @@ require(['jquery'], function(jQuery){
 var submitButtons = jQuery('.submit-button');
 var updateButtons = jQuery('.update-button, .update-totals-button');
 var fields = jQuery('.qty-input, .order-subtotal-table input[type="text"]');
+var reasonSelect = jQuery('#creditmemo_comment_text');
+var refundButton = jQuery('button.refund');
+reasonSelect.on('change', toggleRefundButton);
+
+function toggleRefundButton() {
+    if (reasonSelect.val()) {
+        refundButton.removeClass('disabled').prop('disabled', false);
+    } else {
+        refundButton.addClass('disabled').prop('disabled', true);
+    }
+}
+
 function enableButtons(buttons) {
     buttons.removeClass('disabled').prop('disabled', false);
 }
