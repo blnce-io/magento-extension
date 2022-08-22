@@ -29,11 +29,11 @@ use Magento\Sales\Model\OrderFactory;
 use Balancepay\Balancepay\Helper\Data;
 
 /**
- * Balancepay transaction/refund-canceled webhook.
+ * Balancepay transaction/refundcanceled webhook.
  */
 class RefundCanceled extends Action implements CsrfAwareActionInterface
 {
-    public const WEBHOOK_CANCELED_NAME = 'transaction/refund-canceled';
+    public const WEBHOOK_CANCELED_NAME = 'transaction/refundcanceled';
 
     /**
      * @var JsonFactory
