@@ -126,26 +126,31 @@ class Save implements ObserverInterface
                     $this->requestFactory
                         ->create(RequestFactory::WEBHOOKS_REQUEST_METHOD)
                         ->setTopic('checkout/charged')
+                        ->setWebookAddress('checkout/charged')
                         ->process();
 
                     $this->requestFactory
                         ->create(RequestFactory::WEBHOOKS_REQUEST_METHOD)
                         ->setTopic('transaction/confirmed')
+                        ->setWebookAddress('transaction/confirmed')
                         ->process();
 
                     $this->requestFactory
                         ->create(RequestFactory::WEBHOOKS_REQUEST_METHOD)
-                        ->setTopic('transaction/refundcanceled')
+                        ->setTopic('transaction/refund-canceled')
+                        ->setWebookAddress('transaction/refundcanceled')
                         ->process();
 
                     $this->requestFactory
                         ->create(RequestFactory::WEBHOOKS_REQUEST_METHOD)
-                        ->setTopic('transaction/refundsuccessful')
+                        ->setTopic('transaction/refund-successful')
+                        ->setWebookAddress('transaction/refundsuccessful')
                         ->process();
 
                     $this->requestFactory
                         ->create(RequestFactory::WEBHOOKS_REQUEST_METHOD)
-                        ->setTopic('transaction/refundfailed')
+                        ->setTopic('transaction/refund-failed')
+                        ->setWebookAddress('transaction/refundfailed')
                         ->process();
 
                     $this->appEmulation->stopEnvironmentEmulation();
