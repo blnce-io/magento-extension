@@ -33,7 +33,7 @@ use Balancepay\Balancepay\Helper\Data;
  */
 class RefundSuccessful extends Action implements CsrfAwareActionInterface
 {
-    public const WEBHOOK_SUCCESSFUL_NAME = 'transaction/refundsuccessful';
+    public const WEBHOOK_SUCCESSFUL_NAME = 'transaction/refund_successful';
 
     /**
      * @var JsonFactory

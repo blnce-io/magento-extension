@@ -29,11 +29,11 @@ use Magento\Sales\Model\OrderFactory;
 use Balancepay\Balancepay\Helper\Data;
 
 /**
- * Balancepay transaction/refundfailed webhook.
+ * Balancepay transaction/refundcanceled webhook.
  */
-class RefundFailed extends Action implements CsrfAwareActionInterface
+class RefundCanceled extends Action implements CsrfAwareActionInterface
 {
-    public const WEBHOOK_FAILED_NAME = 'transaction/refundfailed';
+    public const WEBHOOK_CANCELED_NAME = 'transaction/refund_canceled';
 
     /**
      * @var JsonFactory
@@ -113,14 +113,14 @@ class RefundFailed extends Action implements CsrfAwareActionInterface
         if (!$this->balancepayConfig->isActive()) {
             return $this->resultFactory->create(ResultFactory::TYPE_FORWARD)->forward('noroute');
         }
+
         $content = $this->getRequest()->getContent();
         $headers = $this->getRequest()->getHeaders()->toArray();
-
         $this->balancepayConfig->log('Webhook\Checkout\Confirmed::execute() ', 'debug', [
             'content' => $content,
             'headers' => $headers,
         ]);
-        return $this->webhookRequestProcessor->process($content, $headers, self::WEBHOOK_FAILED_NAME);
+        return $this->webhookRequestProcessor->process($content, $headers, self::WEBHOOK_CANCELED_NAME);
     }
 
     /**
