@@ -26,6 +26,11 @@ class Webhooks extends AbstractRequest
     protected $_topic;
 
     /**
+     * @var string
+     */
+    protected $webookAddress;
+
+    /**
      * SetTopic
      *
      * @param  string   $topic
@@ -45,6 +50,29 @@ class Webhooks extends AbstractRequest
     public function getTopic()
     {
         return $this->_topic;
+    }
+
+
+    /**
+     * SetWebookAddress
+     *
+     * @param  string   $webookAddress
+     * @return $this
+     */
+    public function setWebookAddress($webookAddress)
+    {
+        $this->webookAddress = (string) $webookAddress;
+        return $this;
+    }
+
+    /**
+     * GetWebookAddress
+     *
+     * @return string
+     */
+    public function getWebookAddress()
+    {
+        return $this->webookAddress;
     }
 
     /**
@@ -79,7 +107,7 @@ class Webhooks extends AbstractRequest
             [
               'topic' => $this->_topic,
               'address' => $this->_balancepayConfig->getCurrentStore()->getBaseUrl() .
-                  'balancepay/webhook_' . $this->_topic,
+                  'balancepay/webhook_' . $this->webookAddress,
             ]
         );
     }

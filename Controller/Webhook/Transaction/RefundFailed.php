@@ -29,11 +29,11 @@ use Magento\Sales\Model\OrderFactory;
 use Balancepay\Balancepay\Helper\Data;
 
 /**
- * Balancepay transaction/refund-canceled webhook.
+ * Balancepay transaction/refundfailed webhook.
  */
 class RefundFailed extends Action implements CsrfAwareActionInterface
 {
-    public const WEBHOOK_FAILED_NAME = 'transaction/refund-failed';
+    public const WEBHOOK_FAILED_NAME = 'transaction/refund_failed';
 
     /**
      * @var JsonFactory
