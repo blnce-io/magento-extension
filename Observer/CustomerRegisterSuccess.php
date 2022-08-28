@@ -38,9 +38,11 @@ class CustomerRegisterSuccess implements ObserverInterface
     public function execute(Observer $observer)
     {
         try {
+            $customerId = $observer->getCustomer()->getId();
             $buyerId = $this->_coreSession->getBalanceBuyerId();
-            if ($buyerId) {
-                $this->balanceBuyer->updateCustomerBalanceBuyerId($buyerId);
+            if ($buyerId && $customerId) {
+                $this->balanceBuyer->updateCustomerBalanceBuyerId($buyerId, $customerId);
+                $this->_coreSession->unsBalanceBuyerId();
             }
         } catch (\Exception $e) {
             $this->balancepayConfig->log('Customer Register Success - Couldnot assign the buyer to customer');

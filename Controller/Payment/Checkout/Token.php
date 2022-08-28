@@ -135,10 +135,8 @@ class Token extends Action
                 $this->_coreSession->start();
                 $this->_coreSession->setBalanceBuyerId($buyerId);
             }
-
             $this->checkoutSession->setBalanceCheckoutToken($token);
             $this->checkoutSession->setBalanceCheckoutTransactionId($transactionId);
-
             $resBody = [
                 "error" => 0,
                 "token" => $token,
