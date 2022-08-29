@@ -83,6 +83,7 @@ class Token extends Action
         SessionManagerInterface $coreSession
     ) {
         parent::__construct($context);
+        $this->context = $context;
         $this->jsonResultFactory = $jsonResultFactory;
         $this->balancepayConfig = $balancepayConfig;
         $this->requestFactory = $requestFactory;
@@ -100,7 +101,7 @@ class Token extends Action
     public function execute()
     {
         if (!$this->balancepayConfig->isActive()) {
-            return $this->resultFactory->create(ResultFactory::TYPE_FORWARD)->forward('noroute');
+            return $this->context->getResultFactory()->create(ResultFactory::TYPE_FORWARD)->forward('noroute');
         }
 
         $resBody = [];
