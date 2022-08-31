@@ -23,6 +23,7 @@ use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\Session\SessionManagerInterface;
 use Magento\Framework\Webapi\Response;
 
 /**
@@ -78,15 +79,18 @@ class Token extends Action
         RequestFactory $requestFactory,
         CheckoutSession $checkoutSession,
         Session $customerSession,
-        BalanceBuyer $balanceBuyer
+        BalanceBuyer $balanceBuyer,
+        SessionManagerInterface $coreSession
     ) {
         parent::__construct($context);
+        $this->context = $context;
         $this->jsonResultFactory = $jsonResultFactory;
         $this->balancepayConfig = $balancepayConfig;
         $this->requestFactory = $requestFactory;
         $this->checkoutSession = $checkoutSession;
         $this->customerSession = $customerSession;
         $this->balanceBuyer = $balanceBuyer;
+        $this->_coreSession = $coreSession;
     }
 
     /**
@@ -97,7 +101,7 @@ class Token extends Action
     public function execute()
     {
         if (!$this->balancepayConfig->isActive()) {
-            return $this->resultFactory->create(ResultFactory::TYPE_FORWARD)->forward('noroute');
+            return $this->context->getResultFactory()->create(ResultFactory::TYPE_FORWARD)->forward('noroute');
         }
 
         $resBody = [];
@@ -128,9 +132,12 @@ class Token extends Action
                 $this->balanceBuyer->updateCustomerBalanceBuyerId($buyerId);
             }
 
+            if ($buyerId && !$this->customerSession->isLoggedIn()) {
+                $this->_coreSession->start();
+                $this->_coreSession->setBalanceBuyerId($buyerId);
+            }
             $this->checkoutSession->setBalanceCheckoutToken($token);
             $this->checkoutSession->setBalanceCheckoutTransactionId($transactionId);
-
             $resBody = [
                 "error" => 0,
                 "token" => $token,

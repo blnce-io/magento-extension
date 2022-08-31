@@ -90,9 +90,12 @@ class BalanceBuyer
      *
      * @param mixed $buyerId
      */
-    public function updateCustomerBalanceBuyerId($buyerId)
+    public function updateCustomerBalanceBuyerId($buyerId, $customerId = 0)
     {
-        $customer = $this->customer->load($this->customerSession->getCustomer()->getId());
+        if (!$customerId) {
+            $customerId = $this->customerSession->getCustomer()->getId();
+        }
+        $customer = $this->customer->load($customerId);
         $customerData = $customer->getDataModel();
         $customerData->setCustomAttribute('buyer_id', $buyerId);
         $customer->updateData($customerData);
