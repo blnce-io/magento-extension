@@ -157,6 +157,7 @@ class Buyers extends AbstractRequest
      */
     protected function getParams()
     {
+        $params = [];
         if ($this->_topic == 'buyers') {
             $params['firstname'] = $this->session->getCustomer()->getFirstname() ?? '';
             $params['lastname'] = $this->session->getCustomer()->getLastname() ?? '';
