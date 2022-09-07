@@ -8,14 +8,16 @@ use Balancepay\Balancepay\Controller\Webhook\Transaction\RefundFailed;
 use Balancepay\Balancepay\Helper\Data;
 use Balancepay\Balancepay\Model\Config;
 use Balancepay\Balancepay\Model\QueueFactory;
-use Balancepay\Balancepay\Model\RequestInterface;
-use Magento\Framework\App\RequestInterface as BalanceRequestInterface;
 use Balancepay\Balancepay\Model\Queue;
-use Magento\Framework\App\Action\AbstractAction;
+use Magento\Framework\Controller\Result\JsonFactory;
+use Balancepay\Balancepay\Model\ChargedProcessor;
+use Balancepay\Balancepay\Model\ConfirmedProcessor;
+use Balancepay\Balancepay\Model\QueueProcessor;
+use Laminas\Http\Headers;
+use Magento\Framework\App\Request\Http;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Balancepay\Balancepay\Model\WebhookRequestProcessor;
 use Magento\Customer\Api\Data\CustomerInterface;
-use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\Result\Json as ResultJson;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
@@ -24,114 +26,10 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\Controller\ResultInterface;
-
+use Magento\Framework\App\Action\Context;
 
 class RefundFailedTest extends TestCase
 {
-    /**
-     * Object for test
-     *
-     * @var object
-     */
-    private $testableObject;
-
-    /**
-     * @var Config|MockObject
-     */
-    private $balancepayConfig;
-
-    /**
-     * @var ObjectManagerInterface|MockObject
-     */
-    private $objectManager;
-
-    /**
-     * @var RequestFactory|MockObject
-     */
-    private $requestFactory;
-
-    /**
-     * @var CustomerInterface|MockObject
-     */
-    private $customerInterface;
-
-    /**
-     * @var Json|MockObject
-     */
-    private $json;
-
-    /**
-     * @var RequestInterface|MockObject
-     */
-    private $requestInterface;
-    /**
-     * @var ResultJson|MockObject
-     */
-    private $resultJson;
-
-    /**
-     * @var CustomerInterface|MockObject
-     */
-    private $getRequest;
-
-    /**
-     * @var AbstractAction|MockObject
-     */
-    private $abstractAction;
-
-    /**
-     * @var QueueFactory|MockObject
-     */
-    private $queueFactory;
-
-    /**
-     * @var ResultInterface|MockObject
-     */
-    private $resultInterface;
-
-    /**
-     * @var OrderFactory|MockObject
-     */
-    private $orderFactory;
-
-    /**
-     * @var Data|MockObject
-     */
-    private $helperData;
-
-    /**
-     * @var WebhookRequestProcessor|MockObject
-     */
-    private $webhookRequestProcessor;
-
-    /**
-     * @var JsonFactory|MockObject
-     */
-    private $jsonResultFactory;
-
-    public function testExecute(): void
-    {
-        $this->abstractAction->expects($this->any())->method('getRequest')->willReturn($this->balanceRequestInterface);
-        $this->balanceRequestInterface->expects($this->any())->method('getContent')->willReturn('string');
-        $this->balancepayConfig->expects($this->any())->method('isActive')->willReturn(true);
-        $this->requestFactory->expects($this->any())->method('create')->willReturn($this->resultInterface);
-        $this->resultInterface->expects($this->any())->method('forward')->willReturn($this->requestInterface);
-        $this->json->expects($this->any())->method('unserialize')->willReturn([]);
-        $this->json->expects($this->any())->method('serialize')->willReturn([]);
-        $this->balancepayConfig->expects($this->any())->method('log')->willReturn($this->balancepayConfig);
-        $this->queueFactory->expects($this->any())->method('create')->willReturn($this->queue);
-        $this->queue->expects($this->any())->method('setData')->willReturn($this->queue);
-        $this->jsonResultFactory->expects($this->any())->method('create')->willReturn($this->resultJson);
-        $this->resultJson->expects($this->any())->method('setHttpResponseCode')->willReturn($this->resultJson);
-        $result = $this->testableObject->execute();
-        $this->assertIsObject($result);
-    }
-
-    /**
-     * This method is called before a test is executed
-     *
-     * @return void
-     */
     protected function setUp(): void
     {
         $this->balancepayConfig = $this->getMockBuilder(Config::class)
@@ -139,14 +37,37 @@ class RefundFailedTest extends TestCase
             ->onlyMethods([
                 'getIsAuth',
                 'log',
-                'isActive'
+                'isActive',
+                'getWebhookSecret'
             ])
-            ->getMockForAbstractClass();
+            ->getMock();
 
         $this->requestFactory = $this->getMockBuilder(RequestFactory::class)
             ->disableOriginalConstructor()
             ->onlyMethods(['create'])
             ->getMockForAbstractClass();
+
+        $this->chargedProcessor = $this->getMockBuilder(ChargedProcessor::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods([])
+            ->getMock();
+
+        $this->confirmedProcessor = $this->getMockBuilder(ConfirmedProcessor::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods([])
+            ->getMock();
+
+        $this->queueProcessor = $this->getMockBuilder(QueueProcessor::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods([])
+            ->getMock();
+
+        $this->headers = $this->getMockBuilder(Headers::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['toArray'])
+            ->getMock();
+
+        $context = $this->createMock(Context::class);
 
         $this->resultJson = $this->getMockBuilder(ResultJson::class)
             ->disableOriginalConstructor()
@@ -158,14 +79,9 @@ class RefundFailedTest extends TestCase
             ->addMethods(['updateData'])
             ->getMockForAbstractClass();
 
-        $this->getRequest = $this->getMockBuilder(CustomerInterface::class)
+        $this->customerInterface = $this->getMockBuilder(CustomerInterface::class)
             ->disableOriginalConstructor()
             ->addMethods(['updateData'])
-            ->getMockForAbstractClass();
-
-        $this->abstractAction = $this->getMockBuilder(AbstractAction::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['getRequest'])
             ->getMockForAbstractClass();
 
         $this->queue = $this->getMockBuilder(Queue::class)
@@ -178,19 +94,13 @@ class RefundFailedTest extends TestCase
             ->onlyMethods(['create'])
             ->getMockForAbstractClass();
 
-        $this->requestInterface = $this->getMockBuilder(RequestInterface::class)
+        $this->request = $this->getMockBuilder(Http::class)
             ->disableOriginalConstructor()
-            ->addMethods(['setRequestMethod', 'setTopic'])
-            ->getMockForAbstractClass();
+            ->getMock();
 
         $this->json = $this->getMockBuilder(Json::class)
             ->disableOriginalConstructor()
             ->onlyMethods(['unserialize', 'serialize'])
-            ->getMockForAbstractClass();
-
-        $this->balanceRequestInterface = $this->getMockBuilder(BalanceRequestInterface::class)
-            ->disableOriginalConstructor()
-            ->addMethods(['getContent'])
             ->getMockForAbstractClass();
 
         $this->objectManager = $this->getMockBuilder(ObjectManagerInterface::class)
@@ -220,15 +130,55 @@ class RefundFailedTest extends TestCase
             ->addMethods(['setData'])
             ->getMockForAbstractClass();
 
+        $context->method('getRequest')
+            ->willReturn($this->request);
+
         $objectManager = new ObjectManager($this);
         $this->testableObject = $objectManager->getObject(RefundFailed::class, [
-            'requestFactory' => $this->requestFactory,
-            'balancepayConfig' => $this->balancepayConfig,
+            'context' => $context,
             'jsonResultFactory' => $this->jsonResultFactory,
+            'balancepayConfig' => $this->balancepayConfig,
+            'requestFactory' => $this->requestFactory,
             'json' => $this->json,
             'orderFactory' => $this->orderFactory,
             'helperData' => $this->helperData,
             'webhookRequestProcessor' => $this->webhookRequestProcessor
         ]);
+
+        $this->webhookProcessor = $objectManager->getObject(WebhookRequestProcessor::class, [
+            'orderFactory' => $this->orderFactory,
+            'balancepayConfig' => $this->balancepayConfig,
+            'jsonResultFactory' => $this->jsonResultFactory,
+            'chargedProcessor' => $this->chargedProcessor,
+            'confirmedProcessor' => $this->confirmedProcessor,
+            'queueProcessor' => $this->queueProcessor,
+            'json' => $this->json
+        ]);
+    }
+
+    /**
+     * Object for test
+     *
+     * @var object
+     */
+    private $testableObject;
+
+    public function testExecute(): void
+    {
+        $this->request->expects($this->any())->method('getContent')->willReturn('string');
+        $this->request->expects($this->any())->method('getHeaders')->willReturn($this->headers);
+        $this->headers->expects($this->any())->method('toArray')->willReturn(['test']);
+        $this->balancepayConfig->expects($this->any())->method('isActive')->willReturn(true);
+        $this->requestFactory->expects($this->any())->method('create')->willReturn($this->resultInterface);
+        $this->json->expects($this->any())->method('unserialize')->willReturn([]);
+        $this->json->expects($this->any())->method('serialize')->willReturn([]);
+        $this->webhookProcessor->process('string', ['test'], 'transaction/refund_failed');
+        $this->jsonResultFactory->expects($this->any())->method('create')->willReturn($this->resultJson);
+        $this->resultJson->expects($this->any())->method('setHttpResponseCode')->willReturn($this->resultJson);
+        $this->balancepayConfig->expects($this->any())->method('getWebhookSecret')->willReturn('webhooksecretstring');
+        $this->queueFactory->expects($this->any())->method('create')->willReturn($this->queue);
+        $this->queue->expects($this->any())->method('setData')->willReturn($this->queue);
+        $result = $this->testableObject->execute();
+        $this->assertIsObject($result);
     }
 }
