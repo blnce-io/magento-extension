@@ -4,9 +4,7 @@ namespace Balancepay\Balancepay\Model;
 
 use Balancepay\Balancepay\Controller\Webhook\Checkout\Charged;
 use Balancepay\Balancepay\Controller\Webhook\Transaction\Confirmed;
-use Balancepay\Balancepay\Model\Config;
-use Balancepay\Balancepay\Model\ChargedProcessor;
-use Balancepay\Balancepay\Model\ConfirmedProcessor;
+use Laminas\Crypt\Hmac;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -55,6 +53,11 @@ class WebhookRequestProcessor
     private $queueProcessor;
 
     /**
+     * @var Hmac
+     */
+    protected $hmac;
+
+    /**
      * @param OrderFactory $orderFactory
      * @param Config $balancepayConfig
      * @param JsonFactory $jsonResultFactory
@@ -70,7 +73,8 @@ class WebhookRequestProcessor
         ChargedProcessor $chargedProcessor,
         ConfirmedProcessor $confirmedProcessor,
         QueueProcessor $queueProcessor,
-        Json $json
+        Json $json,
+        Hmac $hmac
     ) {
         $this->orderFactory = $orderFactory;
         $this->balancepayConfig = $balancepayConfig;
@@ -79,6 +83,7 @@ class WebhookRequestProcessor
         $this->confirmedProcessor = $confirmedProcessor;
         $this->queueProcessor = $queueProcessor;
         $this->json = $json;
+        $this->hmac = $hmac;
     }
 
     /**
@@ -114,7 +119,7 @@ class WebhookRequestProcessor
      */
     public function validateSignature($content, $headers, $webhookName): array
     {
-        $signature = hash_hmac("sha256", $content, $this->balancepayConfig->getWebhookSecret());
+        $signature = $this->hmac->compute($this->balancepayConfig->getWebhookSecret(), "sha256", $content);
         if ($signature !== $headers['X-Blnce-Signature']) {
             throw new LocalizedException(new Phrase("Signature is doesn't match!"));
         }
