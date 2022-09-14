@@ -8,6 +8,7 @@ use Magento\Framework\App\Action\Context;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Balancepay\Balancepay\Model\Config;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
+use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Sales\Model\OrderFactory;
 use Balancepay\Balancepay\Helper\Data;
@@ -16,6 +17,7 @@ use Balancepay\Balancepay\Model\ChargedProcessor;
 use Balancepay\Balancepay\Model\ConfirmedProcessor;
 use Balancepay\Balancepay\Model\QueueProcessor;
 use Magento\Framework\App\Request\Http;
+use Magento\Framework\App\RequestInterface;
 use Laminas\Http\Headers;
 use Magento\Framework\Controller\Result\Json as ResultJson;
 use Magento\Customer\Api\Data\CustomerInterface;
@@ -23,7 +25,7 @@ use Balancepay\Balancepay\Model\Queue;
 use Balancepay\Balancepay\Model\QueueFactory;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Controller\AbstractResult;
-
+use Laminas\Crypt\Hmac;
 use Balancepay\Balancepay\Controller\Webhook\Transaction\RefundFailed;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 
@@ -80,6 +82,13 @@ class RefundFailedTest extends TestCase
         $context->method('getRequest')
             ->willReturn($this->request);
 
+        $this->resultFactory = $this->getMockBuilder(ResultFactory::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['create'])
+            ->getMock();
+
+        $context->method('getResultFactory')->willReturn($this->resultFactory);
+
         $objectManager = new ObjectManager($this);
         $this->testableObject = $objectManager->getObject(RefundFailed::class, [
             'context' => $context,
@@ -118,6 +127,11 @@ class RefundFailedTest extends TestCase
             ->onlyMethods(['setHttpResponseCode'])
             ->getMock();
 
+        $this->hmac = $this->getMockBuilder(Hmac::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['compute'])
+            ->getMock();
+
         $this->jsonResultFactorySecond->expects($this->any())->method('create')->willReturn($this->resultJson);
 
         $this->webhookProcessor = $objectManager->getObject(WebhookRequestProcessor::class, [
@@ -127,7 +141,8 @@ class RefundFailedTest extends TestCase
             'chargedProcessor' => $this->chargedProcessor,
             'confirmedProcessor' => $this->confirmedProcessor,
             'queueProcessor' => $this->queueProcessor,
-            'json' => $this->json
+            'json' => $this->json,
+            'hmac' => $this->hmac
         ]);
 
         $this->headers = $this->getMockBuilder(Headers::class)
@@ -159,6 +174,11 @@ class RefundFailedTest extends TestCase
             ->disableOriginalConstructor()
             ->addMethods([])
             ->getMockForAbstractClass();
+
+        $this->requestInterface = $this->getMockBuilder(RequestInterface::class)
+            ->disableOriginalConstructor()
+            ->addMethods([])
+            ->getMockForAbstractClass();
     }
 
     /**
@@ -178,11 +198,29 @@ class RefundFailedTest extends TestCase
         $this->json->expects($this->any())->method('unserialize')->willReturn([]);
         $this->json->expects($this->any())->method('serialize')->willReturn([]);
         $this->webhookProcessor->process('string', ['test'], 'transaction/refund_failed');
-        $this->resultJson->expects($this->any())->method('setHttpResponseCode')->willReturn($this->abstractResult);
         $this->balancepayConfig->expects($this->any())->method('getWebhookSecret')->willReturn('webhooksecretstring');
+        $this->hmac->expects($this->any())->method('compute')->willReturn('balancesignature');
+        $this->resultJson->expects($this->any())->method('setHttpResponseCode')->willReturn($this->abstractResult);
         $this->queueFactory->expects($this->any())->method('create')->willReturn($this->queue);
         $this->queue->expects($this->any())->method('setData')->willReturn($this->queue);
         $result = $this->testableObject->execute();
-        $this->assertIsObject($result);
+    }
+
+    public function testExecuteNotActive()
+    {
+        $this->balancepayConfig->expects($this->any())->method('isActive')->willReturn(false);
+        $this->resultFactory->expects($this->any())->method('create')->willReturn($this->resultInterface);
+        $this->resultInterface->expects($this->any())->method('forward')->willReturnSelf();
+        $result = $this->testableObject->execute();
+    }
+
+    public function testCreateCsrfValidationException()
+    {
+        $result = $this->testableObject->createCsrfValidationException($this->requestInterface);
+    }
+
+    public function testValidateForCsrf()
+    {
+        $result = $this->testableObject->validateForCsrf($this->requestInterface);
     }
 }

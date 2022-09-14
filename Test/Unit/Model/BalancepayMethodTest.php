@@ -20,6 +20,8 @@ use Balancepay\Balancepay\Helper\Data as HelperData;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Magento\Customer\Model\Session;
 use Balancepay\Balancepay\Model\Config;
+use Magento\Framework\DataObject;
+use Magento\Framework\Event\ManagerInterface;
 
 class BalancepayMethodTest extends TestCase
 {
@@ -106,7 +108,13 @@ class BalancepayMethodTest extends TestCase
         $this->order = $this->getMockBuilder(Order::class)
             ->disableOriginalConstructor()->addMethods(['getOrder'])->getMock();
 
+        $this->dataObject = $this->getMockBuilder(DataObject::class)
+            ->disableOriginalConstructor()->addMethods([])->getMock();
+
         $this->orderItemInterface = $this->getMockBuilder(OrderItemInterface::class)
+            ->disableOriginalConstructor()->getMockForAbstractClass();
+
+        $this->_eventManager = $this->getMockBuilder(ManagerInterface::class)
             ->disableOriginalConstructor()->getMockForAbstractClass();
 
         $this->requestInterface = $this->getMockBuilder(\Balancepay\Balancepay\Model\RequestInterface::class)
@@ -126,7 +134,7 @@ class BalancepayMethodTest extends TestCase
 
         $this->abstractResponse = $this->getMockBuilder(AbstractResponse::class)
             ->disableOriginalConstructor()
-            ->getMockForAbstractClass();
+            ->getMock();
 
         $this->config = $this->getMockBuilder(Config::class)
             ->disableOriginalConstructor()->getMock();
@@ -164,17 +172,31 @@ class BalancepayMethodTest extends TestCase
         $this->assertIsBool($result);
     }
 
-    public function testValidate()
+    public function testIsAvailableFalse()
+    {
+        $this->cartInterface->expects($this->any())->method('isMultipleShippingAddresses')->willReturn(false);
+        $this->helperData->expects($this->any())->method('isCustomerGroupAllowed')->willReturn(true);
+        $result = $this->testableObject->isAvailable($this->cartInterface);
+        $this->assertIsBool($result);
+    }
+
+    public function testAssignData()
+    {
+        $this->_eventManager->expects($this->any())->method('dispatch')->willReturn(null);
+        $result = $this->testableObject->assignData($this->dataObject);
+    }
+
+    /*public function testValidate()
     {
         $this->abstractMethod->expects($this->any())->method('getInfoInstance')->willReturn($this->infoInterface);
-        $result = $this->testableObject->validate($this->cartInterface);
-        $this->assertNull($result);
-    }
+        $this->abstractMethod->expects($this->any())->method('getData')->willReturn($this->infoInterface);
+        $result = $this->testableObject->validate();
+    }*/
 
     public function testGetConfigPaymentAction()
     {
         $this->config->expects($this->any())->method('getIsAuth')->willReturn(true);
-        $result = $this->testableObject->getConfigPaymentAction($this->cartInterface);
+        $result = $this->testableObject->getConfigPaymentAction();
         $this->assertIsString($result);
     }
 
@@ -216,16 +238,3 @@ class BalancepayMethodTest extends TestCase
         $result = $this->testableObject->cancel($this->infoInterface);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
