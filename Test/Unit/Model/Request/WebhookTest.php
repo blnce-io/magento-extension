@@ -115,12 +115,6 @@ class WebhookTest extends TestCase
         $this->assertEquals($this->testableObject, $result);
     }
 
-    public function testSetRequestMethod()
-    {
-        $result = $this->testableObject->setRequestMethod('requestmethod');
-        $this->assertEquals($this->testableObject, $result);
-    }
-
     public function testGetTopic()
     {
         $result = $this->testableObject->getTopic();
@@ -129,23 +123,6 @@ class WebhookTest extends TestCase
     public function testGetWebookAddress()
     {
         $result = $this->testableObject->getWebookAddress();
-    }
-
-    public function testGetRequestMethod()
-    {
-        $result = $this->testableObject->getRequestMethod();
-    }
-
-    public function testGetResponseHandlerType()
-    {
-        $result = $this->testableObject->getResponseHandlerType();
-    }
-
-    public function testGetParams()
-    {
-        $this->balancepayConfig->expects($this->any())->method('getCurrentStore')->willReturn($this->storeInterface);
-        $this->storeInterface->expects($this->any())->method('getBaseUrl')->willReturn('string');
-        $result = $this->testableObject->getParams();
     }
 }
 
