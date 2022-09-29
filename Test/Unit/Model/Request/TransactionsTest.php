@@ -199,39 +199,6 @@ class TransactionsTest extends TestCase
         $result = $this->testableObject->getTopic();
     }
 
-//    public function testGetParams()
-//    {
-//        $this->checkoutSession->expects($this->any())->method('getQuote')->willReturn($this->quote);
-//        $this->quote->expects($this->any())->method('collectTotals')->willReturn($this->quote);
-//        $this->quote->expects($this->any())->method('getShippingAddress')->willReturn($this->address);
-//        $this->quote->expects($this->any())->method('getBaseCurrencyCode')->willReturn('string');
-//        $this->cartTotalRepository->expects($this->any())->method('get');
-//        $this->session->expects($this->any())->method('getCustomer')->willReturn($this->customer);
-//        $this->session->expects($this->any())->method('isLoggedIn')->willReturn(true);
-//        $this->balancepayConfig->expects($this->any())->method('getMerchantTermsOptions')->willReturn([]);
-//        $this->balancepayConfig->expects($this->any())->method('getReservedOrderId')->willReturn('string');
-//        $this->balancepayConfig->expects($this->any())->method('getGmtDate')->willReturn('string');
-//        $this->customerRepositoryInterface->expects($this->any())->method('getById')->willReturn($this->customerInterface);
-//        $this->balanceBuyer->expects($this->any())->method('getCustomerBalanceBuyerId')->willReturn('string');
-//        $this->quote->expects($this->any())->method('getBillingAddress')->willReturn($this->address);
-//        $this->address->expects($this->any())->method('getEmail')->willReturn('test@test.com');
-//        $this->quote->expects($this->any())->method('getCustomerEmail')->willReturn('test@test.com');
-//        $this->quote->expects($this->any())->method('getAllVisibleItems')->willReturn($this->item);
-//        $iterator = new IteratorIterator(new ArrayIterator([$this->item]));
-//        $this->quote->method('getIterator')->willReturn($iterator);
-//        $this->item->expects($this->any())->method('getProduct')->willReturn($this->product);
-//        $this->item->expects($this->any())->method('getProductType')->willReturn('string');
-//        $this->item->expects($this->any())->method('getChildren');
-//        $this->item->expects($this->any())->method('getName')->willReturn('string');
-//        $this->item->expects($this->any())->method('getQty')->willReturn(4345);
-//        $this->item->expects($this->any())->method('getSku')->willReturn('stirn');
-//        $this->item->expects($this->any())->method('getIsVirtual');
-//        $this->item->expects($this->any())->method('getBaseTaxAmount');
-//        $this->product->expects($this->any())->method('load')->willReturnSelf();
-//        $this->helperData->expects($this->any())->method('getBalanceVendors')->willReturn('string');
-//        $result = $this->testableObject->getParams();
-//    }
-
     public function testGetCustomerTermsOptions()
     {
         $this->customerRepositoryInterface->expects($this->any())->method('getById')->willReturn($this->customerInterface);
