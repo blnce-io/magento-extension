@@ -8,6 +8,8 @@ use Balancepay\Balancepay\Model\ChargedProcessor;
 use Balancepay\Balancepay\Model\BalancepayChargeFactory;
 use Balancepay\Balancepay\Model\BalancepayCharge;
 use Balancepay\Balancepay\Model\BalancepayMethod;
+use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\Phrase;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -31,6 +33,11 @@ class ChargedProcessorTest extends TestCase
     private $phrase;
 
     /**
+     * @var ResourceConnection|MockObject
+     */
+    private $resourceConnection;
+
+    /**
      * This method is called before a test is executed
      *
      * @return void
@@ -50,6 +57,12 @@ class ChargedProcessorTest extends TestCase
         $this->order = $this->getMockBuilder(Order::class)
             ->disableOriginalConstructor()->onlyMethods(['save', 'getPayment', 'getBaseGrandTotal', 'setStatus'])->getMock();
 
+        $this->resourceConnection = $this->getMockBuilder(ResourceConnection::class)
+            ->disableOriginalConstructor()->onlyMethods(['getConnection'])->getMock();
+
+        $this->adapterInterface = $this->getMockBuilder(AdapterInterface::class)
+            ->disableOriginalConstructor()->onlyMethods(['getTableName'])->getMockForAbstractClass();
+
         $this->orderPaymentInterface = $this->getMockBuilder(OrderPaymentInterface::class)
             ->disableOriginalConstructor()
             ->addMethods([
@@ -67,7 +80,8 @@ class ChargedProcessorTest extends TestCase
         $objectManager = new ObjectManager($this);
         $this->testableObject = $objectManager->getObject(ChargedProcessor::class, [
             'balancepayConfig' => $this->balancepayConfig,
-            'balancepayChargeFactory' => $this->balancepayChargeFactory
+            'balancepayChargeFactory' => $this->balancepayChargeFactory,
+            'resource' => $this->resourceConnection
         ]);
     }
 
@@ -124,7 +138,8 @@ class ChargedProcessorTest extends TestCase
         $this->balancepayChargeFactory->expects($this->any())->method('create')->willReturn($this->balancepayCharge);
         $this->balancepayCharge->expects($this->any())->method('setData')->with([
             'charge_id' => 14234,
-            'invoice_id' => 5
+            'invoice_id' => 5,
+            'status' => 'charged'
         ])->willReturnSelf();
         $this->balancepayCharge->expects($this->any())->method('save')->willReturnSelf();
         $result = $this->testableObject->processChargedWebhook(
@@ -147,6 +162,9 @@ class ChargedProcessorTest extends TestCase
                 [BalancepayMethod::BALANCEPAY_CHECKOUT_TRANSACTION_ID]
             )
             ->willReturnOnConsecutiveCalls(14235, true, 'txn_83782747234982934');
+
+        $this->resourceConnection->expects($this->any())->method('getConnection')->willReturn($this->adapterInterface);
+        $this->adapterInterface->expects($this->any())->method('getTableName')->willReturn('tableName');
         $this->orderPaymentInterface->expects($this->any())->method('setTransactionId')->with('txn_83782747234982934')->willReturnSelf();
         $this->orderPaymentInterface->expects($this->any())->method('setIsTransactionPending')->with(false)->willReturnSelf();
         $this->orderPaymentInterface->expects($this->any())->method('setIsTransactionClosed')->with(true)->willReturnSelf();
