@@ -9,6 +9,7 @@ use Magento\Config\Model\ResourceModel\Config as ResourceConfig;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Stdlib\DateTime\DateTime;
+use Magento\Quote\Model\Quote;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use Magento\Framework\UrlInterface;
 use Magento\Store\Model\StoreManagerInterface;
@@ -49,6 +50,10 @@ class ConfigTest extends TestCase
             ->getMock();
 
         $this->logger = $this->getMockBuilder(LoggerInterface::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->quote = $this->getMockBuilder(Quote::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -182,6 +187,16 @@ class ConfigTest extends TestCase
         $this->assertIsString($result);
     }
 
+    public function testGetStoreManager()
+    {
+        $result = $this->testableObject->getStoreManager();
+    }
+
+    public function testGetUrlBuilder()
+    {
+        $result = $this->testableObject->getUrlBuilder();
+    }
+
     public function testGetApiKey(): void
     {
         $this->storeManager->method('getStore')->willReturn($this->storeInterface);
@@ -198,6 +213,24 @@ class ConfigTest extends TestCase
         $this->encryptor->method('decrypt')->willReturn('string');
         $result = $this->testableObject->getMerchantTermsOptions();
         $this->assertIsArray($result);
+    }
+
+    public function testGetReservedOrderId(): void
+    {
+        $this->quote->method('getReservedOrderId')->willReturn('string');
+        $result = $this->testableObject->getReservedOrderId($this->quote);
+        $this->assertIsString($result);
+    }
+
+    public function testLog(): void
+    {
+        $this->storeManager->method('getStore')->willReturn($this->storeInterface);
+        $this->storeInterface->method('getId')->willReturn('556557');
+        $this->logger->method('error');
+        $this->logger->method('info');
+        $this->logger->method('debug');
+        $result = $this->testableObject->log('saved', 'debug', [], '[Balancepay]');
+        $this->assertIsObject($result);
     }
 
     public function testGetWebhookSecret(): void

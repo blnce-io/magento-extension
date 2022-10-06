@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Balancepay\Balancepay\Test\Unit\Helper;
 
 use Balancepay\Balancepay\Model\Config as BalancepayConfig;
+use Balancepay\Balancepay\Model\RequestInterface;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Balancepay\Balancepay\Model\ResourceModel\BalancepayProduct\CollectionFactory as MpProductCollection;
 use Magento\Customer\Api\CustomerRepositoryInterface;
@@ -45,6 +46,10 @@ class DataTest extends TestCase
             ->onlyMethods([])->getMock();
 
         $this->customerRepositoryInterface = $this->getMockBuilder(CustomerRepositoryInterface::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods([])->getMockForAbstractClass();
+
+        $this->requestInterface = $this->getMockBuilder(RequestInterface::class)
             ->disableOriginalConstructor()
             ->onlyMethods([])->getMockForAbstractClass();
 
@@ -114,6 +119,14 @@ class DataTest extends TestCase
                 ]
             ]);
         $this->customerSession->expects($this->any())->method('setBuyerId')
+            ->willReturnSelf();
+        $this->requestFactory->expects($this->any())->method('create')
+            ->willReturn($this->requestInterface);
+        $this->requestInterface->expects($this->any())->method('setRequestMethod')
+            ->willReturnSelf();
+        $this->requestInterface->expects($this->any())->method('setTopic')
+            ->willReturnSelf();
+        $this->requestInterface->expects($this->any())->method('process')
             ->willReturnSelf();
         $result = $this->testableObject->getBuyerAmount();
     }
