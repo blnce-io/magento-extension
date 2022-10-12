@@ -4,6 +4,9 @@ namespace Balancepay\Balancepay\Model;
 
 use Balancepay\Balancepay\Controller\Webhook\Checkout\Charged;
 use Balancepay\Balancepay\Controller\Webhook\Transaction\Confirmed;
+use Balancepay\Balancepay\Controller\Webhook\Transaction\RefundCanceled;
+use Balancepay\Balancepay\Controller\Webhook\Transaction\RefundFailed;
+use Balancepay\Balancepay\Controller\Webhook\Transaction\RefundSuccessful;
 use Laminas\Crypt\Hmac;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Exception\LocalizedException;
@@ -129,7 +132,14 @@ class WebhookRequestProcessor
             $requiredKeys = ['externalReferenceId', 'isFinanced', 'selectedPaymentMethod'];
         } elseif ($webhookName == Charged::WEBHOOK_CHARGED_NAME) {
             $requiredKeys = ['externalReferenceId', 'chargeId', 'amount'];
+        }elseif (
+            $webhookName == RefundSuccessful::WEBHOOK_SUCCESSFUL_NAME ||
+            $webhookName == RefundCanceled::WEBHOOK_CANCELED_NAME ||
+            $webhookName == RefundFailed::WEBHOOK_FAILED_NAME
+        ) {
+            $requiredKeys = ['externalReferenceId', 'selectedPaymentMethod', 'status'];
         }
+
         $bodyKeys = array_keys($params);
         $diff = array_diff($requiredKeys, $bodyKeys);
         if (!empty($diff)) {
