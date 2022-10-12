@@ -51,7 +51,7 @@ class RefundSuccessfulProcessor
     {
         $data = $params;
         $json = !empty($data) ? $data : [];
-        $refundId = isset($json['data']['refundId']) ? $json['data']['refundId'] : '';
+        $refundId = isset($json['refundId']) ? $json['refundId'] : '';
         if (!$refundId) {
             throw new LocalizedException(new Phrase("Refund ID Not Present!"));
         }
