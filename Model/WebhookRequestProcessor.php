@@ -122,7 +122,7 @@ class WebhookRequestProcessor
      */
     public function validateSignature($content, $headers, $webhookName): array
     {
-        $signature = $this->hmac->compute($this->balancepayConfig->getWebhookSecret(), "sha256", $content);
+        $signature = Hmac::compute($this->balancepayConfig->getWebhookSecret(), "sha256", $content);
         if ($signature !== $headers['X-Blnce-Signature']) {
             throw new LocalizedException(new Phrase("Signature is doesn't match!"));
         }
