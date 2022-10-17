@@ -166,22 +166,4 @@ class Save implements ObserverInterface
             }
         }
     }
-
-    /**
-     * CleanConfigCache
-     *
-     * @return $this
-     */
-    private function cleanConfigCache()
-    {
-        try {
-            $this->cacheTypeList->cleanType(Config::TYPE_IDENTIFIER);
-            $this->appConfig->reinit();
-        } catch (\Exception $e) {
-            $this->messageManager->addNoticeMessage(__('For some reason,
-            Balance (payment) couldn\'t clear your config cache,
-            please clear the cache manually. (Exception message: %1)', $e->getMessage()));
-        }
-        return $this;
-    }
 }

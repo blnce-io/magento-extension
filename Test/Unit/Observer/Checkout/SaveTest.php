@@ -234,13 +234,4 @@ class SaveTest extends TestCase
         $this->assertIsObject($result);
     }
 
-//    public function testCleanConfigCache(): void
-//    {
-//        $this->cacheTypeList->expects($this->any())->method('cleanType');
-//        $this->appConfig->expects($this->any())->method('reinit')->willReturn($this->appConfig);
-//        $this->messageManager->expects($this->any())->method('addNoticeMessage')->willReturn($this->messageManager);
-//        $result = $this->testableObject->cleanConfigCache($this->observer);
-//        $this->assertIsObject($result);
-//    }
-
 }
