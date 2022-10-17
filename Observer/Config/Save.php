@@ -138,19 +138,19 @@ class Save implements ObserverInterface
                     $this->requestFactory
                         ->create(RequestFactory::WEBHOOKS_REQUEST_METHOD)
                         ->setTopic('transaction/refund-canceled')
-                        ->setWebookAddress('transaction/refund_canceled')
+                        ->setWebookAddress('transaction/refundcanceled')
                         ->process();
 
                     $this->requestFactory
                         ->create(RequestFactory::WEBHOOKS_REQUEST_METHOD)
                         ->setTopic('transaction/refund-successful')
-                        ->setWebookAddress('transaction/refund_successful')
+                        ->setWebookAddress('transaction/refundsuccessful')
                         ->process();
 
                     $this->requestFactory
                         ->create(RequestFactory::WEBHOOKS_REQUEST_METHOD)
                         ->setTopic('transaction/refund-failed')
-                        ->setWebookAddress('transaction/refund_failed')
+                        ->setWebookAddress('transaction/refundfailed')
                         ->process();
 
                     $this->appEmulation->stopEnvironmentEmulation();
@@ -165,23 +165,5 @@ class Save implements ObserverInterface
                 throw new LocalizedException(new Phrase('Can\' enable Balance payments, API key is missing!'));
             }
         }
-    }
-
-    /**
-     * CleanConfigCache
-     *
-     * @return $this
-     */
-    private function cleanConfigCache()
-    {
-        try {
-            $this->cacheTypeList->cleanType(Config::TYPE_IDENTIFIER);
-            $this->appConfig->reinit();
-        } catch (\Exception $e) {
-            $this->messageManager->addNoticeMessage(__('For some reason,
-            Balance (payment) couldn\'t clear your config cache,
-            please clear the cache manually. (Exception message: %1)', $e->getMessage()));
-        }
-        return $this;
     }
 }

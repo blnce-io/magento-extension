@@ -72,7 +72,7 @@ class RefundCanceledProcessor
     {
         $data = $params[0];
         $json = !empty($data) ? json_decode($data, true) : [];
-        $refundId = isset($json['data']['refundId']) ? $json['data']['refundId'] : '';
+        $refundId = isset($json['refundId']) ? $json['refundId'] : '';
         if(!$refundId){
             throw new LocalizedException(new Phrase("Refund ID Not Present!"));
         }

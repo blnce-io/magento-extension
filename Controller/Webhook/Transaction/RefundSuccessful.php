@@ -116,7 +116,7 @@ class RefundSuccessful extends Action implements CsrfAwareActionInterface
         $content = $this->getRequest()->getContent();
         $headers = $this->getRequest()->getHeaders()->toArray();
 
-        $this->balancepayConfig->log('Webhook\Checkout\Confirmed::execute() ', 'debug', [
+        $this->balancepayConfig->log('Webhook\Transaction\RefundSuccessful::execute() ', 'debug', [
             'content' => $content,
             'headers' => $headers,
         ]);

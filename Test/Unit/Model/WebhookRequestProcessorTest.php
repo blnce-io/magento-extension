@@ -19,7 +19,6 @@ use Balancepay\Balancepay\Model\Queue;
 use Balancepay\Balancepay\Model\QueueFactory;
 use Magento\Framework\Controller\AbstractResult;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
-
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -123,12 +122,7 @@ class WebhookRequestProcessorTest extends TestCase
 
         $this->queueProcessor = $this->getMockBuilder(QueueProcessor::class)
             ->disableOriginalConstructor()
-            ->onlyMethods([])
-            ->getMock();
-
-        $this->queue = $this->getMockBuilder(Queue::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['setData'])
+            ->onlyMethods(['addToQueue'])
             ->getMock();
 
         $this->resultJson = $this->getMockBuilder(ResultJson::class)
@@ -136,9 +130,9 @@ class WebhookRequestProcessorTest extends TestCase
             ->onlyMethods(['setHttpResponseCode'])
             ->getMock();
 
-        $this->queueFactory = $this->getMockBuilder(QueueFactory::class)
+        $this->hmac = $this->getMockBuilder(Hmac::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['create'])
+            ->onlyMethods(['compute'])
             ->getMock();
 
         $this->abstractResult = $this->getMockBuilder(AbstractResult::class)
@@ -148,13 +142,14 @@ class WebhookRequestProcessorTest extends TestCase
 
         $objectManager = new ObjectManager($this);
         $this->testableObject = $objectManager->getObject(WebhookRequestProcessor::class, [
-            'jsonResultFactory' => $this->jsonResultFactory,
-            'balancepayConfig' => $this->balancepayConfig,
-            'json' => $this->json,
             'orderFactory' => $this->orderFactory,
+            'balancepayConfig' => $this->balancepayConfig,
+            'jsonResultFactory' => $this->jsonResultFactory,
             'chargedProcessor' => $this->chargedProcessor,
             'confirmedProcessor' => $this->confirmedProcessor,
-            'queueProcessor' => $this->queueProcessor
+            'queueProcessor' => $this->queueProcessor,
+            'json' => $this->json,
+            'hmac' => $this->hmac
         ]);
     }
 
@@ -165,23 +160,127 @@ class WebhookRequestProcessorTest extends TestCase
      */
     private $testableObject;
 
-    public function testProcess(): void
+    public function testProcessConfirmedWebhook()
     {
-        $this->json->expects($this->any())->method('unserialize')->willReturn([]);
-        $this->json->expects($this->any())->method('serialize')->willReturn([]);
         $this->balancepayConfig->expects($this->any())->method('getWebhookSecret')->willReturn('string');
-        $this->queueFactory->expects($this->any())->method('create')->willReturn($this->queue);
-        $this->queue->expects($this->any())->method('setData')->willReturn($this->queue);
+        $this->json->expects($this->any())->method('unserialize')->willReturn(
+            [
+                'externalReferenceId' => '1000023',
+                'isFinanced' => true,
+                'selectedPaymentMethod' => 'tdt4424234304b'
+            ]
+        );
+        $this->queueProcessor->expects($this->any())->method('addToQueue')->willReturn(null);
         $this->jsonResultFactory->expects($this->any())->method('create')->willReturn($this->resultJson);
         $this->resultJson->expects($this->any())->method('setHttpResponseCode')->willReturn($this->abstractResult);
-        $result = $this->testableObject->process([], [], 'webhook');
+        $headers = [
+            'X-Blnce-Signature' => '7bd24c445433123c4ac69885dbded509657f4cda82f5c2401cf036e5e6aa7583'
+        ];
+        $result = $this->testableObject->process('contentstring', $headers, 'transaction/confirmed');
     }
 
-    public function testValidateSignature(): void
+    public function testProcessChargedWebhook()
     {
         $this->balancepayConfig->expects($this->any())->method('getWebhookSecret')->willReturn('string');
-        $this->json->expects($this->any())->method('unserialize')->willReturn([]);
-        $result = $this->testableObject->validateSignature([], [], 'webhook');
+        $this->json->expects($this->any())->method('unserialize')->willReturn(
+            [
+                'externalReferenceId' => '1000023',
+                'chargeId' => '12345',
+                'amount' => '20'
+            ]
+        );
+        $this->queueProcessor->expects($this->any())->method('addToQueue')->willReturn(null);
+        $this->jsonResultFactory->expects($this->any())->method('create')->willReturn($this->resultJson);
+        $this->resultJson->expects($this->any())->method('setHttpResponseCode')->willReturn($this->abstractResult);
+        $headers = [
+            'X-Blnce-Signature' => '7bd24c445433123c4ac69885dbded509657f4cda82f5c2401cf036e5e6aa7583'
+        ];
+        $result = $this->testableObject->process('contentstring', $headers, 'checkout/charged');
     }
 
+    public function testProcessRefundWebhookSuccess()
+    {
+        $this->balancepayConfig->expects($this->any())->method('getWebhookSecret')->willReturn('string');
+        $this->json->expects($this->any())->method('unserialize')->willReturn(
+            [
+                'externalReferenceId' => '1000023',
+                'selectedPaymentMethod' => 'tersdf0445340v',
+                'status' => 'pending'
+            ]
+        );
+        $this->queueProcessor->expects($this->any())->method('addToQueue')->willReturn(null);
+        $this->jsonResultFactory->expects($this->any())->method('create')->willReturn($this->resultJson);
+        $this->resultJson->expects($this->any())->method('setHttpResponseCode')->willReturn($this->abstractResult);
+        $headers = [
+            'X-Blnce-Signature' => '7bd24c445433123c4ac69885dbded509657f4cda82f5c2401cf036e5e6aa7583'
+        ];
+        $result = $this->testableObject->process('contentstring', $headers, 'transaction/refund_successful');
+    }
+
+    public function testProcessRefundWebhookFailed()
+    {
+        $this->balancepayConfig->expects($this->any())->method('getWebhookSecret')->willReturn('string');
+        $this->json->expects($this->any())->method('unserialize')->willReturn(
+            [
+                'externalReferenceId' => '1000023',
+                'selectedPaymentMethod' => 'tersdf0445340v',
+                'status' => 'pending'
+            ]
+        );
+        $this->queueProcessor->expects($this->any())->method('addToQueue')->willReturn(null);
+        $this->jsonResultFactory->expects($this->any())->method('create')->willReturn($this->resultJson);
+        $this->resultJson->expects($this->any())->method('setHttpResponseCode')->willReturn($this->abstractResult);
+        $headers = [
+            'X-Blnce-Signature' => '7bd24c445433123c4ac69885dbded509657f4cda82f5c2401cf036e5e6aa7583'
+        ];
+        $result = $this->testableObject->process('contentstring', $headers, 'transaction/refund_failed');
+    }
+
+    public function testProcessRefundWebhookCanceled()
+    {
+        $this->balancepayConfig->expects($this->any())->method('getWebhookSecret')->willReturn('string');
+        $this->json->expects($this->any())->method('unserialize')->willReturn(
+            [
+                'externalReferenceId' => '1000023',
+                'selectedPaymentMethod' => 'tersdf0445340v',
+                'status' => 'pending'
+            ]
+        );
+        $this->queueProcessor->expects($this->any())->method('addToQueue')->willReturn(null);
+        $this->jsonResultFactory->expects($this->any())->method('create')->willReturn($this->resultJson);
+        $this->resultJson->expects($this->any())->method('setHttpResponseCode')->willReturn($this->abstractResult);
+        $headers = [
+            'X-Blnce-Signature' => '7bd24c445433123c4ac69885dbded509657f4cda82f5c2401cf036e5e6aa7583'
+        ];
+        $result = $this->testableObject->process('contentstring', $headers, 'transaction/refund_canceled');
+    }
+
+    public function testProcessRefundWebhookDiffKeys()
+    {
+        $this->balancepayConfig->expects($this->any())->method('getWebhookSecret')->willReturn('string');
+        $this->json->expects($this->any())->method('unserialize')->willReturn(
+            [
+                'externalReferenceId' => '1000023',
+                'status' => 'pending'
+            ]
+        );
+        $this->queueProcessor->expects($this->any())->method('addToQueue')->willReturn(null);
+        $this->jsonResultFactory->expects($this->any())->method('create')->willReturn($this->resultJson);
+        $this->resultJson->expects($this->any())->method('setHttpResponseCode')->willReturn($this->abstractResult);
+        $headers = [
+            'X-Blnce-Signature' => '7bd24c445433123c4ac69885dbded509657f4cda82f5c2401cf036e5e6aa7583'
+        ];
+        $result = $this->testableObject->process('contentstring', $headers, 'transaction/refund_successful');
+    }
+
+    public function testProcessSignatureNoMatch()
+    {
+        $this->balancepayConfig->expects($this->any())->method('getWebhookSecret')->willReturn('string');
+        $this->jsonResultFactory->expects($this->any())->method('create')->willReturn($this->resultJson);
+        $this->resultJson->expects($this->any())->method('setHttpResponseCode')->willReturn($this->abstractResult);
+        $headers = [
+            'X-Blnce-Signature' => 'd24c445433123c4ac69885dbded509657f4cda82f5c2401cf036e5e6aa7583'
+        ];
+        $result = $this->testableObject->process('contentstring', $headers, 'transaction/refund_successful');
+    }
 }
