@@ -11,6 +11,7 @@
 namespace Balancepay\Balancepay\Block;
 
 use Balancepay\Balancepay\Model\BalancepayMethod;
+use Balancepay\Balancepay\Model\ResourceModel\BalancepayCharge\Collection;
 use Magento\Framework\App\Area;
 use Magento\Framework\App\State;
 use Magento\Framework\View\Element\Template\Context;
@@ -31,10 +32,12 @@ class Info extends \Magento\Payment\Block\Info
     public function __construct(
         Context $context,
         State $appState,
+        Collection $collection,
         array $data = []
     ) {
         parent::__construct($context, $data);
         $this->appState = $appState;
+        $this->collection = $collection;
     }
 
     /**
@@ -62,8 +65,14 @@ class Info extends \Magento\Payment\Block\Info
                 $data[(string)__('Transaction ID')] = $transationId;
             }
             if (($chargeId = $info->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHARGE_ID))) {
+                $invoiceId = $this->getRequest()->getParam('invoice_id');
                 $data[(string)__('Is Charged')] = __('Yes');
-                $data[(string)__('Charge ID')] = $chargeId;
+                if (!$invoiceId) {
+                    $data[(string)__('Charge ID')] = $chargeId;
+                } else {
+                    $chargeId = $this->collection->getChargeId($invoiceId);
+                    $data[(string)__('Charge ID')] = $chargeId;
+                }
             } else {
                 $data[(string)__('Is Charged')] = __('No');
             }

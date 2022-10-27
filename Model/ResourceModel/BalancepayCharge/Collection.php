@@ -22,4 +22,13 @@ class Collection extends AbstractCollection
             ->getFirstItem();
         return $chargeItem->getChargeId() && ($chargeItem->getStatus() == 'charged');
     }
+
+    public function getChargeId($invoiceId) {
+        $chargeItem = $this->addFieldToFilter('invoice_id', ['eq' => $invoiceId])
+            ->getFirstItem();
+        if (isset($chargeItem['charge_id'])) {
+            return $chargeItem['charge_id'];
+        }
+        return '';
+    }
 }
