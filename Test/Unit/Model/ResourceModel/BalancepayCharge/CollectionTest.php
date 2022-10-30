@@ -2,7 +2,9 @@
 
 namespace Balancepay\Balancepay\Test\Unit\Model\ResourceModel\BalancepayCharge;
 
+use Balancepay\Balancepay\Helper\Data;
 use Balancepay\Balancepay\Model\ResourceModel\BalancepayCharge\Collection;
+use Balancepay\Balancepay\Model\BalancepayCharge;
 use PHPUnit\Framework\TestCase;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -12,6 +14,7 @@ use Magento\Framework\Event\ManagerInterface;
 use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 use Magento\Framework\DB\Select;
+use Magento\Framework\DataObject;
 use Psr\Log\LoggerInterface;
 use ReflectionMethod;
 use ReflectionException;
@@ -95,6 +98,17 @@ class CollectionTest extends TestCase
         $this->eventManagerMock = $this->createMock(ManagerInterface::class);
         $this->connectionMock = $this->createMock(AdapterInterface::class);
         $this->resourceMock = $this->createMock(AbstractDb::class);
+        $this->dataObject = $this->getMockBuilder(DataObject::class)
+            ->disableOriginalConstructor()->setMethods(['getChargeId', 'getStatus'])
+            ->getMock();
+
+        $this->chargeCollection = $this->getMockBuilder(Collection::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->balancepayCharge = $this->getMockBuilder(BalancepayCharge::class)
+            ->disableOriginalConstructor()->setMethods(['getChargeId', 'getStatus'])
+            ->getMock();
 
         $this->resourceMock->method('getConnection')
             ->willReturn($this->connectionMock);
@@ -116,14 +130,6 @@ class CollectionTest extends TestCase
         );
     }
 
-    /**
-     * Test
-     *
-     * @covers ::_construct
-     *
-     * @return void
-     * @throws ReflectionException
-     */
     public function testConstructMethod(): void
     {
         $reflectionMethod = new ReflectionMethod($this->testableObject, '_construct');
@@ -131,4 +137,28 @@ class CollectionTest extends TestCase
         $result = $reflectionMethod->invoke($this->testableObject);
         $this->assertNull($result);
     }
+
+    public function testGetChargeAndStatus() {
+        $this->chargeCollection->expects($this->any())->method('addFieldToFilter')->willReturnSelf();
+        $this->chargeCollection->expects($this->any())->method('getFirstItem')
+            ->willReturn(new DataObject(['charge_id'=> 1, 'status' => 'charged']));
+        $this->testableObject->getChargeAndStatus(12);
+    }
+
+    public function testGetChargeId() {
+        $this->chargeCollection->expects($this->any())->method('addFieldToFilter')->willReturnSelf();
+        $this->chargeCollection->expects($this->any())->method('getFirstItem')->willReturn(new DataObject(
+            [
+                'charge_id' => 1
+            ]
+        ));
+        $this->testableObject->getChargeId(12);
+    }
 }
+
+
+
+
+
+
+
