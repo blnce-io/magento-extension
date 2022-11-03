@@ -18,8 +18,15 @@ class Collection extends AbstractCollection
     }
 
     public function getChargeAndStatus($invoiceId) {
-        $chargeItem = $this->addFieldToFilter('invoice_id', ['eq' => $invoiceId])
-            ->getFirstItem();
-        return $chargeItem->getChargeId() && ($chargeItem->getStatus() == 'charged');
+        $chargeItem = $this->addFieldToFilter('invoice_id', ['eq' => $invoiceId])->getFirstItem();
+        return $chargeItem['charge_id'] && ($chargeItem['status'] == 'charged');
+    }
+
+    public function getChargeId($invoiceId) {
+        $chargeItem = $this->addFieldToFilter('invoice_id', ['eq' => $invoiceId])->getFirstItem();
+        if (isset($chargeItem['charge_id'])) {
+            return $chargeItem['charge_id'];
+        }
+        return '';
     }
 }
