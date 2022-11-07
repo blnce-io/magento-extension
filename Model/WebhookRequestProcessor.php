@@ -145,7 +145,7 @@ class WebhookRequestProcessor
         if (!empty($diff)) {
             throw new LocalizedException(
                 new Phrase(
-                    'Balancepay webhook required fields are missing: %1.',
+                    'Balance webhook required fields are missing: %1.',
                     [implode(', ', $diff)]
                 )
             );
