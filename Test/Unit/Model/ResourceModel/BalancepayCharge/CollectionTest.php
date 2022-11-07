@@ -147,11 +147,8 @@ class CollectionTest extends TestCase
 
     public function testGetChargeId() {
         $this->chargeCollection->expects($this->any())->method('addFieldToFilter')->willReturnSelf();
-        $this->chargeCollection->expects($this->any())->method('getFirstItem')->willReturn(new DataObject(
-            [
-                'charge_id' => 1
-            ]
-        ));
+        $this->chargeCollection->expects($this->any())->method('getFirstItem')
+            ->willReturn(new DataObject(['charge_id' => 1]));
         $this->testableObject->getChargeId(12);
     }
 }

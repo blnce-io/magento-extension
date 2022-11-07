@@ -18,7 +18,7 @@ class Collection extends AbstractCollection
     }
 
     public function getChargeAndStatus($invoiceId) {
-        $chargeItem = $this->addFieldToFilter('invoice_id', ['eq' => $invoiceId])->getFirstItem();
+        $chargeItem = $this->addFieldToFilter('invoice_id', ['eq' => $invoiceId])->getFirstItem()->getData();
         return $chargeItem['charge_id'] && ($chargeItem['status'] == 'charged');
     }
 
