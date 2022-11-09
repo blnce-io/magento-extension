@@ -6,6 +6,9 @@
 namespace Balancepay\Balancepay\Block\Adminhtml\Order;
 
 use Magento\Sales\Model\ConfigInterface;
+use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Sales\Api\InvoiceRepositoryInterface;
+use Balancepay\Balancepay\Model\Config;
 
 /**
  * Adminhtml sales order view
@@ -55,11 +58,17 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
         \Magento\Framework\Registry $registry,
         ConfigInterface $salesConfig,
         \Magento\Sales\Helper\Reorder $reorderHelper,
+        InvoiceRepositoryInterface $invoiceRepository,
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        Config $balancepayConfig,
         array $data = []
     ) {
         $this->_reorderHelper = $reorderHelper;
         $this->_coreRegistry = $registry;
         $this->_salesConfig = $salesConfig;
+        $this->invoiceRepository = $invoiceRepository;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->balancepayConfig = $balancepayConfig;
         parent::__construct($context, $data);
     }
 
@@ -146,12 +155,40 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
                 ['label' => __('Refund Offline'), 'onclick' => $onClick, 'class' => 'credit-memo']
             );
 
-            $onclickJsRefund = 'jQuery("#sales_order_view_tabs").tabs("option", "active", 1 );';
+            if ($this->balancepayConfig->isActive()) {
+                $searchCriteria = $this->searchCriteriaBuilder->addFilter('order_id', $order->getId())->create();
+                $invoiceTabSwitch = true;
+                $invoiceUrl = '';
+                try {
+                    $invoices = $this->invoiceRepository->getList($searchCriteria);
+                    $invoiceRecords = $invoices->getItems();
+                    if (count($invoiceRecords) == 1) {
+                        $invoiceTabSwitch = false;
+                        foreach ($invoiceRecords as $invoiceRec) {
+                            $invoiceId = $invoiceRec->getEntityId();
+                            break;
+                        }
+                        $invoiceUrl = $this->getUrl('sales/order_invoice/view', ['invoice_id' => $invoiceId]);
+                    }
+                } catch (\Exception $exception) {
 
-            $this->addButton(
-                'order_creditmemo_refund',
-                ['label' => __('Refund'), 'onclick' => $onclickJsRefund, 'class' => 'credit-memo']
-            );
+                }
+                if ($invoiceTabSwitch) {
+                    $onclickJsRefund = 'jQuery("#sales_order_view_tabs").tabs("option", "active", 1 );';
+                    $this->addButton(
+                        'order_creditmemo_refund',
+                        ['label' => __('Refund'), 'onclick' => $onclickJsRefund, 'class' => 'credit-memo']
+                    );
+                } else {
+                    $this->addButton(
+                        'order_creditmemo_refund',
+                        [
+                            'label' => __('Refund'),
+                            'onclick' => 'setLocation(\'' . $invoiceUrl . '\')'
+                        ]
+                    );
+                }
+            }
         }
 
         // invoice action intentionally
