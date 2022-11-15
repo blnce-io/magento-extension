@@ -25,6 +25,7 @@ class Factory
      * Request methods.
      */
     public const CAPTURE_REQUEST_METHOD = 'capture';
+    public const TRANSACTION_CANCEL_REQUEST_METHOD = 'cancel';
     public const REFUND_REQUEST_METHOD = 'refund';
     public const CLOSE_REQUEST_METHOD = 'close';
     public const CHECKOUT_REQUEST_METHOD = 'checkout';
@@ -49,6 +50,7 @@ class Factory
         self::WEBHOOKS_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Webhooks::class,
         self::VENDORS_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Vendors::class,
         self::BUYER_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Buyers::class,
+        self::TRANSACTION_CANCEL_REQUEST_METHOD => \Balancepay\Balancepay\Model\Request\Transactions\Cancel::class,
     ];
 
     /**
