@@ -27,6 +27,16 @@ php bin/magento maintenance:disable
 php bin/magento cache:flush
 ```
 
+With docker-magento:
+```
+bin/magento maintenance:enable
+bin/magento setup:upgrade
+bin/magento setup:di:compile
+bin/magento setup:static-content:deploy
+bin/magento maintenance:disable
+bin/magento cache:flush
+```
+
 ---
 
 https://www.getbalance.com/
