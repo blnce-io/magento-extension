@@ -11,6 +11,7 @@ use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Balancepay\Balancepay\Model\Response\Factory as ResponseFactory;
 use Magento\Customer\Api\AccountManagementInterface;
 use Magento\Directory\Model\RegionFactory;
+use Magento\Framework\Exception\PaymentException;
 use Magento\Sales\Model\Order\Payment as OrderPayment;
 
 /**
@@ -19,9 +20,9 @@ use Magento\Sales\Model\Order\Payment as OrderPayment;
 class Cancel extends AbstractRequest
 {
     /**
-     * @var OrderPayment
+     * @var transactionId
      */
-    protected $_payment;
+    private $transactionId;
 
     /**
      * @param Config $balancepayConfig
@@ -50,27 +51,21 @@ class Cancel extends AbstractRequest
     }
 
     /**
-     * Set Payment
-     *
-     * @method setPayment
-     * @param  OrderPayment $payment
-     * @return Cancel $this
+     * @param $transactionId
+     * @return $this
      */
-    public function setPayment(OrderPayment $payment)
+    public function setTransactionId($transactionId)
     {
-        $this->_payment = $payment;
+        $this->transactionId = $transactionId;
         return $this;
     }
 
     /**
-     * Get Payment
-     *
-     * @method getPayment
-     * @return OrderPayment|null
+     * @return mixed
      */
-    public function getPayment()
+    public function getTransactionId()
     {
-        return $this->_payment;
+        return $this->transactionId;
     }
 
     /**
@@ -83,9 +78,20 @@ class Cancel extends AbstractRequest
         return $this->_balancepayConfig->getBalanceApiUrl() .
             sprintf(
                 'transactions/%s/%s',
-                $this->getPayment()->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHECKOUT_TRANSACTION_ID),
+                $this->getTransactionId(),
                 $this->getRequestMethod()
             );
+    }
+
+    /**
+     * Get Curl method
+     *
+     * @return string
+     * @throws PaymentException
+     */
+    protected function getCurlMethod()
+    {
+        return 'post';
     }
 
     /**
