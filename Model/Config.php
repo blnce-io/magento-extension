@@ -35,6 +35,13 @@ class Config
     public const BALANCEPAY_IFRAME_SANDBOX_URL = 'https://checkout-v2.sandbox.getbalance.com/checkout.html'; //Sandbox
     public const BALANCEPAY_IFRAME_LIVE_URL = 'https://checkout-v2.getbalance.com/checkout.html'; //Production
 
+    // Developer config keys
+    public const CONFIG_KEY_USE_DEV_ENV = 'use_dev_env';
+    public const CONFIG_KEY_DEV_API_KEY = 'dev_api_key';
+    public const CONFIG_KEY_DEV_SDK_URL = 'dev_sdk_url';
+    public const CONFIG_KEY_DEV_API_URL = 'dev_api_url';
+    public const CONFIG_KEY_DEV_IFRAME_URL = 'dev_iframe_url';
+
     /**
      * Scope config object.
      *
@@ -76,23 +83,24 @@ class Config
 
     /**
      * @method __construct
-     * @param  ScopeConfigInterface  $scopeConfig
-     * @param  ResourceConfig        $resourceConfig
-     * @param  StoreManagerInterface $storeManager
-     * @param  EncryptorInterface    $encryptor
-     * @param  LoggerInterface       $logger
-     * @param  UrlInterface          $urlBuilder
-     * @param  DateTime              $dateTime
+     * @param ScopeConfigInterface $scopeConfig
+     * @param ResourceConfig $resourceConfig
+     * @param StoreManagerInterface $storeManager
+     * @param EncryptorInterface $encryptor
+     * @param LoggerInterface $logger
+     * @param UrlInterface $urlBuilder
+     * @param DateTime $dateTime
      */
     public function __construct(
-        ScopeConfigInterface $scopeConfig,
-        ResourceConfig $resourceConfig,
+        ScopeConfigInterface  $scopeConfig,
+        ResourceConfig        $resourceConfig,
         StoreManagerInterface $storeManager,
-        EncryptorInterface $encryptor,
-        LoggerInterface $logger,
-        UrlInterface $urlBuilder,
-        DateTime $dateTime
-    ) {
+        EncryptorInterface    $encryptor,
+        LoggerInterface       $logger,
+        UrlInterface          $urlBuilder,
+        DateTime              $dateTime
+    )
+    {
         $this->scopeConfig = $scopeConfig;
         $this->resourceConfig = $resourceConfig;
         $this->storeManager = $storeManager;
@@ -262,7 +270,7 @@ class Config
             return '';
         }
         return $this->storeManager->getStore()
-            ->getBaseUrl(UrlInterface::URL_TYPE_MEDIA) . 'balancepay/' . $logoImage;
+                ->getBaseUrl(UrlInterface::URL_TYPE_MEDIA) . 'balancepay/' . $logoImage;
     }
 
     /**
@@ -274,8 +282,10 @@ class Config
      */
     public function getApiKey($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
-        return (($val = $this->getConfigValue(($this->isSandboxMode($scope, $storeId)
-            ? 'sandbox_api_key' : 'api_key'), $scope, $storeId))) ? $this->encryptor->decrypt($val) : null;
+        $configKey = $this->getConfigValue($this->resolveFromEnvironment(
+            'api_key', 'sandbox_api_key', self::CONFIG_KEY_DEV_API_KEY),
+            $scope, $storeId);
+        return (($val = $configKey)) ? $this->encryptor->decrypt($val) : null;
     }
 
     /**
@@ -302,6 +312,18 @@ class Config
     public function isSandboxMode($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
         return ($this->getConfigValue('mode', $scope, $storeId) === BalancepayMethod::MODE_LIVE) ? false : true;
+    }
+
+    /**
+     * Whether to use development environment
+     *
+     * @param string $scope
+     * @param int $storeId
+     * @return bool
+     */
+    public function getUseDevEnv($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
+    {
+        return (bool)$this->getConfigValue(self::CONFIG_KEY_USE_DEV_ENV, $scope, $storeId);
     }
 
     /**
@@ -349,8 +371,9 @@ class Config
      */
     public function getBalanceSdkUrl($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
-        return ($this->isSandboxMode($scope, $storeId)
-            ? self::BALANCEPAY_SDK_SANDBOX_URL : self::BALANCEPAY_SDK_LIVE_URL);
+        return $this->resolveFromEnvironment(self::BALANCEPAY_SDK_LIVE_URL,
+            self::BALANCEPAY_SDK_SANDBOX_URL,
+            $this->getConfigValue(self::CONFIG_KEY_DEV_SDK_URL));
     }
 
     /**
@@ -363,8 +386,9 @@ class Config
      */
     public function getBalanceApiUrl($path = "", $scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
-        return ($this->isSandboxMode($scope, $storeId)
-                ? self::BALANCEPAY_API_SANDBOX_URL : self::BALANCEPAY_API_LIVE_URL) . (($path) ? '/' . $path : '');
+        return $this->resolveFromEnvironment(self::BALANCEPAY_API_LIVE_URL,
+            self::BALANCEPAY_API_SANDBOX_URL,
+            $this->getConfigValue(self::CONFIG_KEY_DEV_API_URL));
     }
 
     /**
@@ -376,8 +400,9 @@ class Config
      */
     public function getBalanceIframeUrl($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
-        return ($this->isSandboxMode($scope, $storeId)
-            ? self::BALANCEPAY_IFRAME_SANDBOX_URL : self::BALANCEPAY_IFRAME_LIVE_URL);
+        return $this->resolveFromEnvironment(self::BALANCEPAY_IFRAME_LIVE_URL,
+            self::BALANCEPAY_IFRAME_SANDBOX_URL,
+            $this->getConfigValue(self::CONFIG_KEY_DEV_IFRAME_URL));
     }
 
     /**
@@ -489,5 +514,14 @@ class Config
             }
         }
         return $this;
+    }
+
+    private function resolveFromEnvironment($liveValue, $sandboxValue, $devValue, $scope = ScopeInterface::SCOPE_STORE, $storeId = null)
+    {
+        if ($this->getUseDevEnv($scope, $storeId))
+            return $devValue;
+
+        return ($this->isSandboxMode($scope, $storeId)
+            ? $sandboxValue : $liveValue);
     }
 }
