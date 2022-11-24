@@ -83,13 +83,13 @@ class Config
 
     /**
      * @method __construct
-     * @param ScopeConfigInterface $scopeConfig
-     * @param ResourceConfig $resourceConfig
-     * @param StoreManagerInterface $storeManager
-     * @param EncryptorInterface $encryptor
-     * @param LoggerInterface $logger
-     * @param UrlInterface $urlBuilder
-     * @param DateTime $dateTime
+     * @param  ScopeConfigInterface  $scopeConfig
+     * @param  ResourceConfig        $resourceConfig
+     * @param  StoreManagerInterface $storeManager
+     * @param  EncryptorInterface    $encryptor
+     * @param  LoggerInterface       $logger
+     * @param  UrlInterface          $urlBuilder
+     * @param  DateTime              $dateTime
      */
     public function __construct(
         ScopeConfigInterface  $scopeConfig,
@@ -270,7 +270,7 @@ class Config
             return '';
         }
         return $this->storeManager->getStore()
-                ->getBaseUrl(UrlInterface::URL_TYPE_MEDIA) . 'balancepay/' . $logoImage;
+            ->getBaseUrl(UrlInterface::URL_TYPE_MEDIA) . 'balancepay/' . $logoImage;
     }
 
     /**
