@@ -14,4 +14,5 @@
         </arguments>
     </virtualType>
     <preference for="Magento\Sales\Block\Adminhtml\Order\View" type="Balancepay\Balancepay\Block\Adminhtml\Order\View" />
+    <preference for="Magento\Sales\Model\Order" type="Balancepay\Balancepay\Model\Order" />
 </config>

@@ -426,25 +426,6 @@ class BalancepayMethod extends AbstractMethod
     }
 
     /**
-     * Cancel payment method.
-     *
-     * @param InfoInterface $payment
-     *
-     * @return Gateway
-     * @throws \Magento\Framework\Exception\LocalizedException
-     *
-     * @api
-     */
-    public function cancel(InfoInterface $payment)
-    {
-        parent::cancel($payment);
-
-        $this->void($payment);
-
-        return $this;
-    }
-
-    /**
      * Refund payment method.
      *
      * @param InfoInterface $payment

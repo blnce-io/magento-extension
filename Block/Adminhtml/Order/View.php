@@ -16,7 +16,7 @@ use Balancepay\Balancepay\Model\Config;
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  * @since 100.0.2
  */
-class View extends \Magento\Backend\Block\Widget\Form\Container
+class View extends \Magento\Sales\Block\Adminhtml\Order\View
 {
     /**
      * Block group
@@ -46,6 +46,8 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
      */
     protected $_reorderHelper;
 
+
+
     /**
      * @param \Magento\Backend\Block\Widget\Context $context
      * @param \Magento\Framework\Registry $registry
@@ -69,7 +71,7 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
         $this->invoiceRepository = $invoiceRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->balancepayConfig = $balancepayConfig;
-        parent::__construct($context, $data);
+        parent::__construct($context, $registry, $salesConfig, $reorderHelper, $data);
     }
 
     /**
