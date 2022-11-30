@@ -158,6 +158,7 @@ class Save implements ObserverInterface
                     (Webhooks have been successfully registered)'));
                 } catch (\Exception $e) {
                     $this->balancepayConfig->updateBalancePayStatus($scope);
+                    throw $e;
                 }
             } else {
                 $this->appEmulation->stopEnvironmentEmulation();

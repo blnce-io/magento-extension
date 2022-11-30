@@ -5,6 +5,7 @@
  */
 namespace Balancepay\Balancepay\Block\Adminhtml\Order;
 
+use Balancepay\Balancepay\Model\BalancepayMethod;
 use Magento\Sales\Model\ConfigInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Sales\Api\InvoiceRepositoryInterface;
@@ -148,15 +149,18 @@ class View extends \Magento\Sales\Block\Adminhtml\Order\View
                 'This will create an offline refund. ' .
                 'To create an online refund, open an invoice and create credit memo for it. Do you want to continue?'
             );
-            $onClick = "setLocation('{$this->getCreditmemoUrl()}')";
-            if ($order->getPayment()->getMethodInstance()->isGateway()) {
-                $onClick = "confirmSetLocation('{$message}', '{$this->getCreditmemoUrl()}')";
-            }
-            $this->addButton(
-                'order_creditmemo',
-                ['label' => __('Refund Offline'), 'onclick' => $onClick, 'class' => 'credit-memo']
-            );
 
+            if ($order->getPayment()->getMethodInstance()->getCode() !== BalancepayMethod::METHOD_CODE) {
+                $onClick = "setLocation('{$this->getCreditmemoUrl()}')";
+                if ($order->getPayment()->getMethodInstance()->isGateway()) {
+                    $onClick = "confirmSetLocation('{$message}', '{$this->getCreditmemoUrl()}')";
+                }
+                $this->addButton(
+                    'order_creditmemo',
+                    ['label' => __('Credit Memo'), 'onclick' => $onClick, 'class' => 'credit-memo']
+                );
+            }
+            $invoiceRecordsCount = 0;
             if ($this->balancepayConfig->isActive()) {
                 $searchCriteria = $this->searchCriteriaBuilder->addFilter('order_id', $order->getId())->create();
                 $invoiceTabSwitch = true;
@@ -164,7 +168,8 @@ class View extends \Magento\Sales\Block\Adminhtml\Order\View
                 try {
                     $invoices = $this->invoiceRepository->getList($searchCriteria);
                     $invoiceRecords = $invoices->getItems();
-                    if (count($invoiceRecords) == 1) {
+                    $invoiceRecordsCount = count($invoiceRecords);
+                    if ($invoiceRecordsCount == 1) {
                         $invoiceTabSwitch = false;
                         foreach ($invoiceRecords as $invoiceRec) {
                             $invoiceId = $invoiceRec->getEntityId();
@@ -175,13 +180,13 @@ class View extends \Magento\Sales\Block\Adminhtml\Order\View
                 } catch (\Exception $exception) {
 
                 }
-                if ($invoiceTabSwitch) {
+                if ($invoiceTabSwitch && $invoiceRecordsCount) {
                     $onclickJsRefund = 'jQuery("#sales_order_view_tabs").tabs("option", "active", 1 );';
                     $this->addButton(
                         'order_creditmemo_refund',
                         ['label' => __('Refund'), 'onclick' => $onclickJsRefund, 'class' => 'credit-memo']
                     );
-                } else {
+                } elseif ($invoiceRecordsCount) {
                     $this->addButton(
                         'order_creditmemo_refund',
                         [

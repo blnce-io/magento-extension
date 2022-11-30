@@ -51,6 +51,27 @@
                         <field id="mode">sandbox</field>
                     </depends>
                 </field>
+                <field id="use_dev_env" translate="label comment" type="obscure" sortOrder="50" showInDefault="0" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Use dev env</label>
+                    <config_path>payment/balancepay/use_dev_env</config_path>
+                </field>
+                <field id="dev_api_key" translate="label comment" type="obscure" sortOrder="50" showInDefault="0" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Use dev env</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                    <config_path>payment/balancepay/dev_api_key</config_path>
+                </field>
+                <field id="dev_sdk_url" translate="label comment" type="obscure" sortOrder="50" showInDefault="0" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Use dev env</label>
+                    <config_path>payment/balancepay/dev_sdk_url</config_path>
+                </field>
+                <field id="dev_api_url" translate="label comment" type="obscure" sortOrder="50" showInDefault="0" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Use dev env</label>
+                    <config_path>payment/balancepay/dev_api_url</config_path>
+                </field>
+                <field id="dev_iframe_url" translate="label comment" type="obscure" sortOrder="50" showInDefault="0" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Use dev env</label>
+                    <config_path>payment/balancepay/dev_iframe_url</config_path>
+                </field>
                 <field id="logo_image" translate="label" type="image" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Logo Image</label>
                     <backend_model>Magento\Config\Model\Config\Backend\Image</backend_model>
