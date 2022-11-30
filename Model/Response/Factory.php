@@ -26,6 +26,7 @@ class Factory
      * Response handlers.
      */
     public const CAPTURE_RESPONSE_HANDLER = 'capture';
+    public const TRANSACTION_CANCEL_RESPONSE_METHOD = 'cancel';
     public const CLOSE_RESPONSE_HANDLER = 'close';
     public const CHECKOUT_RESPONSE_HANDLER = 'checkout';
     public const TRANSACTIONS_RESPONSE_HANDLER = 'transactions';
@@ -41,6 +42,7 @@ class Factory
      */
     private $invokableClasses = [
         self::CAPTURE_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Transactions\Capture::class,
+        self::TRANSACTION_CANCEL_RESPONSE_METHOD => \Balancepay\Balancepay\Model\Response\Transactions\Cancel::class,
         self::CLOSE_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Transactions\Close::class,
         self::CHECKOUT_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Checkout::class,
         self::TRANSACTIONS_RESPONSE_HANDLER => \Balancepay\Balancepay\Model\Response\Transactions::class,
