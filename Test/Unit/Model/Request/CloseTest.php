@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Balancepay\Balancepay\Test\Unit\Model\Request;
 
 use Balancepay\Balancepay\Helper\Data as HelperData;
-use Balancepay\Balancepay\Model\Request\Transactions\Close;
+use Balancepay\Balancepay\Model\Request\Close;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use PHPUnit\Framework\MockObject\MockObject;
