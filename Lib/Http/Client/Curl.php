@@ -11,6 +11,8 @@
 
 namespace Balancepay\Balancepay\Lib\Http\Client;
 
+use Balancepay\Balancepay\Model\HttpConstants;
+
 class Curl extends \Magento\Framework\HTTP\Client\Curl
 {
     /**
@@ -117,11 +119,11 @@ class Curl extends \Magento\Framework\HTTP\Client\Curl
     protected function setPostParams(array $params)
     {
         $contentType = null;
-        if (!empty($this->_headers['Content-Type'])) {
-            $contentType = $this->_headers['Content-Type'];
+        if (!empty($this->_headers[HttpConstants::HEADER_CONTENT_TYPE])) {
+            $contentType = $this->_headers[HttpConstants::HEADER_CONTENT_TYPE];
         }
 
-        if ($contentType === 'application/json') {
+        if ($contentType === HttpConstants::CONTENT_TYPE_APPLICATION_JSON) {
             $params = json_encode($params);
         } else {
             $params = http_build_query($params);
