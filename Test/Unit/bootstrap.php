@@ -1,6 +1,12 @@
 <?php
 // @codingStandardsIgnoreFile
-require_once realpath(__DIR__ . '/vendor/autoload.php');
+
+
+const MAGENTO_ROOT = __DIR__ . '/../../../../../..';
+require_once realpath(MAGENTO_ROOT . '/vendor/autoload.php');
+
+const XDEBUG_CC_UNUSED = 1;
+const XDEBUG_CC_DEAD_CODE = 2;
 
 /**
  * @SuppressWarnings(PHPMD.ShortMethodName)
