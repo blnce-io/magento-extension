@@ -21,4 +21,5 @@
         <plugin name="balancepay_plugin_sales_model_order_can_creditmemo" type="Balancepay\Balancepay\Plugin\Sales\Model\OrderPlugin" sortOrder="15"/>
     </type>
     <preference for="Magento\Sales\Model\Service\CreditmemoService" type="Balancepay\Balancepay\Model\Service\CreditmemoService" />
+    <preference for="Magento\Sales\Controller\Adminhtml\Order\Cancel" type="Balancepay\Balancepay\Controller\Adminhtml\Order\Cancel" />
 </config>
