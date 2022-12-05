@@ -87,6 +87,7 @@ class ConfigProvider extends CcGenericConfigProvider
                     'balanceCheckoutTokenUrl' => $this->urlBuilder->getUrl('balancepay/payment_checkout/token'),
                     'balancelogoImageUrl' => $this->balancepayConfig->getLogoImageUrl(),
                     'balanceIsAuth' => $this->balancepayConfig->getIsAuth(),
+                    'balanceSource' => HttpConstants::BALANCE_SOURCE_MAGENTO,
                 ],
             ],
         ];
