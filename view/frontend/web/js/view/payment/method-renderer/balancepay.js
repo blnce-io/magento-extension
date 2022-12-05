@@ -54,7 +54,8 @@ define(
                 balanceIframeUrl: '',
                 balanceCheckoutTokenUrl: '',
                 balancelogoImageUrl: '',
-                balanceIsAuth: false
+                balanceIsAuth: false,
+                balanceSource: '',
             },
 
             initObservable: function() {
@@ -127,6 +128,10 @@ define(
                 return window.checkoutConfig.payment[self.getCode()].balanceIsAuth;
             },
 
+            getBalanceSource: function() {
+                return window.checkoutConfig.payment[self.getCode()].balanceSource;
+            },
+
             /**
              * @return {Boolean}
              */
@@ -143,8 +148,9 @@ define(
             },
 
             openCheckout: function(checkoutToken) {
-                window.balanceCheckout
+                window.balanceSDK.checkout
                     .init({
+                        source: self.getBalanceSource(),
                         isAuth: self.getBalanceIsAuth(),
                         hideDueDate: false,
                         allowedPaymentMethods: null,
@@ -176,12 +182,12 @@ define(
                             console.error('Balancepay callback error: ', err);
                         },
                         onClose: () => {
-                            window.balanceCheckout.destroy();
+                            window.balanceSDK.checkout.destroy();
                             $('body').trigger('processStop');
                             self.isPlaceOrderActionAllowed(true);
                         },
                     });
-                    window.balanceCheckout.render(checkoutToken, '#balance-checkout');
+                    window.balanceSDK.checkout.render(checkoutToken, '#balance-checkout');
             },
 
             placeOrder: function(data, event) {
