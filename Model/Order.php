@@ -137,4 +137,43 @@ class Order extends \Magento\Sales\Model\Order
         return $this;
     }
 
+    /**
+     * Retrieve order cancel availability
+     *
+     * @return bool
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
+     */
+    public function canCancel()
+    {
+        if (!$this->_canVoidOrder()) {
+            return false;
+        }
+        if ($this->canUnhold()) {
+            return false;
+        }
+        if (!$this->canReviewPayment() && $this->canFetchPaymentReviewUpdate()) {
+            return false;
+        }
+
+        $allInvoiced = true;
+        foreach ($this->getAllItems() as $item) {
+            if ($item->getQtyToInvoice()) {
+                $allInvoiced = false;
+                break;
+            }
+        }
+
+        $state = $this->getState();
+        if ($this->isCanceled() || $state === self::STATE_COMPLETE || $state === self::STATE_CLOSED) {
+            return false;
+        }
+
+        if ($this->getActionFlag(self::ACTION_FLAG_CANCEL) === false) {
+            return false;
+        }
+
+        return true;
+    }
+
 }
