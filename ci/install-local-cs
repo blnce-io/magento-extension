@@ -3,7 +3,7 @@ LOCAL_DIR=$(dirname -- "$0")
 CLONE_DIR="${LOCAL_DIR}/magento-coding-standard"
 CS_GIT_REPO="https://github.com/magento/magento-coding-standard.git"
 
-if [ -d "/path/to/dir" ]; then
+if [ ! -d "$CLONE_DIR" ]; then
     echo "Cloning ${CS_GIT_REPO}"
     git clone $CS_GIT_REPO $CLONE_DIR
 fi
