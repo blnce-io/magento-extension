@@ -8,6 +8,8 @@ namespace Balancepay\Balancepay\Block\Adminhtml\Order;
 use Balancepay\Balancepay\Model\BalancepayMethod;
 use Magento\Sales\Model\ConfigInterface;
 use Balancepay\Balancepay\Model\Config;
+use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Sales\Api\InvoiceRepositoryInterface;
 
 /**
  * Adminhtml sales order view
@@ -60,12 +62,16 @@ class View extends \Magento\Sales\Block\Adminhtml\Order\View
         ConfigInterface $salesConfig,
         \Magento\Sales\Helper\Reorder $reorderHelper,
         Config $balancepayConfig,
+        InvoiceRepositoryInterface $invoiceRepository,
+        SearchCriteriaBuilder $searchCriteriaBuilder,
         array $data = []
     ) {
         $this->_reorderHelper = $reorderHelper;
         $this->_coreRegistry = $registry;
         $this->_salesConfig = $salesConfig;
         $this->balancepayConfig = $balancepayConfig;
+        $this->invoiceRepository = $invoiceRepository;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         parent::__construct($context, $registry, $salesConfig, $reorderHelper, $data);
     }
 
@@ -155,7 +161,16 @@ class View extends \Magento\Sales\Block\Adminhtml\Order\View
                 );
             }
             $invoiceRecordsCount = 0;
-            if ($this->balancepayConfig->isActive()) {
+            $searchCriteria = $this->searchCriteriaBuilder->addFilter('order_id', $order->getId())->create();
+            try {
+                $invoices = $this->invoiceRepository->getList($searchCriteria);
+                $invoiceRecords = $invoices->getItems();
+                $invoiceRecordsCount = count($invoiceRecords);
+            } catch (\Exception $exception) {
+
+            }
+
+            if ($this->balancepayConfig->isActive() && $invoiceRecordsCount) {
                 $onclickJsRefund = 'jQuery("#sales_order_view_tabs").tabs("option", "active", 1 );';
                 $this->addButton(
                     'order_creditmemo_refund',
@@ -247,8 +262,8 @@ class View extends \Magento\Sales\Block\Adminhtml\Order\View
         }
 
         if ($this->_isAllowedAction(
-            'Magento_Sales::ship'
-        ) && $order->canShip() && !$order->getForcedShipmentWithInvoice()
+                'Magento_Sales::ship'
+            ) && $order->canShip() && !$order->getForcedShipmentWithInvoice()
         ) {
             $this->addButton(
                 'order_ship',
@@ -261,10 +276,10 @@ class View extends \Magento\Sales\Block\Adminhtml\Order\View
         }
 
         if ($this->_isAllowedAction(
-            'Magento_Sales::reorder'
-        ) && $this->_reorderHelper->isAllowed(
-            $order->getStore()
-        ) && $order->canReorderIgnoreSalable()
+                'Magento_Sales::reorder'
+            ) && $this->_reorderHelper->isAllowed(
+                $order->getStore()
+            ) && $order->canReorderIgnoreSalable()
         ) {
             $this->addButton(
                 'order_reorder',
