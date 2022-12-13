@@ -8,7 +8,7 @@ if [ ! -d "$CLONE_DIR" ]; then
     git clone $CS_GIT_REPO $CLONE_DIR
 fi
 
-cd $CLONE_DIR || exit
+cd "$CLONE_DIR" || exit
 echo "Pulling ${CS_GIT_REPO}"
 git pull
 
