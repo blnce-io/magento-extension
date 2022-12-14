@@ -102,11 +102,13 @@
                     <source_model>Balancepay\Balancepay\Model\Adminhtml\Source\NetTermsPaymentMethods</source_model>
                     <config_path>payment/balancepay/net_terms_allowed_payment_methods</config_path>
                 </field>
-                <field id="terms_option" translate="label" type="multiselect" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="terms_option" translate="label" type="multiselect" sortOrder="30" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
                     <label>Terms Options (In Days)</label>
                     <source_model>Balancepay\Balancepay\Model\Config\Customer\TermsOptions</source_model>
-                    <backend_model>Balancepay\Balancepay\Model\Config\Customer\TermsOptionsLimit</backend_model>
+                    <validate>validate-terms-options-count</validate>
                 </field>
+
                 <field id="allowspecific" translate="label" type="allowspecific" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                     <label>Payment from Applicable Countries</label>
                     <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
