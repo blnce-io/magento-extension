@@ -34,11 +34,6 @@ class InfoTest extends TestCase
             'data' => []
         ]);
     }
-
-    public function testGetSpecificInformation()
-    {
-        $result = $this->testableObject->getSpecificInformation();
-    }
 }
 
 
