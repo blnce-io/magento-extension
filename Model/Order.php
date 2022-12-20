@@ -146,9 +146,17 @@ class Order extends \Magento\Sales\Model\Order
      */
     public function canCancel()
     {
-        if (!$this->_canVoidOrder()) {
+        $isFinanced = $this->getPayment()->getAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_FINANCED);
+        $isAuth = $this->getPayment()->getAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_AUTH_CHECKOUT);
+
+        if (!$isAuth && !$isFinanced) {
             return false;
         }
+
+        if (!$isFinanced && !$this->_canVoidOrder()) {
+            return false;
+        }
+
         if ($this->canUnhold()) {
             return false;
         }
