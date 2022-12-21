@@ -2,16 +2,21 @@
 
 namespace Balancepay\Balancepay\Helper;
 
+use Balancepay\Balancepay\Model\BalancepayMethod;
 use Balancepay\Balancepay\Model\Config as BalancepayConfig;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
+use Balancepay\Balancepay\Model\ResourceModel\BalancepayCharge\Collection;
 use Balancepay\Balancepay\Model\ResourceModel\BalancepayProduct\CollectionFactory as MpProductCollection;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\Session;
+use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\Cache\TypeListInterface;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Http\Context;
 use Magento\Framework\Message\ManagerInterface as MessageManagerInterface;
 use Magento\Framework\Pricing\Helper\Data as PricingHelper;
+use Magento\Sales\Api\InvoiceRepositoryInterface;
+use Magento\Sales\Api\OrderRepositoryInterface;
 
 class Data extends AbstractHelper
 {
@@ -66,6 +71,16 @@ class Data extends AbstractHelper
     public $ccIcons;
 
     /**
+     * @var InvoiceRepositoryInterface
+     */
+    protected $invoiceRepository;
+
+    /**
+     * @var SearchCriteriaBuilder
+     */
+    protected $searchCriteriaBuilder;
+
+    /**
      * Data constructor.
      *
      * @param MpProductCollection $mpProductCollectionFactory
@@ -83,7 +98,11 @@ class Data extends AbstractHelper
         CustomerRepositoryInterface $customerRepositoryInterface,
         RequestFactory $requestFactory,
         BalancepayConfig $balancepayConfig,
-        PricingHelper $pricingHelper
+        PricingHelper $pricingHelper,
+        InvoiceRepositoryInterface $invoiceRepository,
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        Collection $collection,
+        OrderRepositoryInterface $orderRepositoryInterface
     ) {
         $this->ccIcons = [
             'visa' => 'vi',
@@ -98,6 +117,10 @@ class Data extends AbstractHelper
         $this->requestFactory = $requestFactory;
         $this->balancepayConfig = $balancepayConfig;
         $this->pricingHelper = $pricingHelper;
+        $this->invoiceRepository = $invoiceRepository;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->collection = $collection;
+        $this->orderRepositoryInterface = $orderRepositoryInterface;
     }
 
     /**
@@ -204,5 +227,28 @@ class Data extends AbstractHelper
         $currentCustomerGroup = $this->customerSession->getCustomer()->getGroupId();
         $allowedCustomerGroups = $this->balancepayConfig->getAllowedCustomerGroups();
         return in_array($currentCustomerGroup, $allowedCustomerGroups);
+    }
+
+    public function isAnyChargePaid($orderId) {
+        $anyChargePaid = false;
+        $searchCriteria = $this->searchCriteriaBuilder->addFilter('order_id', $orderId)->create();
+        try {
+            $invoices = $this->invoiceRepository->getList($searchCriteria);
+            $invoiceRecords = $invoices->getItems();
+            if ($invoiceRecords) {
+                $order = $this->orderRepositoryInterface->get($orderId);
+                if ($order->getPayment()->getAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_AUTH_CHECKOUT)) {
+                    foreach ($invoiceRecords as $invoice) {
+                        if ($this->collection->getChargeAndStatus($invoice->getEntityId())) {
+                            $anyChargePaid = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        } catch (\Exception $exception) {
+
+        }
+        return $anyChargePaid;
     }
 }
