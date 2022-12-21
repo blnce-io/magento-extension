@@ -218,7 +218,7 @@ class RefundTest extends TestCase
 
     public function testSetReason()
     {
-        $result = $this->testableObject->setReason('requestmethod');
+        $result = $this->testableObject->setReason('reason');
         $this->assertEquals($this->testableObject, $result);
     }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Balancepay\Balancepay\Test\Unit\Model;
 
 use Balancepay\Balancepay\Model\AbstractResponse;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Api\Data\CartInterface;
 use Balancepay\Balancepay\Model\BalancepayMethod;
 use Magento\Checkout\Model\Session as CheckoutSession;
@@ -183,15 +184,9 @@ class BalancepayMethodTest extends TestCase
     public function testAssignData()
     {
         $this->_eventManager->expects($this->any())->method('dispatch')->willReturn(null);
+        $this->expectException(LocalizedException::class);
         $result = $this->testableObject->assignData($this->dataObject);
     }
-
-    /*public function testValidate()
-    {
-        $this->abstractMethod->expects($this->any())->method('getInfoInstance')->willReturn($this->infoInterface);
-        $this->abstractMethod->expects($this->any())->method('getData')->willReturn($this->infoInterface);
-        $result = $this->testableObject->validate();
-    }*/
 
     public function testGetConfigPaymentAction()
     {

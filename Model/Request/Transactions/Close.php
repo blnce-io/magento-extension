@@ -9,7 +9,7 @@
  * @author   Company: Girit-Interactive (https://www.girit-tech.com/)
  */
 
-namespace Balancepay\Balancepay\Model\Request;
+namespace Balancepay\Balancepay\Model\Request\Transactions;
 
 use Balancepay\Balancepay\Helper\Data as HelperData;
 use Balancepay\Balancepay\Lib\Http\Client\Curl;

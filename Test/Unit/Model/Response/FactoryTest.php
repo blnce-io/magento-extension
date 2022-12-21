@@ -6,6 +6,7 @@ namespace Balancepay\Balancepay\Test\Unit\Model\Response;
 use Balancepay\Balancepay\Model\Response\Factory;
 use Balancepay\Balancepay\Model\Request\Refunds;
 use Magento\Customer\Model\Address;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -33,6 +34,7 @@ class FactoryTest extends TestCase
     public function testCreate()
     {
         $this->_objectManager->expects($this->any())->method('create');
+        $this->expectException(LocalizedException::class);
         $result = $this->testableObject->create(Refunds::class);
         $this->assertEquals($this->testableObject, $result);
     }

@@ -84,6 +84,32 @@ class CollectionTest extends TestCase
      */
     private $selectMock;
 
+    public function testConstructMethod(): void
+    {
+        $reflectionMethod = new ReflectionMethod($this->testableObject, '_construct');
+        $reflectionMethod->setAccessible(true);
+        $result = $reflectionMethod->invoke($this->testableObject);
+        $this->assertNull($result);
+    }
+
+    public function testGetChargeAndStatus()
+    {
+        $dataObject = new DataObject(['charge_id' => 1, 'status' => 'charged']);
+        $this->chargeCollection->expects($this->any())->method('addFieldToFilter')->willReturnSelf();
+        $this->chargeCollection->expects($this->any())->method('getFirstItem')
+            ->willReturn($dataObject);
+        $dataObject->getData();
+        $this->testableObject->getChargeAndStatus(12);
+    }
+
+    public function testGetChargeId()
+    {
+        $this->chargeCollection->expects($this->any())->method('addFieldToFilter')->willReturnSelf();
+        $this->chargeCollection->expects($this->any())->method('getFirstItem')
+            ->willReturn(new DataObject(['charge_id' => 1]));
+        $this->testableObject->getChargeId(12);
+    }
+
     /**
      * This method is executed before each test
      *
@@ -129,33 +155,4 @@ class CollectionTest extends TestCase
             ]
         );
     }
-
-    public function testConstructMethod(): void
-    {
-        $reflectionMethod = new ReflectionMethod($this->testableObject, '_construct');
-        $reflectionMethod->setAccessible(true);
-        $result = $reflectionMethod->invoke($this->testableObject);
-        $this->assertNull($result);
-    }
-
-    public function testGetChargeAndStatus() {
-        $this->chargeCollection->expects($this->any())->method('addFieldToFilter')->willReturnSelf();
-        $this->chargeCollection->expects($this->any())->method('getFirstItem')
-            ->willReturn(new DataObject(['charge_id'=> 1, 'status' => 'charged']));
-        $this->testableObject->getChargeAndStatus(12);
-    }
-
-    public function testGetChargeId() {
-        $this->chargeCollection->expects($this->any())->method('addFieldToFilter')->willReturnSelf();
-        $this->chargeCollection->expects($this->any())->method('getFirstItem')
-            ->willReturn(new DataObject(['charge_id' => 1]));
-        $this->testableObject->getChargeId(12);
-    }
 }
-
-
-
-
-
-
-

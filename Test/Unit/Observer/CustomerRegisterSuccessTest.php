@@ -24,6 +24,27 @@ class CustomerRegisterSuccessTest extends TestCase
      */
     private $testableObject;
 
+    public function testExecute()
+    {
+        $this->observer->expects($this->any())->method('getCustomer')->willReturn($this->customer);
+        $this->customer->expects($this->any())->method('getId')->willReturn(1);
+        $this->sessionManager->expects($this->any())->method('getBalanceBuyerId')->willReturn('byc_4ksl4342342342');
+        $this->balanceBuyer->expects($this->any())->method('updateCustomerBalanceBuyerId')->willReturn(null);
+        $this->sessionManager->expects($this->any())->method('unsBalanceBuyerId')->willReturnSelf();
+        $result = $this->testableObject->execute($this->observer);
+        $this->assertNull($result);
+    }
+
+    public function testExecuteException()
+    {
+        $this->observer->expects($this->any())->method('getCustomer')->willReturn($this->customer);
+        $this->customer->expects($this->any())->method('getId')->willReturn(1);
+        $this->sessionManager->expects($this->any())->method('getBalanceBuyerId')->willThrowException(new \Exception());
+        $this->config->expects($this->any())->method('log')->willReturnSelf();
+        $result = $this->testableObject->execute($this->observer);
+        $this->assertNull($result);
+    }
+
     protected function setUp(): void
     {
         $this->sessionManager = $this->getMockBuilder(SessionManagerInterface::class)
@@ -56,38 +77,4 @@ class CustomerRegisterSuccessTest extends TestCase
             'balancepayConfig' => $this->config
         ]);
     }
-
-    public function testExecute()
-    {
-        $this->observer->expects($this->any())->method('getCustomer')->willReturn($this->customer);
-        $this->customer->expects($this->any())->method('getId')->willReturn(1);
-        $this->sessionManager->expects($this->any())->method('getBalanceBuyerId')->willReturn('byc_4ksl4342342342');
-        $this->balanceBuyer->expects($this->any())->method('updateCustomerBalanceBuyerId')->willReturn(null);
-        $this->sessionManager->expects($this->any())->method('unsBalanceBuyerId')->willReturnSelf();
-        $result = $this->testableObject->execute($this->observer);
-        $this->assertNull($result);
-    }
-
-    public function testExecuteException()
-    {
-        $this->observer->expects($this->any())->method('getCustomer')->willReturn($this->customer);
-        $this->customer->expects($this->any())->method('getId')->willReturn(1);
-        $this->sessionManager->expects($this->any())->method('getBalanceBuyerId')->willThrowException(new \Exception());
-        $this->config->expects($this->any())->method('log')->willReturnSelf();
-        $result = $this->testableObject->execute($this->observer);
-        $this->assertNull($result);
-    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

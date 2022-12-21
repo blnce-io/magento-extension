@@ -65,6 +65,28 @@ class WebhookTest extends TestCase
      */
     private $storeInterface;
 
+    public function testSetTopic()
+    {
+        $result = $this->testableObject->setTopic('topic');
+        $this->assertEquals($this->testableObject, $result);
+    }
+
+    public function testSetWebookAddress()
+    {
+        $result = $this->testableObject->setWebookAddress('webhookCharge');
+        $this->assertEquals($this->testableObject, $result);
+    }
+
+    public function testGetTopic()
+    {
+        $result = $this->testableObject->getTopic();
+    }
+
+    public function testGetWebookAddress()
+    {
+        $result = $this->testableObject->getWebookAddress();
+    }
+
     protected function setUp(): void
     {
         $this->balancepayConfig = $this->getMockBuilder(Config::class)
@@ -102,30 +124,4 @@ class WebhookTest extends TestCase
             'request' => $this->request
         ]);
     }
-
-    public function testSetTopic()
-    {
-        $result = $this->testableObject->setTopic('topic');
-        $this->assertEquals($this->testableObject, $result);
-    }
-
-    public function testSetWebookAddress()
-    {
-        $result = $this->testableObject->setWebookAddress('webhookCharge');
-        $this->assertEquals($this->testableObject, $result);
-    }
-
-    public function testGetTopic()
-    {
-        $result = $this->testableObject->getTopic();
-    }
-
-    public function testGetWebookAddress()
-    {
-        $result = $this->testableObject->getWebookAddress();
-    }
 }
-
-
-
-

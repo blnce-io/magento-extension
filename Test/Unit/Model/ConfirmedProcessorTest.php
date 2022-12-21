@@ -28,6 +28,37 @@ class ConfirmedProcessorTest extends TestCase
     private $phrase;
 
     /**
+     * @return void
+     */
+    public function testProcessConfirmedWebhook()
+    {
+        $this->order->expects($this->any())->method('getPayment')->willReturn($this->orderPaymentInterface);
+        $this->orderPaymentInterface->expects($this->any())->method('save')->willReturnSelf();
+
+        $this->orderPaymentInterface->expects($this->exactly(3))->method('setAdditionalInformation')
+            ->withConsecutive(
+                [BalancepayMethod::BALANCEPAY_IS_FINANCED, 1],
+                [BalancepayMethod::BALANCEPAY_IS_AUTH_CHECKOUT, 1],
+                [BalancepayMethod::BALANCEPAY_SELECTED_PAYMENT_METHOD, '0.0']
+            )->willReturnOnConsecutiveCalls(
+                $this->orderPaymentInterface,
+                $this->orderPaymentInterface,
+                $this->orderPaymentInterface
+            );
+
+        $this->order->expects($this->any())->method('save')->willReturnSelf();
+        $this->balancepayConfig->expects($this->any())->method('getIsAuth')->willReturn(1);
+        $result = $this->testableObject->processConfirmedWebhook(
+            [
+                'isFinanced' => 1,
+                'selectedPaymentMethod' => 'RnGw68WL1qFDKJJJ5Qnnhn38dVrEejcRGdJvA'
+            ],
+            $this->order
+        );
+        $this->assertIsBool($result);
+    }
+
+    /**
      * This method is called before a test is executed
      *
      * @return void
@@ -50,33 +81,4 @@ class ConfirmedProcessorTest extends TestCase
             'balancepayConfig' => $this->balancepayConfig
         ]);
     }
-
-    /**
-     * @return void
-     */
-    public function testProcessConfirmedWebhook()
-    {
-        $this->order->expects($this->any())->method('getPayment')->willReturn($this->orderPaymentInterface);
-        $this->orderPaymentInterface->expects($this->any())->method('save')->willReturnSelf();
-
-        $this->orderPaymentInterface->expects($this->exactly(3))->method('setAdditionalInformation')
-            ->withConsecutive(
-                [BalancepayMethod::BALANCEPAY_IS_FINANCED,1],
-                [BalancepayMethod::BALANCEPAY_IS_AUTH_CHECKOUT, 1],
-                [BalancepayMethod::BALANCEPAY_SELECTED_PAYMENT_METHOD, '0.0']
-            )->willReturnOnConsecutiveCalls($this->orderPaymentInterface, $this->orderPaymentInterface, $this->orderPaymentInterface);
-
-        $this->order->expects($this->any())->method('save')->willReturnSelf();
-        $this->balancepayConfig->expects($this->any())->method('getIsAuth')->willReturn(1);
-        $result = $this->testableObject->processConfirmedWebhook(
-            [
-                'isFinanced' => 1,
-                'selectedPaymentMethod' => 'RnGw68WL1qFDKJJJ5Qnnhn38dVrEejcRGdJvA'
-            ],
-            $this->order
-        );
-        $this->assertIsBool($result);
-    }
-
-
 }

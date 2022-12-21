@@ -45,6 +45,11 @@ class Refunds extends AbstractRequest
     private $chargeId;
 
     /**
+     * @var string
+     */
+    private $reason;
+
+    /**
      * Buyers constructor.
      *
      * @param Config $balancepayConfig
@@ -205,7 +210,7 @@ class Refunds extends AbstractRequest
     /**
      * Get Reason
      *
-     * @return int
+     * @return string
      */
     public function getReason()
     {

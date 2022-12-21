@@ -20,6 +20,7 @@ use Magento\Quote\Model\Cart\CartTotalRepository;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Balancepay\Balancepay\Model\Request\Buyers;
+
 class CheckoutTest extends TestCase
 {
     /**
@@ -72,8 +73,3 @@ class CheckoutTest extends TestCase
         ]);
     }
 }
-
-
-
-
-
