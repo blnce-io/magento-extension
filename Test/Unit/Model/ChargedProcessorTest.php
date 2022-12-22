@@ -21,8 +21,6 @@ use Magento\Framework\Exception\LocalizedException;
 class ChargedProcessorTest extends TestCase
 {
     /**
-     * Object for test
-     *
      * @var object
      */
     private $testableObject;
@@ -38,54 +36,6 @@ class ChargedProcessorTest extends TestCase
     private $resourceConnection;
 
     /**
-     * This method is called before a test is executed
-     *
-     * @return void
-     */
-    protected function setUp(): void
-    {
-        $this->balancepayConfig = $this->getMockBuilder(Config::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['getIsAuth'])->getMock();
-
-        $this->balancepayChargeFactory = $this->getMockBuilder(BalancepayChargeFactory::class)
-            ->disableOriginalConstructor()->onlyMethods(['create'])->getMock();
-
-        $this->balancepayCharge = $this->getMockBuilder(BalancepayCharge::class)
-            ->disableOriginalConstructor()->onlyMethods(['save', 'setData'])->getMock();
-
-        $this->order = $this->getMockBuilder(Order::class)
-            ->disableOriginalConstructor()->onlyMethods(['save', 'getPayment', 'getBaseGrandTotal', 'setStatus'])->getMock();
-
-        $this->resourceConnection = $this->getMockBuilder(ResourceConnection::class)
-            ->disableOriginalConstructor()->onlyMethods(['getConnection'])->getMock();
-
-        $this->adapterInterface = $this->getMockBuilder(AdapterInterface::class)
-            ->disableOriginalConstructor()->onlyMethods(['getTableName'])->getMockForAbstractClass();
-
-        $this->orderPaymentInterface = $this->getMockBuilder(OrderPaymentInterface::class)
-            ->disableOriginalConstructor()
-            ->addMethods([
-                'save',
-                'setIsFraudDetected',
-                'setTransactionId',
-                'setIsTransactionPending',
-                'setIsTransactionClosed',
-                'capture',
-                'getCreatedInvoice',
-                'getId'
-            ])->onlyMethods(['setAdditionalInformation'])->getMockForAbstractClass();
-
-
-        $objectManager = new ObjectManager($this);
-        $this->testableObject = $objectManager->getObject(ChargedProcessor::class, [
-            'balancepayConfig' => $this->balancepayConfig,
-            'balancepayChargeFactory' => $this->balancepayChargeFactory,
-            'resource' => $this->resourceConnection
-        ]);
-    }
-
-    /**
      * @return void
      */
     public function testProcessChargedWebhookChargeIdNotEqualNonAuthCheckoutAmountDifferent()
@@ -95,7 +45,9 @@ class ChargedProcessorTest extends TestCase
             ->withConsecutive([BalancepayMethod::BALANCEPAY_CHARGE_ID], [BalancepayMethod::BALANCEPAY_IS_AUTH_CHECKOUT])
             ->willReturnOnConsecutiveCalls(14235, false);
         $this->order->expects($this->any())->method('getBaseGrandTotal')->willReturn(13.30);
-        $this->orderPaymentInterface->expects($this->once())->method('setIsFraudDetected')->with(true)->willReturnSelf();
+        $this->orderPaymentInterface->expects($this->once())
+            ->method('setIsFraudDetected')
+            ->with(true)->willReturnSelf();
         $this->orderPaymentInterface->expects($this->any())->method('save')->willReturnSelf();
         $this->order->expects($this->any())->method('setStatus')->with(Order::STATUS_FRAUD)->willReturnSelf();
         $this->order->expects($this->any())->method('save')->willReturnSelf();
@@ -122,11 +74,19 @@ class ChargedProcessorTest extends TestCase
         $this->order->expects($this->any())->method('getBaseGrandTotal')->willReturn(12.40);
         $this->orderPaymentInterface->expects($this->any())->method('setIsFraudDetected')->with(true)->willReturnSelf();
         $this->orderPaymentInterface->expects($this->any())->method('save')->willReturnSelf();
-        $this->order->expects($this->any())->method('setStatus')->with(Order::STATUS_FRAUD)->willReturnSelf();
+        $this->order->expects($this->any())
+            ->method('setStatus')
+            ->with(Order::STATUS_FRAUD)->willReturnSelf();
         $this->order->expects($this->any())->method('save')->willReturnSelf();
-        $this->orderPaymentInterface->expects($this->any())->method('setTransactionId')->with('txn_83782747234982934')->willReturnSelf();
-        $this->orderPaymentInterface->expects($this->any())->method('setIsTransactionPending')->with(false)->willReturnSelf();
-        $this->orderPaymentInterface->expects($this->any())->method('setIsTransactionClosed')->with(true)->willReturnSelf();
+        $this->orderPaymentInterface->expects($this->any())
+            ->method('setTransactionId')
+            ->with('txn_83782747234982934')->willReturnSelf();
+        $this->orderPaymentInterface->expects($this->any())
+            ->method('setIsTransactionPending')
+            ->with(false)->willReturnSelf();
+        $this->orderPaymentInterface->expects($this->any())
+            ->method('setIsTransactionClosed')
+            ->with(true)->willReturnSelf();
         $this->orderPaymentInterface->expects($this->any())->method('setAdditionalInformation')
             ->with(
                 BalancepayMethod::BALANCEPAY_CHARGE_ID,
@@ -165,9 +125,12 @@ class ChargedProcessorTest extends TestCase
 
         $this->resourceConnection->expects($this->any())->method('getConnection')->willReturn($this->adapterInterface);
         $this->adapterInterface->expects($this->any())->method('getTableName')->willReturn('tableName');
-        $this->orderPaymentInterface->expects($this->any())->method('setTransactionId')->with('txn_83782747234982934')->willReturnSelf();
-        $this->orderPaymentInterface->expects($this->any())->method('setIsTransactionPending')->with(false)->willReturnSelf();
-        $this->orderPaymentInterface->expects($this->any())->method('setIsTransactionClosed')->with(true)->willReturnSelf();
+        $this->orderPaymentInterface->expects($this->any())
+            ->method('setTransactionId')->with('txn_83782747234982934')->willReturnSelf();
+        $this->orderPaymentInterface->expects($this->any())
+            ->method('setIsTransactionPending')->with(false)->willReturnSelf();
+        $this->orderPaymentInterface->expects($this->any())
+            ->method('setIsTransactionClosed')->with(true)->willReturnSelf();
         $this->orderPaymentInterface->expects($this->any())->method('setAdditionalInformation')->with(
             BalancepayMethod::BALANCEPAY_CHARGE_ID,
             " \n14234"
@@ -200,5 +163,53 @@ class ChargedProcessorTest extends TestCase
             $this->order
         );
         $this->assertIsBool($result);
+    }
+
+    /**
+     * This method is called before a test is executed
+     *
+     * @return void
+     */
+    protected function setUp(): void
+    {
+        $this->balancepayConfig = $this->getMockBuilder(Config::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getIsAuth'])->getMock();
+
+        $this->balancepayChargeFactory = $this->getMockBuilder(BalancepayChargeFactory::class)
+            ->disableOriginalConstructor()->onlyMethods(['create'])->getMock();
+
+        $this->balancepayCharge = $this->getMockBuilder(BalancepayCharge::class)
+            ->disableOriginalConstructor()->onlyMethods(['save', 'setData'])->getMock();
+
+        $this->order = $this->getMockBuilder(Order::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['save', 'getPayment', 'getBaseGrandTotal', 'setStatus'])->getMock();
+
+        $this->resourceConnection = $this->getMockBuilder(ResourceConnection::class)
+            ->disableOriginalConstructor()->onlyMethods(['getConnection'])->getMock();
+
+        $this->adapterInterface = $this->getMockBuilder(AdapterInterface::class)
+            ->disableOriginalConstructor()->onlyMethods(['getTableName'])->getMockForAbstractClass();
+
+        $this->orderPaymentInterface = $this->getMockBuilder(OrderPaymentInterface::class)
+            ->disableOriginalConstructor()
+            ->addMethods([
+                'save',
+                'setIsFraudDetected',
+                'setTransactionId',
+                'setIsTransactionPending',
+                'setIsTransactionClosed',
+                'capture',
+                'getCreatedInvoice',
+                'getId'
+            ])->onlyMethods(['setAdditionalInformation'])->getMockForAbstractClass();
+
+        $objectManager = new ObjectManager($this);
+        $this->testableObject = $objectManager->getObject(ChargedProcessor::class, [
+            'balancepayConfig' => $this->balancepayConfig,
+            'balancepayChargeFactory' => $this->balancepayChargeFactory,
+            'resource' => $this->resourceConnection
+        ]);
     }
 }

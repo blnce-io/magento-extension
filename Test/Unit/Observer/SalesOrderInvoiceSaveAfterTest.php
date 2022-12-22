@@ -56,6 +56,24 @@ class SalesOrderInvoiceSaveAfterTest extends TestCase
      */
     private $balancepayChargeFactory;
 
+    /**
+     * Test
+     *
+     */
+    public function testExecute(): void
+    {
+        $this->observer->expects($this->any())->method('getEvent')->willReturn($this->event);
+        $this->event->expects($this->any())->method('getInvoice')->willReturn($this->invoice);
+        $this->invoice->expects($this->any())->method('getId')->willReturn('44555');
+        $this->registry->expects($this->any())->method('registry')->withConsecutive(['charge_id'], ['charge_status'])
+            ->willReturnOnConsecutiveCalls('12', 1);
+        $this->balancepayChargeFactory->expects($this->any())->method('create')->willReturn($this->balancepayCharge);
+        $this->balancepayCharge->expects($this->any())->method('setData')->willReturn($this->balancepayCharge);
+        $this->balancepayCharge->expects($this->any())->method('save')->willReturn($this->balancepayCharge);
+        $result = $this->testableObject->execute($this->observer);
+        $this->assertIsObject($result);
+    }
+
     protected function setUp(): void
     {
         $this->observer = $this->getMockBuilder(Observer::class)
@@ -90,23 +108,4 @@ class SalesOrderInvoiceSaveAfterTest extends TestCase
             'balancepayChargeFactory' => $this->balancepayChargeFactory
         ]);
     }
-
-    /**
-     * Test
-     *
-     */
-    public function testExecute(): void
-    {
-        $this->observer->expects($this->any())->method('getEvent')->willReturn($this->event);
-        $this->event->expects($this->any())->method('getInvoice')->willReturn($this->invoice);
-        $this->invoice->expects($this->any())->method('getId')->willReturn('44555');
-        $this->registry->expects($this->any())->method('registry')->withConsecutive(['charge_id'], ['charge_status'])
-            ->willReturnOnConsecutiveCalls('12', 1);
-        $this->balancepayChargeFactory->expects($this->any())->method('create')->willReturn($this->balancepayCharge);
-        $this->balancepayCharge->expects($this->any())->method('setData')->willReturn($this->balancepayCharge);
-        $this->balancepayCharge->expects($this->any())->method('save')->willReturn($this->balancepayCharge);
-        $result = $this->testableObject->execute($this->observer);
-        $this->assertIsObject($result);
-    }
-
 }

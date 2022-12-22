@@ -18,15 +18,42 @@ use Magento\Payment\Model\CcConfig;
 use Magento\Payment\Model\CcGenericConfigProvider;
 use Magento\Payment\Model\MethodInterface;
 
-class ConfigProviderTest extends TestCase
+class   ConfigProviderTest extends TestCase
 {
     /**
-     * Object for test
-     *
      * @var object
      */
     private $testableObject;
 
+    /**
+     * @return void
+     */
+    public function testGetConfig()
+    {
+        $this->config->expects($this->any())->method('isActive')->willReturn(true);
+        $this->checkoutSession->expects($this->any())->method('unsBalanceCustomerEmail')
+            ->willReturnSelf();
+        $this->checkoutSession->expects($this->any())->method('unsBalanceCheckoutToken')
+            ->willReturnSelf();
+        $this->config->expects($this->any())->method('getBalanceSdkUrl')
+            ->willReturn('https://balancesdkurl.com');
+        $this->urlInterface->expects($this->any())->method('getUrl')
+            ->willReturn('https://balancetokenurl.com');
+        $this->config->expects($this->any())->method('getBalanceIframeUrl')
+            ->willReturn('https://balanceiframeurl.com');
+        $this->config->expects($this->any())->method('getLogoImageUrl')
+            ->willReturn('https://balancelogoimageurl.com');
+        $this->config->expects($this->any())->method('getIsAuth')
+            ->willReturn(true);
+
+        $result = $this->testableObject->getConfig();
+    }
+
+    public function testGetConfigFalse()
+    {
+        $this->config->expects($this->any())->method('isActive')->willReturn(false);
+        $result = $this->testableObject->getConfig();
+    }
 
     protected function setUp(): void
     {
@@ -82,44 +109,5 @@ class ConfigProviderTest extends TestCase
             'checkoutSession' => $this->checkoutSession,
             'methodCodes' => ['balancepay'],
         ]);
-    }
-
-    /**
-     * @return void
-     */
-    public function testGetConfig()
-    {
-        $this->config->expects($this->any())->method('isActive')->willReturn(true);
-        $this->checkoutSession->expects($this->any())->method('unsBalanceCustomerEmail')
-            ->willReturnSelf();
-        $this->checkoutSession->expects($this->any())->method('unsBalanceCheckoutToken')
-            ->willReturnSelf();
-        $this->config->expects($this->any())->method('getBalanceSdkUrl')
-            ->willReturn('https://balancesdkurl.com');
-        $this->urlInterface->expects($this->any())->method('getUrl')
-            ->willReturn('https://balancetokenurl.com');
-        $this->config->expects($this->any())->method('getBalanceIframeUrl')
-            ->willReturn('https://balanceiframeurl.com');
-        $this->config->expects($this->any())->method('getLogoImageUrl')
-            ->willReturn('https://balancelogoimageurl.com');
-        $this->config->expects($this->any())->method('getIsAuth')
-            ->willReturn(true);
-
-        $result = $this->testableObject->getConfig();
-        $this->assertEquals([
-            'payment' => [
-                'balancepay' => [
-                    'balanceSdkUrl' => 'https://balancesdkurl.com',
-                    'balanceIframeUrl' => 'https://balanceiframeurl.com',
-                    'balanceCheckoutTokenUrl' => 'https://balancetokenurl.com',
-                    'balancelogoImageUrl' => 'https://balancelogoimageurl.com',
-                    'balanceIsAuth' => true
-                ],
-            ]], $result);
-    }
-    public function testGetConfigFalse()
-    {
-        $this->config->expects($this->any())->method('isActive')->willReturn(false);
-        $result = $this->testableObject->getConfig();
     }
 }

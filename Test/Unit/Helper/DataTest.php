@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Balancepay\Balancepay\Test\Unit\Helper;
 
+use Balancepay\Balancepay\Model\BalancepayProduct;
 use Balancepay\Balancepay\Model\Config as BalancepayConfig;
 use Balancepay\Balancepay\Model\RequestInterface;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
@@ -31,19 +32,25 @@ class DataTest extends TestCase
     {
         $this->mpProductCollection = $this->getMockBuilder(MpProductCollection::class)
             ->disableOriginalConstructor()
-            ->onlyMethods([])->getMock();
+            ->onlyMethods(['create'])->getMock();
+
+        $this->balancepayProduct = $this->getMockBuilder(BalancepayProduct::class)
+            ->disableOriginalConstructor()
+            ->addMethods(['getVendorId'])->getMock();
 
         $this->context = $this->getMockBuilder(Context::class)
             ->disableOriginalConstructor()
-            ->onlyMethods([])->getMock();
+            ->onlyMethods(['getValue'])->getMock();
 
         $this->session = $this->getMockBuilder(Session::class)
             ->disableOriginalConstructor()
-            ->onlyMethods([])->getMock();
+            ->addMethods(['getBuyerId', 'setBuyerId'])->getMock();
 
         $this->collection = $this->getMockBuilder(Collection::class)
             ->disableOriginalConstructor()
-            ->onlyMethods([])->getMock();
+            ->onlyMethods([
+                'addFieldToFilter',
+                'getFirstItem'])->getMock();
 
         $this->customerRepositoryInterface = $this->getMockBuilder(CustomerRepositoryInterface::class)
             ->disableOriginalConstructor()
@@ -51,15 +58,15 @@ class DataTest extends TestCase
 
         $this->requestInterface = $this->getMockBuilder(RequestInterface::class)
             ->disableOriginalConstructor()
-            ->onlyMethods([])->getMockForAbstractClass();
+            ->addMethods(['setRequestMethod', 'setTopic'])->getMockForAbstractClass();
 
         $this->customerInterface = $this->getMockBuilder(CustomerInterface::class)
             ->disableOriginalConstructor()
-            ->onlyMethods([])->getMockForAbstractClass();
+            ->addMethods(['__toArray'])->getMockForAbstractClass();
 
         $this->requestFactory = $this->getMockBuilder(RequestFactory::class)
             ->disableOriginalConstructor()
-            ->onlyMethods([])->getMock();
+            ->onlyMethods(['create'])->getMock();
 
         $this->balancepayConfig = $this->getMockBuilder(BalancepayConfig::class)
             ->disableOriginalConstructor()
@@ -86,27 +93,29 @@ class DataTest extends TestCase
      */
     public function testGetBalanceVendors()
     {
-        $this->mpProductCollectionFactory->expects($this->any())->method('create')
+        $this->mpProductCollection->expects($this->any())->method('create')
             ->willReturn($this->collection);
         $this->collection->expects($this->any())->method('addFieldToFilter')
             ->willReturnSelf();
         $this->collection->expects($this->any())->method('getFirstItem')
-            ->willReturn();
-        $result = $this->testableObject->getBalanceVendors('12');
+            ->willReturn($this->balancepayProduct);
+        $this->balancepayProduct->expects($this->any())->method('getVendorId')
+            ->willReturn(12);
+        $this->testableObject->getBalanceVendors('12');
     }
 
     public function testGetCustomerSessionId()
     {
-        $this->appContext->expects($this->any())->method('getValue')
+        $this->context->expects($this->any())->method('getValue')
             ->willReturn(12);
         $result = $this->testableObject->getCustomerSessionId();
     }
 
     public function testGetBuyerAmountNoBuyerId()
     {
-        $this->customerSession->expects($this->any())->method('getBuyerId')
+        $this->session->expects($this->any())->method('getBuyerId')
             ->willReturn(0);
-        $this->appContext->expects($this->any())->method('getValue')
+        $this->context->expects($this->any())->method('getValue')
             ->willReturn(12);
         $this->customerRepositoryInterface->expects($this->any())->method('getById')
             ->willReturn($this->customerInterface);
@@ -118,7 +127,7 @@ class DataTest extends TestCase
                     ]
                 ]
             ]);
-        $this->customerSession->expects($this->any())->method('setBuyerId')
+        $this->session->expects($this->any())->method('setBuyerId')
             ->willReturnSelf();
         $this->requestFactory->expects($this->any())->method('create')
             ->willReturn($this->requestInterface);

@@ -86,6 +86,84 @@ class SubmitAllAfterTest extends TestCase
      */
     private $localizedException;
 
+    public function testExecuteOrderNull(): void
+    {
+        $this->observer->expects($this->any())->method('getEvent')->willReturn($this->event);
+        $this->event->expects($this->any())->method('getOrder')->willReturn(null);
+        $result = $this->testableObject->execute($this->observer);
+        $this->assertIsObject($result);
+    }
+
+    public function testExecuteIsNotBalancepayMethod(): void
+    {
+        $this->observer->expects($this->any())->method('getEvent')->willReturn($this->event);
+        $this->event->expects($this->any())->method('getOrder')->willReturn($this->order);
+        $this->order->expects($this->any())->method('getPayment')->willReturn($this->orderpaymentinterface);
+        $this->orderpaymentinterface->expects($this->any())->method('getMethod')->willReturn('string');
+        $result = $this->testableObject->execute($this->observer);
+        $this->assertIsObject($result);
+    }
+
+    public function testExecuteGetBalanceMethodNoAuth(): void
+    {
+        $this->observer->expects($this->any())->method('getEvent')->willReturn($this->event);
+        $this->event->expects($this->any())->method('getOrder')->willReturn($this->order);
+        $this->order->expects($this->any())->method('getPayment')->willReturn($this->orderpaymentinterface);
+        $this->balancepayConfig->expects($this->any())->method('getIsAuth')->willReturn(0);
+        $this->orderpaymentinterface->expects($this->any())->method('getMethod')->willReturn('balancepay');
+        $this->orderpaymentinterface->expects($this->any())->method('getAdditionalInformation')
+            ->with(BalancepayMethod::BALANCEPAY_CHECKOUT_TRANSACTION_ID)->willReturn('string');
+        $this->order->expects($this->any())->method('getBaseGrandTotal')->willReturn(2.56);
+        $this->captureCommand->expects($this->any())->method('execute')
+            ->with(
+                $this->orderpaymentinterface,
+                2.56,
+                $this->order
+            )->willReturn($this->phrase);
+        $this->orderpaymentinterface->expects($this->any())->method('setIsTransactionClosed')
+            ->with(0)->willReturn($this->orderpaymentinterface);
+        $this->orderpaymentinterface->expects($this->any())->method('setTransactionId')
+            ->with('string')->willReturn($this->orderpaymentinterface);
+        $this->orderpaymentinterface->expects($this->any())->method('addTransaction')->willReturn($this->transaction);
+        $this->orderpaymentinterface->expects($this->any())->method('prependMessage')->willReturn('string');
+        $this->orderpaymentinterface->expects($this->any())->method('addTransactionCommentsToOrder')
+            ->with($this->transaction, 'string')->willReturn($this->orderpaymentinterface);
+        $this->orderpaymentinterface->expects($this->any())->method('save')->willReturnSelf();
+        $this->order->expects($this->any())->method('save')->willReturnSelf();
+        $result = $this->testableObject->execute($this->observer);
+        $this->assertIsObject($result);
+    }
+
+    public function testExecuteGetBalanceMethodAuth(): void
+    {
+        $this->observer->expects($this->any())->method('getEvent')->willReturn($this->event);
+        $this->event->expects($this->any())->method('getOrder')->willReturn($this->order);
+        $this->order->expects($this->any())->method('getPayment')->willReturn($this->orderpaymentinterface);
+        $this->balancepayConfig->expects($this->any())->method('getIsAuth')->willReturn(1);
+        $this->orderpaymentinterface->expects($this->any())->method('getMethod')->willReturn('balancepay');
+        $this->orderpaymentinterface->expects($this->any())->method('getAdditionalInformation')->willReturn('string');
+        $this->order->expects($this->any())->method('getBaseGrandTotal')->willReturn(2.56);
+        $this->authorizeCommand->expects($this->any())->method('execute')->willReturn($this->phrase);
+        $this->orderpaymentinterface->expects($this->any())
+            ->method('setIsTransactionClosed')->willReturn($this->orderpaymentinterface);
+        $this->orderpaymentinterface->expects($this->any())
+            ->method('setTransactionId')->willReturn($this->orderpaymentinterface);
+        $this->orderpaymentinterface->expects($this->any())->method('addTransaction')->willReturn($this->transaction);
+        $this->orderpaymentinterface->expects($this->any())->method('prependMessage')->willReturn('string');
+        $this->orderpaymentinterface->expects($this->any())->method('addTransactionCommentsToOrder')
+            ->with($this->transaction, 'string')->willReturn($this->orderpaymentinterface);
+        $this->orderpaymentinterface->expects($this->any())->method('save')->willReturnSelf();
+        $this->order->expects($this->any())->method('save')->willReturnSelf();
+        $result = $this->testableObject->execute($this->observer);
+        $this->assertIsObject($result);
+    }
+
+    public function testExecuteGetBalanceMethodAuthException(): void
+    {
+        $this->observer->expects($this->any())->method('getEvent')->willThrowException(new \Exception());
+        $this->balancepayConfig->expects($this->any())->method('log')->willReturnSelf();
+    }
+
     protected function setUp(): void
     {
         $this->balancepayConfig = $this->getMockBuilder(Config::class)
@@ -172,82 +250,5 @@ class SubmitAllAfterTest extends TestCase
             'invoiceService' => $this->invoiceService,
             'transactionFactory' => $this->transactionFactory
         ]);
-    }
-
-    public function testExecuteOrderNull(): void
-    {
-        $this->observer->expects($this->any())->method('getEvent')->willReturn($this->event);
-        $this->event->expects($this->any())->method('getOrder')->willReturn(null);
-        $result = $this->testableObject->execute($this->observer);
-        $this->assertIsObject($result);
-    }
-
-    public function testExecuteIsNotBalancepayMethod(): void
-    {
-        $this->observer->expects($this->any())->method('getEvent')->willReturn($this->event);
-        $this->event->expects($this->any())->method('getOrder')->willReturn($this->order);
-        $this->order->expects($this->any())->method('getPayment')->willReturn($this->orderpaymentinterface);
-        $this->orderpaymentinterface->expects($this->any())->method('getMethod')->willReturn('string');
-        $result = $this->testableObject->execute($this->observer);
-        $this->assertIsObject($result);
-    }
-
-    public function testExecuteGetBalanceMethodNoAuth(): void
-    {
-        $this->observer->expects($this->any())->method('getEvent')->willReturn($this->event);
-        $this->event->expects($this->any())->method('getOrder')->willReturn($this->order);
-        $this->order->expects($this->any())->method('getPayment')->willReturn($this->orderpaymentinterface);
-        $this->balancepayConfig->expects($this->any())->method('getIsAuth')->willReturn(0);
-        $this->orderpaymentinterface->expects($this->any())->method('getMethod')->willReturn('balancepay');
-        $this->orderpaymentinterface->expects($this->any())->method('getAdditionalInformation')
-            ->with(BalancepayMethod::BALANCEPAY_CHECKOUT_TRANSACTION_ID)->willReturn('string');
-        $this->order->expects($this->any())->method('getBaseGrandTotal')->willReturn(2.56);
-        $this->captureCommand->expects($this->any())->method('execute')
-            ->with(
-                $this->orderpaymentinterface,
-                2.56,
-                $this->order
-            )->willReturn($this->phrase);
-        $this->orderpaymentinterface->expects($this->any())->method('setIsTransactionClosed')
-            ->with(0)->willReturn($this->orderpaymentinterface);
-        $this->orderpaymentinterface->expects($this->any())->method('setTransactionId')
-            ->with('string')->willReturn($this->orderpaymentinterface);
-        $this->orderpaymentinterface->expects($this->any())->method('addTransaction')->willReturn($this->transaction);
-        $this->orderpaymentinterface->expects($this->any())->method('prependMessage')->willReturn('string');
-        $this->orderpaymentinterface->expects($this->any())->method('addTransactionCommentsToOrder')
-            ->with($this->transaction, 'string')->willReturn($this->orderpaymentinterface);
-        $this->orderpaymentinterface->expects($this->any())->method('save')->willReturnSelf();
-        $this->order->expects($this->any())->method('save')->willReturnSelf();
-        $result = $this->testableObject->execute($this->observer);
-        $this->assertIsObject($result);
-    }
-
-    public function testExecuteGetBalanceMethodAuth(): void
-    {
-        $this->observer->expects($this->any())->method('getEvent')->willReturn($this->event);
-        $this->event->expects($this->any())->method('getOrder')->willReturn($this->order);
-        $this->order->expects($this->any())->method('getPayment')->willReturn($this->orderpaymentinterface);
-        $this->balancepayConfig->expects($this->any())->method('getIsAuth')->willReturn(1);
-        $this->orderpaymentinterface->expects($this->any())->method('getMethod')->willReturn('balancepay');
-        $this->orderpaymentinterface->expects($this->any())->method('getAdditionalInformation')->willReturn('string');
-        $this->order->expects($this->any())->method('getBaseGrandTotal')->willReturn(2.56);
-        $this->authorizeCommand->expects($this->any())->method('execute')->willReturn($this->phrase);
-        $this->orderpaymentinterface->expects($this->any())->method('setIsTransactionClosed')->willReturn($this->orderpaymentinterface);
-        $this->orderpaymentinterface->expects($this->any())->method('setTransactionId')->willReturn($this->orderpaymentinterface);
-        $this->orderpaymentinterface->expects($this->any())->method('addTransaction')->willReturn($this->transaction);
-        $this->orderpaymentinterface->expects($this->any())->method('prependMessage')->willReturn('string');
-        $this->orderpaymentinterface->expects($this->any())->method('addTransactionCommentsToOrder')
-            ->with($this->transaction, 'string')->willReturn($this->orderpaymentinterface);
-        $this->orderpaymentinterface->expects($this->any())->method('save')->willReturnSelf();
-        $this->order->expects($this->any())->method('save')->willReturnSelf();
-        $result = $this->testableObject->execute($this->observer);
-        $this->assertIsObject($result);
-    }
-
-    public function testExecuteGetBalanceMethodAuthException(): void
-    {
-        $this->observer->expects($this->any())->method('getEvent')->willThrowException(new \Exception());
-        $this->balancepayConfig->expects($this->any())->method('log')->willReturnSelf();
-        $this->expectException(LocalizedException::class);
     }
 }

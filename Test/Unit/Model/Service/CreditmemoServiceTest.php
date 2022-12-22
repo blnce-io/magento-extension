@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Balancepay\Balancepay\Test\Unit\Model\Service;
 
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -29,6 +30,20 @@ class CreditmemoServiceTest extends TestCase
      * @var object
      */
     private $testableObject;
+
+    /**
+     * @return void
+     */
+    public function testRefund()
+    {
+        $this->creditmemoInterface->expects($this->any())->method('setState')->willReturnSelf();
+        $this->creditmemoInterface->expects($this->any())->method('getInvoice')->willReturn($this->invoice);
+        $this->creditmemoInterface->expects($this->any())->method('getId')->willReturn(12);
+        $this->invoice->expects($this->any())->method('setIsUsedForRefund')->willReturnSelf();
+        $this->invoice->expects($this->any())->method('setBaseTotalRefunded')->willReturnSelf();
+        $this->expectException(LocalizedException::class);
+        $result = $this->testableObject->refund($this->creditmemoInterface, false);
+    }
 
     /**
      * This method is called before a test is executed
@@ -80,18 +95,4 @@ class CreditmemoServiceTest extends TestCase
             'eventManager' => $this->managerInterface
         ]);
     }
-
-    /**
-     * @return void
-     */
-    public function testRefund()
-    {
-        $this->creditmemoInterface->expects($this->any())->method('setState')->willReturnSelf();
-        $this->creditmemoInterface->expects($this->any())->method('getInvoice')->willReturn($this->invoice);
-        $this->creditmemoInterface->expects($this->any())->method('getId')->willReturn(12);
-        $this->invoice->expects($this->any())->method('setIsUsedForRefund')->willReturnSelf();
-        $this->invoice->expects($this->any())->method('setBaseTotalRefunded')->willReturnSelf();
-        $result = $this->testableObject->refund($this->creditmemoInterface, false);
-    }
-
 }

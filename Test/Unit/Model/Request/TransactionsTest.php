@@ -104,6 +104,35 @@ class TransactionsTest extends TestCase
      */
     private $balanceBuyer;
 
+    public function testSetTopic()
+    {
+        $result = $this->testableObject->setTopic('topic');
+        $this->assertEquals($this->testableObject, $result);
+    }
+
+    public function testGetRequestMethod()
+    {
+        $result = $this->testableObject->getRequestMethod();
+    }
+
+    public function testSetRequestMethod()
+    {
+        $result = $this->testableObject->setRequestMethod('requestmethod');
+        $this->assertEquals($this->testableObject, $result);
+    }
+
+    public function testGetTopic()
+    {
+        $result = $this->testableObject->getTopic();
+    }
+
+    public function testGetCustomerTermsOptions()
+    {
+        $this->customerRepositoryInterface->expects($this->any())
+            ->method('getById')->willReturn($this->customerInterface);
+        $result = $this->testableObject->getCustomerTermsOptions(3);
+    }
+
     protected function setUp(): void
     {
         $this->balancepayConfig = $this->getMockBuilder(Config::class)
@@ -175,33 +204,5 @@ class TransactionsTest extends TestCase
             'customerSession' => $this->session,
             'balanceBuyer' => $this->balanceBuyer
         ]);
-    }
-
-    public function testSetTopic()
-    {
-        $result = $this->testableObject->setTopic('topic');
-        $this->assertEquals($this->testableObject, $result);
-    }
-
-    public function testGetRequestMethod()
-    {
-        $result = $this->testableObject->getRequestMethod();
-    }
-
-    public function testSetRequestMethod()
-    {
-        $result = $this->testableObject->setRequestMethod('requestmethod');
-        $this->assertEquals($this->testableObject, $result);
-    }
-
-    public function testGetTopic()
-    {
-        $result = $this->testableObject->getTopic();
-    }
-
-    public function testGetCustomerTermsOptions()
-    {
-        $this->customerRepositoryInterface->expects($this->any())->method('getById')->willReturn($this->customerInterface);
-        $result = $this->testableObject->getCustomerTermsOptions(3);
     }
 }
