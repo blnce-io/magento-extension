@@ -157,7 +157,7 @@ class Order extends \Magento\Sales\Model\Order
             return false;
         }
 
-        if ($isAuth && $isFinanced && $isAnyChargePaid) {
+        if ($isAuth && $isAnyChargePaid) {
             return false;
         }
 
