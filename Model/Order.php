@@ -2,37 +2,90 @@
 
 namespace Balancepay\Balancepay\Model;
 
+use Magento\Catalog\Api\ProductRepositoryInterface;
+use Magento\Catalog\Model\Product\Visibility;
+use Magento\Directory\Model\CurrencyFactory;
 use Magento\Directory\Model\RegionFactory;
 use Magento\Directory\Model\ResourceModel\Region as RegionResource;
 use Magento\Framework\Api\AttributeValueFactory;
+use Magento\Framework\Api\ExtensionAttributesFactory;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ObjectManager;
+use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Locale\ResolverInterface;
+use Magento\Framework\Model\Context;
+use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
+use Magento\Framework\Registry;
+use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
+use Magento\Sales\Api\InvoiceManagementInterface;
 use Magento\Sales\Api\OrderItemRepositoryInterface;
 use Magento\Sales\Model\Order\ProductOption;
 use Balancepay\Balancepay\Model\Config;
 use Balancepay\Balancepay\Helper\Data as BalanceHelper;
+use Magento\Sales\Model\Order\Status\HistoryFactory;
+use Magento\Sales\Model\ResourceModel\Order\Item\CollectionFactory;
+use Magento\Store\Model\StoreManagerInterface;
 
 class Order extends \Magento\Sales\Model\Order
 {
+    /**
+     * Order constructor.
+     *
+     * @param Context $context
+     * @param Registry $registry
+     * @param ExtensionAttributesFactory $extensionFactory
+     * @param AttributeValueFactory $customAttributeFactory
+     * @param TimezoneInterface $timezone
+     * @param StoreManagerInterface $storeManager
+     * @param \Magento\Sales\Model\Order\Config $orderConfig
+     * @param ProductRepositoryInterface $productRepository
+     * @param CollectionFactory $orderItemCollectionFactory
+     * @param Visibility $productVisibility
+     * @param InvoiceManagementInterface $invoiceManagement
+     * @param CurrencyFactory $currencyFactory
+     * @param \Magento\Eav\Model\Config $eavConfig
+     * @param HistoryFactory $orderHistoryFactory
+     * @param \Magento\Sales\Model\ResourceModel\Order\Address\CollectionFactory $addressCollectionFactory
+     * @param \Magento\Sales\Model\ResourceModel\Order\Payment\CollectionFactory $paymentCollectionFactory
+     * @param \Magento\Sales\Model\ResourceModel\Order\Status\History\CollectionFactory $historyCollectionFactory
+     * @param \Magento\Sales\Model\ResourceModel\Order\Invoice\CollectionFactory $invoiceCollectionFactory
+     * @param \Magento\Sales\Model\ResourceModel\Order\Shipment\CollectionFactory $shipmentCollectionFactory
+     * @param \Magento\Sales\Model\ResourceModel\Order\Creditmemo\CollectionFactory $memoCollectionFactory
+     * @param \Magento\Sales\Model\ResourceModel\Order\Shipment\Track\CollectionFactory $trackCollectionFactory
+     * @param \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $salesOrderCollectionFactory
+     * @param PriceCurrencyInterface $priceCurrency
+     * @param \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $productListFactory
+     * @param AbstractResource|null $resource
+     * @param AbstractDb|null $resourceCollection
+     * @param \Balancepay\Balancepay\Model\Config $balancepayConfig
+     * @param BalanceHelper $balanceHelper
+     * @param array $data
+     * @param ResolverInterface|null $localeResolver
+     * @param ProductOption|null $productOption
+     * @param OrderItemRepositoryInterface|null $itemRepository
+     * @param SearchCriteriaBuilder|null $searchCriteriaBuilder
+     * @param ScopeConfigInterface|null $scopeConfig
+     * @param RegionFactory|null $regionFactory
+     * @param RegionResource|null $regionResource
+     */
     public function __construct(
-        \Magento\Framework\Model\Context $context,
-        \Magento\Framework\Registry $registry,
-        \Magento\Framework\Api\ExtensionAttributesFactory $extensionFactory,
+        Context $context,
+        Registry $registry,
+        ExtensionAttributesFactory $extensionFactory,
         AttributeValueFactory $customAttributeFactory,
-        \Magento\Framework\Stdlib\DateTime\TimezoneInterface $timezone,
-        \Magento\Store\Model\StoreManagerInterface $storeManager,
+        TimezoneInterface $timezone,
+        StoreManagerInterface $storeManager,
         \Magento\Sales\Model\Order\Config $orderConfig,
-        \Magento\Catalog\Api\ProductRepositoryInterface $productRepository,
-        \Magento\Sales\Model\ResourceModel\Order\Item\CollectionFactory $orderItemCollectionFactory,
-        \Magento\Catalog\Model\Product\Visibility $productVisibility,
-        \Magento\Sales\Api\InvoiceManagementInterface $invoiceManagement,
-        \Magento\Directory\Model\CurrencyFactory $currencyFactory,
+        ProductRepositoryInterface $productRepository,
+        CollectionFactory $orderItemCollectionFactory,
+        Visibility $productVisibility,
+        InvoiceManagementInterface $invoiceManagement,
+        CurrencyFactory $currencyFactory,
         \Magento\Eav\Model\Config $eavConfig,
-        \Magento\Sales\Model\Order\Status\HistoryFactory $orderHistoryFactory,
+        HistoryFactory $orderHistoryFactory,
         \Magento\Sales\Model\ResourceModel\Order\Address\CollectionFactory $addressCollectionFactory,
         \Magento\Sales\Model\ResourceModel\Order\Payment\CollectionFactory $paymentCollectionFactory,
         \Magento\Sales\Model\ResourceModel\Order\Status\History\CollectionFactory $historyCollectionFactory,
@@ -43,8 +96,8 @@ class Order extends \Magento\Sales\Model\Order
         \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $salesOrderCollectionFactory,
         PriceCurrencyInterface $priceCurrency,
         \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $productListFactory,
-        \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
-        \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
+        AbstractResource $resource = null,
+        AbstractDb $resourceCollection = null,
         Config $balancepayConfig,
         BalanceHelper $balanceHelper,
         array $data = [],
@@ -96,6 +149,14 @@ class Order extends \Magento\Sales\Model\Order
         );
     }
 
+    /**
+     * RegisterCancellation
+     *
+     * @param string $comment
+     * @param bool $graceful
+     * @return $this|Order
+     * @throws LocalizedException
+     */
     public function registerCancellation($comment = '', $graceful = true)
     {
         if ($this->canCancel() || $this->isPaymentReview() || $this->isFraudDetected()) {
@@ -191,5 +252,4 @@ class Order extends \Magento\Sales\Model\Order
 
         return true;
     }
-
 }

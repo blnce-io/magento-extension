@@ -22,8 +22,11 @@ class ChargedProcessor
     private $balancepayChargeFactory;
 
     /**
+     * ChargedProcessor constructor.
+     *
      * @param Config $balancepayConfig
      * @param BalancepayChargeFactory $balancepayChargeFactory
+     * @param ResourceConnection $resource
      */
     public function __construct(
         BalancepayConfig $balancepayConfig,

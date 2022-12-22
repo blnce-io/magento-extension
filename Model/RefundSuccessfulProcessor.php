@@ -22,11 +22,13 @@ class RefundSuccessfulProcessor
     private $balancepayChargeFactory;
 
     /**
-     * RefundCanceledProcessor constructor.
+     * RefundSuccessfulProcessor constructor.
      *
      * @param Config $balancepayConfig
      * @param BalancepayChargeFactory $balancepayChargeFactory
      * @param Collection $collection
+     * @param Creditmemo $creditmemo
+     * @param CreditmemoRepositoryInterface $creditmemoRepository
      */
     public function __construct(
         BalancepayConfig $balancepayConfig,
@@ -34,8 +36,7 @@ class RefundSuccessfulProcessor
         Collection $collection,
         Creditmemo $creditmemo,
         CreditmemoRepositoryInterface $creditmemoRepository
-    )
-    {
+    ) {
         $this->balancepayConfig = $balancepayConfig;
         $this->collection = $collection;
         $this->balancepayChargeFactory = $balancepayChargeFactory;
@@ -44,8 +45,10 @@ class RefundSuccessfulProcessor
     }
 
     /**
-     * @param $params
-     * @param $jobName
+     * ProcessSuccessfulWebhook
+     *
+     * @param int|string|mixed|array|null $params
+     * @param int|string|mixed|null $jobName
      */
     public function processSuccessfulWebhook($params, $jobName)
     {

@@ -49,25 +49,26 @@ class WebhookRequestProcessor
      * @var \Balancepay\Balancepay\Model\ConfirmedProcessor
      */
     protected $confirmedProcessor;
-
+    /**
+     * @var Hmac
+     */
+    protected $hmac;
     /**
      * @var \Balancepay\Balancepay\Model\QueueProcessor
      */
     private $queueProcessor;
 
     /**
-     * @var Hmac
-     */
-    protected $hmac;
-
-    /**
+     * WebhookRequestProcessor constructor.
+     *
      * @param OrderFactory $orderFactory
      * @param Config $balancepayConfig
      * @param JsonFactory $jsonResultFactory
      * @param ChargedProcessor $chargedProcessor
      * @param ConfirmedProcessor $confirmedProcessor
-     * @param QueueProcessor $queueProcessor
+     * @param \Balancepay\Balancepay\Model\QueueProcessor $queueProcessor
      * @param Json $json
+     * @param Hmac $hmac
      */
     public function __construct(
         OrderFactory $orderFactory,
@@ -132,10 +133,9 @@ class WebhookRequestProcessor
             $requiredKeys = ['externalReferenceId', 'isFinanced', 'selectedPaymentMethod'];
         } elseif ($webhookName == Charged::WEBHOOK_CHARGED_NAME) {
             $requiredKeys = ['externalReferenceId', 'chargeId', 'amount'];
-        }elseif (
-            $webhookName == RefundSuccessful::WEBHOOK_SUCCESSFUL_NAME ||
-            $webhookName == RefundCanceled::WEBHOOK_CANCELED_NAME ||
-            $webhookName == RefundFailed::WEBHOOK_FAILED_NAME
+        } elseif ($webhookName == RefundSuccessful::WEBHOOK_SUCCESSFUL_NAME
+            || $webhookName == RefundCanceled::WEBHOOK_CANCELED_NAME
+            || $webhookName == RefundFailed::WEBHOOK_FAILED_NAME
         ) {
             $requiredKeys = ['externalReferenceId', 'selectedPaymentMethod', 'status'];
         }

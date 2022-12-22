@@ -140,16 +140,3 @@ class DataTest extends TestCase
         $result = $this->testableObject->getBuyerAmount();
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

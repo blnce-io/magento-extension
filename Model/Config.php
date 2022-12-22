@@ -83,24 +83,23 @@ class Config
 
     /**
      * @method __construct
-     * @param  ScopeConfigInterface  $scopeConfig
-     * @param  ResourceConfig        $resourceConfig
-     * @param  StoreManagerInterface $storeManager
-     * @param  EncryptorInterface    $encryptor
-     * @param  LoggerInterface       $logger
-     * @param  UrlInterface          $urlBuilder
-     * @param  DateTime              $dateTime
+     * @param ScopeConfigInterface $scopeConfig
+     * @param ResourceConfig $resourceConfig
+     * @param StoreManagerInterface $storeManager
+     * @param EncryptorInterface $encryptor
+     * @param LoggerInterface $logger
+     * @param UrlInterface $urlBuilder
+     * @param DateTime $dateTime
      */
     public function __construct(
-        ScopeConfigInterface  $scopeConfig,
-        ResourceConfig        $resourceConfig,
+        ScopeConfigInterface $scopeConfig,
+        ResourceConfig $resourceConfig,
         StoreManagerInterface $storeManager,
-        EncryptorInterface    $encryptor,
-        LoggerInterface       $logger,
-        UrlInterface          $urlBuilder,
-        DateTime              $dateTime
-    )
-    {
+        EncryptorInterface $encryptor,
+        LoggerInterface $logger,
+        UrlInterface $urlBuilder,
+        DateTime $dateTime
+    ) {
         $this->scopeConfig = $scopeConfig;
         $this->resourceConfig = $resourceConfig;
         $this->storeManager = $storeManager;
@@ -108,16 +107,6 @@ class Config
         $this->logger = $logger;
         $this->urlBuilder = $urlBuilder;
         $this->dateTime = $dateTime;
-    }
-
-    /**
-     * Return config path.
-     *
-     * @return string
-     */
-    private function getConfigPath()
-    {
-        return sprintf('payment/%s/', BalancepayMethod::METHOD_CODE);
     }
 
     /**
@@ -134,6 +123,16 @@ class Config
             $scope,
             $storeId
         );
+    }
+
+    /**
+     * Return config path.
+     *
+     * @return string
+     */
+    private function getConfigPath()
+    {
+        return sprintf('payment/%s/', BalancepayMethod::METHOD_CODE);
     }
 
     /**
@@ -185,18 +184,15 @@ class Config
     }
 
     /**
-     * ResetStoreCredentials
+     * Is sandbox mode
      *
      * @param string $scope
      * @param int $storeId
-     * @return $this
+     * @return bool
      */
-    public function resetStoreCredentials($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
+    public function isSandboxMode($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
-        $this->resourceConfig->deleteConfig($this->getConfigPath() . 'active', $scope, $storeId);
-        $this->resourceConfig->deleteConfig($this->getConfigPath() .
-            ($this->isSandboxMode($scope, $storeId) ? 'sandbox_api_key' : 'api_key'), $scope, $storeId);
-        return $this;
+        return ($this->getConfigValue('mode', $scope, $storeId) === BalancepayMethod::MODE_LIVE) ? false : true;
     }
 
     /**
@@ -218,6 +214,42 @@ class Config
             $scope ?: ScopeInterface::SCOPE_STORE,
             ($storeId == null) ? $this->getCurrentStoreId() : $storeId
         );
+    }
+
+    /**
+     * IsSingleStoreMode
+     *
+     * @return bool
+     */
+    public function isSingleStoreMode()
+    {
+        return $this->storeManager->isSingleStoreMode();
+    }
+
+    /**
+     * GetCurrentStoreId
+     *
+     * @return int
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function getCurrentStoreId()
+    {
+        return $this->storeManager->getStore()->getId();
+    }
+
+    /**
+     * ResetStoreCredentials
+     *
+     * @param string $scope
+     * @param int $storeId
+     * @return $this
+     */
+    public function resetStoreCredentials($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
+    {
+        $this->resourceConfig->deleteConfig($this->getConfigPath() . 'active', $scope, $storeId);
+        $this->resourceConfig->deleteConfig($this->getConfigPath() .
+            ($this->isSandboxMode($scope, $storeId) ? 'sandbox_api_key' : 'api_key'), $scope, $storeId);
+        return $this;
     }
 
     /**
@@ -270,7 +302,7 @@ class Config
             return '';
         }
         return $this->storeManager->getStore()
-            ->getBaseUrl(UrlInterface::URL_TYPE_MEDIA) . 'balancepay/' . $logoImage;
+                ->getBaseUrl(UrlInterface::URL_TYPE_MEDIA) . 'balancepay/' . $logoImage;
     }
 
     /**
@@ -282,10 +314,52 @@ class Config
      */
     public function getApiKey($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
-        $configKey = $this->getConfigValue($this->resolveFromEnvironment(
-            'api_key', 'sandbox_api_key', self::CONFIG_KEY_DEV_API_KEY),
-            $scope, $storeId);
+        $configKey = $this->getConfigValue(
+            $this->resolveFromEnvironment(
+                'api_key',
+                'sandbox_api_key',
+                self::CONFIG_KEY_DEV_API_KEY
+            ),
+            $scope,
+            $storeId
+        );
         return (($val = $configKey)) ? $this->encryptor->decrypt($val) : null;
+    }
+
+    /**
+     * ResolveFromEnvironment
+     *
+     * @param string|int|mixed|array $liveValue
+     * @param string|int|mixed|array $sandboxValue
+     * @param string|int|mixed|array $devValue
+     * @param string $scope
+     * @param string|int|mixed|array $storeId
+     * @return mixed
+     */
+    private function resolveFromEnvironment(
+        $liveValue,
+        $sandboxValue,
+        $devValue,
+        $scope = ScopeInterface::SCOPE_STORE,
+        $storeId = null
+    ) {
+        if ($this->getUseDevEnv($scope, $storeId)) {
+            return $devValue;
+        }
+        return ($this->isSandboxMode($scope, $storeId)
+            ? $sandboxValue : $liveValue);
+    }
+
+    /**
+     * Whether to use development environment
+     *
+     * @param string $scope
+     * @param int $storeId
+     * @return bool
+     */
+    public function getUseDevEnv($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
+    {
+        return (bool)$this->getConfigValue(self::CONFIG_KEY_USE_DEV_ENV, $scope, $storeId);
     }
 
     /**
@@ -300,30 +374,6 @@ class Config
         return (($val = $this->getConfigValue(($this->isSandboxMode($scope, $storeId)
             ? 'sandbox_webhook_secret' : 'webhook_secret'), $scope, $storeId)))
             ? $this->encryptor->decrypt($val) : null;
-    }
-
-    /**
-     * Is sandbox mode
-     *
-     * @param string $scope
-     * @param int $storeId
-     * @return bool
-     */
-    public function isSandboxMode($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
-    {
-        return ($this->getConfigValue('mode', $scope, $storeId) === BalancepayMethod::MODE_LIVE) ? false : true;
-    }
-
-    /**
-     * Whether to use development environment
-     *
-     * @param string $scope
-     * @param int $storeId
-     * @return bool
-     */
-    public function getUseDevEnv($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
-    {
-        return (bool)$this->getConfigValue(self::CONFIG_KEY_USE_DEV_ENV, $scope, $storeId);
     }
 
     /**
@@ -353,16 +403,6 @@ class Config
     }
 
     /**
-     * Return bool value depends of that if payment method debug mode
-     *
-     * @return bool
-     */
-    public function isDebugEnabled()
-    {
-        return (bool)$this->getConfigValue('debug');
-    }
-
-    /**
      * GetBalanceSdkUrl
      *
      * @param string $scope
@@ -371,9 +411,11 @@ class Config
      */
     public function getBalanceSdkUrl($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
-        return $this->resolveFromEnvironment(self::BALANCEPAY_SDK_LIVE_URL,
+        return $this->resolveFromEnvironment(
+            self::BALANCEPAY_SDK_LIVE_URL,
             self::BALANCEPAY_SDK_SANDBOX_URL,
-            $this->getConfigValue(self::CONFIG_KEY_DEV_SDK_URL));
+            $this->getConfigValue(self::CONFIG_KEY_DEV_SDK_URL)
+        );
     }
 
     /**
@@ -386,9 +428,11 @@ class Config
      */
     public function getBalanceApiUrl($path = "", $scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
-        return $this->resolveFromEnvironment(self::BALANCEPAY_API_LIVE_URL,
+        return $this->resolveFromEnvironment(
+            self::BALANCEPAY_API_LIVE_URL,
             self::BALANCEPAY_API_SANDBOX_URL,
-            $this->getConfigValue(self::CONFIG_KEY_DEV_API_URL));
+            $this->getConfigValue(self::CONFIG_KEY_DEV_API_URL)
+        );
     }
 
     /**
@@ -400,9 +444,11 @@ class Config
      */
     public function getBalanceIframeUrl($scope = ScopeInterface::SCOPE_STORE, $storeId = null)
     {
-        return $this->resolveFromEnvironment(self::BALANCEPAY_IFRAME_LIVE_URL,
+        return $this->resolveFromEnvironment(
+            self::BALANCEPAY_IFRAME_LIVE_URL,
             self::BALANCEPAY_IFRAME_SANDBOX_URL,
-            $this->getConfigValue(self::CONFIG_KEY_DEV_IFRAME_URL));
+            $this->getConfigValue(self::CONFIG_KEY_DEV_IFRAME_URL)
+        );
     }
 
     /**
@@ -444,27 +490,6 @@ class Config
     public function getCurrentStore()
     {
         return $this->storeManager->getStore();
-    }
-
-    /**
-     * GetCurrentStoreId
-     *
-     * @return int
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     */
-    public function getCurrentStoreId()
-    {
-        return $this->storeManager->getStore()->getId();
-    }
-
-    /**
-     * IsSingleStoreMode
-     *
-     * @return bool
-     */
-    public function isSingleStoreMode()
-    {
-        return $this->storeManager->isSingleStoreMode();
     }
 
     /**
@@ -516,12 +541,13 @@ class Config
         return $this;
     }
 
-    private function resolveFromEnvironment($liveValue, $sandboxValue, $devValue, $scope = ScopeInterface::SCOPE_STORE, $storeId = null)
+    /**
+     * Return bool value depends of that if payment method debug mode
+     *
+     * @return bool
+     */
+    public function isDebugEnabled()
     {
-        if ($this->getUseDevEnv($scope, $storeId))
-            return $devValue;
-
-        return ($this->isSandboxMode($scope, $storeId)
-            ? $sandboxValue : $liveValue);
+        return (bool)$this->getConfigValue('debug');
     }
 }

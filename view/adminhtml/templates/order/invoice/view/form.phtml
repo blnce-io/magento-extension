@@ -11,16 +11,16 @@
 <?php $_invoice = $block->getInvoice() ?>
 <?php $_order = $_invoice->getOrder() ?>
 <?php
-    $viewModel = $block->getViewModel();
-    $enableCreditMemo = $viewModel->enableCreditMemo();
+$viewModel = $block->getViewModel();
+$enableCreditMemo = $viewModel->enableCreditMemo();
 ?>
 <?php if (!$enableCreditMemo): ?>
     <div id="system_messages" class="message-system">
         <div class="message-system-inner">
             <div class="message-system-short">
                 <div class="message message-warning">
-                    <?= __('Invoice cannot be refunded because it has not been paid yet.
-The order can be canceled from the Balance dashboard.'); ?></div>
+                    <?= $block->escapeHtml(__('Invoice cannot be refunded because it has not been paid yet.
+The order can be canceled from the Balance dashboard.')); ?></div>
             </div>
         </div>
     </div>
@@ -32,7 +32,10 @@ The order can be canceled from the Balance dashboard.'); ?></div>
         <span class="title"><?= $block->escapeHtml(__('Payment &amp; Shipping Method')) ?></span>
     </div>
     <div class="admin__page-section-content">
-        <div class="admin__page-section-item order-payment-method<?php if ($_order->getIsVirtual()) : ?> order-payment-method-virtual<?php endif; ?> admin__fieldset-wrapper">
+        <div
+            class="admin__page-section-item order-payment-method
+            <?php if ($_order->getIsVirtual()): ?> order-payment-method-virtual<?php endif; ?>
+            admin__fieldset-wrapper">
             <?php /*Billing Address */ ?>
             <div class="admin__page-section-item-title">
                 <span class="title"><?= $block->escapeHtml(__('Payment Information')) ?></span>
@@ -46,7 +49,7 @@ The order can be canceled from the Balance dashboard.'); ?></div>
             </div>
         </div>
 
-        <?php if (!$_order->getIsVirtual()) : ?>
+        <?php if (!$_order->getIsVirtual()): ?>
             <div class="admin__page-section-item order-shipping-address">
                 <?php /*Shipping Address */ ?>
                 <div class="admin__page-section-item-title">
@@ -59,22 +62,24 @@ The order can be canceled from the Balance dashboard.'); ?></div>
                     <div class="shipping-description-content">
                         <?= $block->escapeHtml(__('Total Shipping Charges')) ?>:
 
-                        <?php if ($this->helper(\Magento\Tax\Helper\Data::class)->displayShippingPriceIncludingTax()) : ?>
-                            <?php $_excl = $block->displayShippingPriceInclTax($_order); ?>
-                        <?php else : ?>
-                            <?php $_excl = $block->displayPriceAttribute('shipping_amount', false, ' '); ?>
-                        <?php endif; ?>
-                        <?php $_incl = $block->displayShippingPriceInclTax($_order); ?>
+                <?php if ($block->helper(\Magento\Tax\Helper\Data::class)->displayShippingPriceIncludingTax()): ?>
+                    <?php $_excl = $block->displayShippingPriceInclTax($_order); ?>
+                <?php else: ?>
+                    <?php $_excl = $block->displayPriceAttribute('shipping_amount', false, ' '); ?>
+                <?php endif; ?>
+                <?php $_incl = $block->displayShippingPriceInclTax($_order); ?>
 
-                        <?= /* @noEscape */ $_excl ?>
-                        <?php if ($this->helper(\Magento\Tax\Helper\Data::class)->displayShippingBothPrices() && $_incl != $_excl) : ?>
-                            (<?= $block->escapeHtml(__('Incl. Tax')) ?> <?= /* @noEscape */ $_incl ?>)
-                        <?php endif; ?>
-                        <div><?= $block->getChildHtml('shipment_tracking') ?></div>
+                <?= /* @noEscape */ $_excl ?>
+                <?php if ($block->helper(\Magento\Tax\Helper\Data::class)->displayShippingBothPrices() &&
+                    $_incl != $_excl): ?>
+                    (<?= $block->escapeHtml(__('Incl. Tax')) ?>
+                    <?= /* @noEscape */ $_incl ?>)
+                <?php endif; ?>
+                <div><?= $block->getChildHtml('shipment_tracking') ?></div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-        <?php endif; ?>
+                <?php endif; ?>
 
     </div>
 </section>

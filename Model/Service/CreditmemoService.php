@@ -24,10 +24,6 @@ use Magento\Sales\Model\Order\CreditmemoNotifier;
 use Magento\Sales\Model\Order\RefundAdapterInterface;
 use Magento\Sales\Model\Service\CreditmemoService as SalesCreditmemoService;
 
-/**
- * Class CreditmemoService
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
- */
 class CreditmemoService extends SalesCreditmemoService
 {
     /**
@@ -84,35 +80,6 @@ class CreditmemoService extends SalesCreditmemoService
      * @var InvoiceRepositoryInterface
      */
     private $invoiceRepository;
-
-    /**
-     * @param CreditmemoRepositoryInterface $creditmemoRepository
-     * @param CreditmemoCommentRepositoryInterface $creditmemoCommentRepository
-     * @param SearchCriteriaBuilder $searchCriteriaBuilder
-     * @param FilterBuilder $filterBuilder
-     * @param CreditmemoNotifier $creditmemoNotifier
-     * @param PriceCurrencyInterface $priceCurrency
-     * @param ManagerInterface $eventManager
-     */
-    public function __construct(
-        CreditmemoRepositoryInterface $creditmemoRepository,
-        CreditmemoCommentRepositoryInterface $creditmemoCommentRepository,
-        SearchCriteriaBuilder $searchCriteriaBuilder,
-        FilterBuilder $filterBuilder,
-        CreditmemoNotifier $creditmemoNotifier,
-        PriceCurrencyInterface $priceCurrency,
-        ManagerInterface $eventManager
-    ) {
-        parent::__construct(
-            $creditmemoRepository,
-            $creditmemoCommentRepository,
-            $searchCriteriaBuilder,
-            $filterBuilder,
-            $creditmemoNotifier,
-            $priceCurrency,
-            $eventManager
-        );
-    }
 
     /**
      * Prepare creditmemo to refund and save it.

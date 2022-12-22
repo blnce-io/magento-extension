@@ -52,7 +52,6 @@ class Webhooks extends AbstractRequest
         return $this->_topic;
     }
 
-
     /**
      * SetWebookAddress
      *

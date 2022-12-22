@@ -82,7 +82,6 @@ class Data extends AbstractHelper
 
     /**
      * Data constructor.
-     *
      * @param MpProductCollection $mpProductCollectionFactory
      * @param Context $appContext
      * @param Session $customerSession
@@ -90,6 +89,10 @@ class Data extends AbstractHelper
      * @param RequestFactory $requestFactory
      * @param BalancepayConfig $balancepayConfig
      * @param PricingHelper $pricingHelper
+     * @param InvoiceRepositoryInterface $invoiceRepository
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param Collection $collection
+     * @param OrderRepositoryInterface $orderRepositoryInterface
      */
     public function __construct(
         MpProductCollection $mpProductCollectionFactory,
@@ -229,7 +232,14 @@ class Data extends AbstractHelper
         return in_array($currentCustomerGroup, $allowedCustomerGroups);
     }
 
-    public function isAnyChargePaid($orderId) {
+    /**
+     * Is Any Charge Paid
+     *
+     * @param int $orderId
+     * @return bool
+     */
+    public function isAnyChargePaid($orderId)
+    {
         $anyChargePaid = false;
         $searchCriteria = $this->searchCriteriaBuilder->addFilter('order_id', $orderId)->create();
         try {
@@ -247,7 +257,7 @@ class Data extends AbstractHelper
                 }
             }
         } catch (\Exception $exception) {
-
+            return $anyChargePaid;
         }
         return $anyChargePaid;
     }

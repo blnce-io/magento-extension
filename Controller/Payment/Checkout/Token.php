@@ -71,6 +71,7 @@ class Token extends Action
      * @param CheckoutSession $checkoutSession
      * @param Session $customerSession
      * @param BalanceBuyer $balanceBuyer
+     * @param SessionManagerInterface $coreSession
      */
     public function __construct(
         Context $context,

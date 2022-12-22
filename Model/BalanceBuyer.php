@@ -86,9 +86,11 @@ class BalanceBuyer
     }
 
     /**
-     * Update Buyer Id
+     * UpdateCustomerBalanceBuyerId
      *
-     * @param mixed $buyerId
+     * @param int|string|mixed|null $buyerId
+     * @param int $customerId
+     * @throws \Exception
      */
     public function updateCustomerBalanceBuyerId($buyerId, $customerId = 0)
     {
