@@ -17,6 +17,7 @@ use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Balancepay\Balancepay\Model\Request\Buyers;
+
 class BuyersTest extends TestCase
 {
     /**
@@ -25,6 +26,28 @@ class BuyersTest extends TestCase
      * @var object
      */
     private $testableObject;
+
+    public function testSetTopic()
+    {
+        $result = $this->testableObject->setTopic('topic');
+        $this->assertEquals($this->testableObject, $result);
+    }
+
+    public function testSetRequestMethod()
+    {
+        $result = $this->testableObject->setRequestMethod('requestmethod');
+        $this->assertEquals($this->testableObject, $result);
+    }
+
+    public function testGetTopic()
+    {
+        $result = $this->testableObject->getTopic();
+    }
+
+    public function testGetRequestMethod()
+    {
+        $result = $this->testableObject->getRequestMethod();
+    }
 
     protected function setUp(): void
     {
@@ -68,31 +91,4 @@ class BuyersTest extends TestCase
             'address' => $this->address
         ]);
     }
-
-    public function testSetTopic()
-    {
-        $result = $this->testableObject->setTopic('topic');
-        $this->assertEquals($this->testableObject, $result);
-    }
-
-    public function testSetRequestMethod()
-    {
-        $result = $this->testableObject->setRequestMethod('requestmethod');
-        $this->assertEquals($this->testableObject, $result);
-    }
-
-    public function testGetTopic()
-    {
-        $result = $this->testableObject->getTopic();
-    }
-
-    public function testGetRequestMethod()
-    {
-        $result = $this->testableObject->getRequestMethod();
-    }
 }
-
-
-
-
-

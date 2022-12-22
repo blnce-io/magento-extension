@@ -6,6 +6,7 @@ namespace Balancepay\Balancepay\Test\Unit\Controller\Buyer;
 use Balancepay\Balancepay\Controller\Buyer\Qualify;
 use Balancepay\Balancepay\Model\BalanceBuyer;
 use Balancepay\Balancepay\Model\Config as BalancepayConfig;
+use Balancepay\Balancepay\Model\Request\Buyers;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Magento\Customer\Model\Customer;
 use Magento\Customer\Model\ResourceModel\CustomerFactory;
@@ -102,6 +103,10 @@ class QualifyTest extends TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
+        $this->buyers = $this->getMockBuilder(Buyers::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
         $this->requestFactory = $this->getMockBuilder(RequestFactory::class)
             ->disableOriginalConstructor()
             ->getMock();
@@ -167,8 +172,8 @@ class QualifyTest extends TestCase
         $this->customer->expects($this->any())->method('getId')->willReturn(44554);
         $this->requestFactory->expects($this->any())->method('create')->willReturn($this->requestInterface);
         $this->requestInterface->expects($this->any())->method('setRequestMethod')->willReturnSelf();
-        $this->requestInterface->expects($this->any())->method('setTopic')->willReturn('buyers');
-        $this->requestInterface->expects($this->any())->method('process')->willReturn($this->abstractResponse);
+        $this->requestInterface->expects($this->any())->method('setTopic')->willReturn($this->buyers);
+        $this->buyers->expects($this->any())->method('process')->willReturn(['id' => 12]);
         $this->balancepayConfig->expects($this->any())->method('log')->willReturnSelf();
         $this->customer->expects($this->any())->method('load')->willReturnSelf();
         $this->customer->expects($this->any())->method('getDataModel')->willReturn($this->customerInterface);

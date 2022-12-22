@@ -96,11 +96,46 @@ class SaveTest extends TestCase
      */
     private $localizedException;
 
+    public function testExecute(): void
+    {
+        $this->cacheTypeList->expects($this->any())->method('cleanType');
+        $this->appConfig->expects($this->any())->method('reinit')->willReturn($this->appConfig);
+        $this->observer->expects($this->any())->method('getEvent')->willReturn($this->event);
+        $this->event->expects($this->any())->method('getStore')->willReturn('balance');
+        $this->event->expects($this->any())->method('getWebsite')->willReturn('balancepay');
+        $this->balancepayConfig->expects($this->any())->method('getApiKey')->willReturn('string');
+        $this->appEmulation->expects($this->any())->method('stopEnvironmentEmulation')->willReturn($this->appEmulation);
+        $this->appEmulation->expects($this->any())->method('startEnvironmentEmulation');
+        $this->balancepayConfig->expects($this->any())
+            ->method('getStoreManager')->willReturn($this->storeManagerInterface);
+        $this->storeManagerInterface->expects($this->any())
+            ->method('getWebsite')->willReturn($this->websiteInterface);
+        $this->websiteInterface->expects($this->any())
+            ->method('getDefaultStore')->willReturn($this->store);
+        $this->store->expects($this->any())->method('getId')->willReturn(1);
+        $this->balancepayConfig->expects($this->any())->method('isActive')->willReturn(true);
+        $this->requestFactory->expects($this->any())->method('create')->willReturn($this->requestInterface);
+        $this->balancepayConfig->expects($this->any())->method('getBalanceApiUrl');
+        $this->requestInterface->expects($this->any())->method('setTopic')->willReturn($this->requestInterface);
+        $this->requestInterface->expects($this->any())->method('setWebookAddress')->willReturn($this->requestInterface);
+        $this->requestInterface->expects($this->any())->method('process')->willReturn($this->abstractResponse);
+        $this->messageManager->expects($this->any())->method('addSuccess')->willReturn($this->messageManager);
+        $this->balancepayConfig->expects($this->any())->method('updateBalancePayStatus');
+        $this->balancepayConfig->expects($this->any())->method('resetStoreCredentials')->willReturnSelf();
+        $result = $this->testableObject->execute($this->observer);
+        $this->assertIsObject($result);
+    }
+
     protected function setUp(): void
     {
         $this->balancepayConfig = $this->getMockBuilder(Config::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getApiKey', 'getStoreManager', 'isActive', 'getBalanceApiUrl', 'updateBalancePayStatus', 'resetStoreCredentials'])
+            ->onlyMethods(['getApiKey',
+                'getStoreManager',
+                'isActive',
+                'getBalanceApiUrl',
+                'updateBalancePayStatus',
+                'resetStoreCredentials'])
             ->getMockForAbstractClass();
 
         $this->appConfig = $this->getMockBuilder(ReinitableConfigInterface::class)
@@ -120,10 +155,9 @@ class SaveTest extends TestCase
             ->addMethods(['update'])
             ->getMock();
 
-
         $this->requestInterface = $this->getMockBuilder(RequestInterface::class)
             ->disableOriginalConstructor()
-            ->setMethods(['setTopic', 'setFallbackEmail'])
+            ->setMethods(['setTopic', 'setFallbackEmail', 'setWebookAddress'])
             ->getMockForAbstractClass();
 
         $this->storeManagerInterface = $this->getMockBuilder(StoreManagerInterface::class)
@@ -206,32 +240,4 @@ class SaveTest extends TestCase
             'appEmulation' => $this->appEmulation
         ]);
     }
-
-    public function testExecute(): void
-    {
-        $this->cacheTypeList->expects($this->any())->method('cleanType');
-        $this->appConfig->expects($this->any())->method('reinit')->willReturn($this->appConfig);
-        $this->observer->expects($this->any())->method('getEvent')->willReturn($this->event);
-        $this->event->expects($this->any())->method('getStore')->willReturn('balance');
-        $this->event->expects($this->any())->method('getWebsite')->willReturn('balancepay');
-        $this->balancepayConfig->expects($this->any())->method('getApiKey')->willReturn('string');
-        $this->appEmulation->expects($this->any())->method('stopEnvironmentEmulation')->willReturn($this->appEmulation);
-        $this->appEmulation->expects($this->any())->method('startEnvironmentEmulation');
-        $this->balancepayConfig->expects($this->any())->method('getStoreManager')->willReturn($this->storeManagerInterface);
-        $this->storeManagerInterface->expects($this->any())->method('getWebsite')->willReturn($this->websiteInterface);
-        $this->websiteInterface->expects($this->any())->method('getDefaultStore')->willReturn($this->store);
-        $this->store->expects($this->any())->method('getId')->willReturn(1);
-        $this->balancepayConfig->expects($this->any())->method('isActive')->willReturn(true);
-        $this->requestFactory->expects($this->any())->method('create')->willReturn($this->requestInterface);
-        $this->balancepayConfig->expects($this->any())->method('getBalanceApiUrl');
-        $this->requestInterface->expects($this->any())->method('setTopic')->willReturn('checkout/charged');
-        $this->webhooks->expects($this->any())->method('setWebookAddress')->willReturn($this->webhooks);
-        $this->requestInterface->expects($this->any())->method('process')->willReturn($this->abstractResponse);
-        $this->messageManager->expects($this->any())->method('addSuccess')->willReturn($this->messageManager);
-        $this->balancepayConfig->expects($this->any())->method('updateBalancePayStatus');
-        $this->balancepayConfig->expects($this->any())->method('resetStoreCredentials')->willReturnSelf();
-        $result = $this->testableObject->execute($this->observer);
-        $this->assertIsObject($result);
-    }
-
 }

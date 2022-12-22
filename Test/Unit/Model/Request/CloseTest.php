@@ -4,9 +4,10 @@ declare(strict_types=1);
 namespace Balancepay\Balancepay\Test\Unit\Model\Request;
 
 use Balancepay\Balancepay\Helper\Data as HelperData;
-use Balancepay\Balancepay\Model\Request\Close;
+use Balancepay\Balancepay\Model\Request\Transactions\Close;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
+use Magento\Sales\Model\Order\Payment as OrderPayment;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Balancepay\Balancepay\Model\Config;
@@ -138,6 +139,9 @@ class CloseTest extends TestCase
             ->getMock();
 
         $this->cartTotalRepository = $this->getMockBuilder(CartTotalRepository::class)
+            ->disableOriginalConstructor()->getMock();
+
+        $this->orderPayment = $this->getMockBuilder(OrderPayment::class)
             ->disableOriginalConstructor()->getMock();
 
         $this->product = $this->getMockBuilder(Product::class)

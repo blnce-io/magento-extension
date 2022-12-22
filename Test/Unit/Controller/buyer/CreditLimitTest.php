@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+
 namespace Balancepay\Balancepay\Test\Unit\Controller\Buyer;
 
 use Balancepay\Balancepay\Controller\Buyer\CreditLimit;
@@ -11,6 +12,13 @@ use Magento\Framework\Controller\Result\Json;
 
 class CreditLimitTest extends TestCase
 {
+    public function testExecute()
+    {
+        $this->resultJsonFactory->expects($this->any())->method('create')->willReturn($this->json);
+        $this->json->expects($this->any())->method('setData')->willReturn($this->json);
+        $result = $this->testableObject->execute();
+    }
+
     protected function setUp(): void
     {
         $this->context = $this->getMockBuilder(Context::class)
@@ -31,20 +39,4 @@ class CreditLimitTest extends TestCase
             'resultJsonFactory' => $this->resultJsonFactory
         ]);
     }
-
-    public function testExecute()
-    {
-        $this->resultJsonFactory->expects($this->any())->method('create')->willReturn($this->json);
-        $this->json->expects($this->any())->method('setData')->willReturn($this->json);
-        $result = $this->testableObject->execute();
-    }
 }
-
-
-
-
-
-
-
-
-

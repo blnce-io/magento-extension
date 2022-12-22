@@ -12,6 +12,11 @@ use Balancepay\Balancepay\Model\ResourceModel\BalancepayCharge\Collection;
 
 class InfoTest extends TestCase
 {
+    public function testGetSpecificInformation()
+    {
+        $result = $this->testableObject->getSpecificInformation();
+    }
+
     protected function setUp(): void
     {
         $this->context = $this->getMockBuilder(Context::class)
@@ -34,18 +39,4 @@ class InfoTest extends TestCase
             'data' => []
         ]);
     }
-
-    public function testGetSpecificInformation()
-    {
-        $result = $this->testableObject->getSpecificInformation();
-    }
 }
-
-
-
-
-
-
-
-
-

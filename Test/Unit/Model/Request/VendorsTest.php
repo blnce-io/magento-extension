@@ -21,6 +21,7 @@ use Magento\Quote\Model\Cart\CartTotalRepository;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Balancepay\Balancepay\Model\Request\Buyers;
+
 class VendorsTest extends TestCase
 {
     /**
@@ -33,6 +34,28 @@ class VendorsTest extends TestCase
      * @var CartTotalRepository|MockObject
      */
     private $cartTotalRepository;
+
+    public function testSetTopic()
+    {
+        $result = $this->testableObject->setTopic('topic');
+        $this->assertEquals($this->testableObject, $result);
+    }
+
+    public function testSetRequestMethod()
+    {
+        $result = $this->testableObject->setRequestMethod('requestmethod');
+        $this->assertEquals($this->testableObject, $result);
+    }
+
+    public function testGetTopic()
+    {
+        $result = $this->testableObject->getTopic();
+    }
+
+    public function testGetRequestMethod()
+    {
+        $result = $this->testableObject->getRequestMethod();
+    }
 
     protected function setUp(): void
     {
@@ -63,31 +86,4 @@ class VendorsTest extends TestCase
         $objectManager = new ObjectManager($this);
         $this->testableObject = $objectManager->getObject(Vendors::class);
     }
-
-    public function testSetTopic()
-    {
-        $result = $this->testableObject->setTopic('topic');
-        $this->assertEquals($this->testableObject, $result);
-    }
-
-    public function testSetRequestMethod()
-    {
-        $result = $this->testableObject->setRequestMethod('requestmethod');
-        $this->assertEquals($this->testableObject, $result);
-    }
-
-    public function testGetTopic()
-    {
-        $result = $this->testableObject->getTopic();
-    }
-
-    public function testGetRequestMethod()
-    {
-        $result = $this->testableObject->getRequestMethod();
-    }
 }
-
-
-
-
-

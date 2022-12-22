@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+
 namespace Balancepay\Balancepay\Test\Unit\Controller\Payment\Checkout;
 
 use Balancepay\Balancepay\Model\BalanceBuyer;
@@ -23,91 +24,6 @@ use Magento\Framework\Controller\Result\Json;
 
 class TokenTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        $this->context = $this->getMockBuilder(Context::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->jsonResultFactory = $this->getMockBuilder(JsonFactory::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->balancepayConfig = $this->getMockBuilder(BalancepayConfig::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->requestFactory = $this->getMockBuilder(RequestFactory::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->checkoutSession = $this->getMockBuilder(CheckoutSession::class)
-            ->disableOriginalConstructor()
-            ->setMethods(['setBalanceCustomerEmail', 'unsBalanceCheckoutToken', 'setBalanceCheckoutToken', 'setBalanceCheckoutTransactionId'])
-            ->getMock();
-
-        $this->customerSession = $this->getMockBuilder(Session::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->balanceBuyer = $this->getMockBuilder(BalanceBuyer::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->resultFactory = $this->getMockBuilder(ResultFactory::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-
-        $this->coreSession = $this->getMockBuilder(SessionManagerInterface::class)
-            ->disableOriginalConstructor()
-            ->setMethods(['setBalanceBuyerId'])
-            ->getMockForAbstractClass();
-
-        $this->resultInterface = $this->getMockBuilder(ResultInterface::class)
-            ->disableOriginalConstructor()
-            ->setMethods(['forward'])
-            ->getMockForAbstractClass();
-
-        $this->requestInterface = $this->getMockBuilder(RequestInterface::class)
-            ->disableOriginalConstructor()
-            ->setMethods(['setRequestMethod', 'setFallbackEmail', 'getParams'])
-            ->getMockForAbstractClass();
-
-        $this->abstractResponse = $this->getMockBuilder(AbstractResponse::class)
-            ->disableOriginalConstructor()
-            ->setMethods(['getToken', 'getTransactionId', 'getBuyerId'])
-            ->getMockForAbstractClass();
-
-        $this->forward = $this->getMockBuilder(Forward::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->json = $this->getMockBuilder(Json::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-
-        $this->context->expects($this->any())->method('getRequest')
-            ->willReturn($this->requestInterface);
-
-        $this->context->expects($this->any())->method('getResultFactory')
-            ->willReturn($this->resultFactory);
-
-
-        $objectManager = new ObjectManager($this);
-        $this->testableObject = $objectManager->getObject(Token::class, [
-            'context' => $this->context,
-            'jsonResultFactory' => $this->jsonResultFactory,
-            'balancepayConfig' => $this->balancepayConfig,
-            'requestFactory' => $this->requestFactory,
-            'checkoutSession' => $this->checkoutSession,
-            'customerSession' => $this->customerSession,
-            'balanceBuyer' => $this->balanceBuyer,
-            'coreSession' => $this->coreSession
-        ]);
-    }
-
     public function testExecute()
     {
         $this->balancepayConfig->expects($this->any())->method('isActive')->willReturn(true);
@@ -116,7 +32,7 @@ class TokenTest extends TestCase
         $this->balancepayConfig->expects($this->any())->method('isActive')->willReturn(true);
         $this->checkoutSession->expects($this->any())->method('setBalanceCustomerEmail')->willReturnSelf();
         $this->checkoutSession->expects($this->any())->method('unsBalanceCheckoutToken')->willReturnSelf();
-        $this->requestInterface->expects($this->any())->method('getParams')->willReturn(['email'=>'test@test.com']);
+        $this->requestInterface->expects($this->any())->method('getParams')->willReturn(['email' => 'test@test.com']);
         $this->requestFactory->expects($this->any())->method('create')->willReturn($this->requestInterface);
         $this->requestInterface->expects($this->any())->method('setRequestMethod')->willReturnSelf();
         $this->requestInterface->expects($this->any())->method('setFallbackEmail')->willReturnSelf();
@@ -141,7 +57,7 @@ class TokenTest extends TestCase
         $this->balancepayConfig->expects($this->any())->method('isActive')->willReturn(true);
         $this->checkoutSession->expects($this->any())->method('setBalanceCustomerEmail')->willReturnSelf();
         $this->checkoutSession->expects($this->any())->method('unsBalanceCheckoutToken')->willReturnSelf();
-        $this->requestInterface->expects($this->any())->method('getParams')->willReturn(['email'=>'test@test.com']);
+        $this->requestInterface->expects($this->any())->method('getParams')->willReturn(['email' => 'test@test.com']);
         $this->requestFactory->expects($this->any())->method('create')->willReturn($this->requestInterface);
         $this->requestInterface->expects($this->any())->method('setRequestMethod')->willReturnSelf();
         $this->requestInterface->expects($this->any())->method('setFallbackEmail')->willReturnSelf();
@@ -185,13 +101,90 @@ class TokenTest extends TestCase
         $this->json->expects($this->any())->method('setData')->willReturnSelf();
         $result = $this->testableObject->execute();
     }
+
+    protected function setUp(): void
+    {
+        $this->context = $this->getMockBuilder(Context::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->jsonResultFactory = $this->getMockBuilder(JsonFactory::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->balancepayConfig = $this->getMockBuilder(BalancepayConfig::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->requestFactory = $this->getMockBuilder(RequestFactory::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->checkoutSession = $this->getMockBuilder(CheckoutSession::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['setBalanceCustomerEmail',
+                'unsBalanceCheckoutToken',
+                'setBalanceCheckoutToken',
+                'setBalanceCheckoutTransactionId'
+            ])
+            ->getMock();
+
+        $this->customerSession = $this->getMockBuilder(Session::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->balanceBuyer = $this->getMockBuilder(BalanceBuyer::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->resultFactory = $this->getMockBuilder(ResultFactory::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->coreSession = $this->getMockBuilder(SessionManagerInterface::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['setBalanceBuyerId'])
+            ->getMockForAbstractClass();
+
+        $this->resultInterface = $this->getMockBuilder(ResultInterface::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['forward'])
+            ->getMockForAbstractClass();
+
+        $this->requestInterface = $this->getMockBuilder(RequestInterface::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['setRequestMethod', 'setFallbackEmail', 'getParams'])
+            ->getMockForAbstractClass();
+
+        $this->abstractResponse = $this->getMockBuilder(AbstractResponse::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['getToken', 'getTransactionId', 'getBuyerId'])
+            ->getMockForAbstractClass();
+
+        $this->forward = $this->getMockBuilder(Forward::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->json = $this->getMockBuilder(Json::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->context->expects($this->any())->method('getRequest')
+            ->willReturn($this->requestInterface);
+
+        $this->context->expects($this->any())->method('getResultFactory')
+            ->willReturn($this->resultFactory);
+
+        $objectManager = new ObjectManager($this);
+        $this->testableObject = $objectManager->getObject(Token::class, [
+            'context' => $this->context,
+            'jsonResultFactory' => $this->jsonResultFactory,
+            'balancepayConfig' => $this->balancepayConfig,
+            'requestFactory' => $this->requestFactory,
+            'checkoutSession' => $this->checkoutSession,
+            'customerSession' => $this->customerSession,
+            'balanceBuyer' => $this->balanceBuyer,
+            'coreSession' => $this->coreSession
+        ]);
+    }
 }
-
-
-
-
-
-
-
-
-

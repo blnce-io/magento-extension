@@ -32,6 +32,49 @@ use PHPUnit\Framework\TestCase;
 
 class ConfirmedTest extends TestCase
 {
+    /**
+     * Object for test
+     *
+     * @var object
+     */
+    private $testableObject;
+
+    public function testExecute(): void
+    {
+        $this->request->expects($this->any())->method('getContent')->willReturn('string');
+        $this->request->expects($this->any())->method('getHeaders')->willReturn($this->headers);
+        $this->headers->expects($this->any())
+            ->method('toArray')
+            ->willReturn(['X-Blnce-Signature' => 'balancesignature']);
+        $this->balancepayConfig->expects($this->any())->method('isActive')->willReturn(true);
+        $this->requestFactory->expects($this->any())->method('create')->willReturn($this->resultInterface);
+        $this->json->expects($this->any())->method('unserialize')->willReturn([]);
+        $this->json->expects($this->any())->method('serialize')->willReturn([]);
+        $this->balancepayConfig->expects($this->any())->method('getWebhookSecret')->willReturn('webhooksecretstring');
+        $this->resultJson->expects($this->any())->method('setHttpResponseCode')->willReturn($this->abstractResult);
+        $this->queueFactory->expects($this->any())->method('create')->willReturn($this->queue);
+        $this->queue->expects($this->any())->method('setData')->willReturn($this->queue);
+        $result = $this->testableObject->execute();
+    }
+
+    public function testExecuteNotActive(): void
+    {
+        $this->balancepayConfig->expects($this->any())->method('isActive')->willReturn(false);
+        $this->resultFactory->expects($this->any())->method('create')->willReturn($this->resultInterface);
+        $this->resultInterface->expects($this->any())->method('forward')->willReturnSelf();
+        $result = $this->testableObject->execute();
+    }
+
+    public function testCreateCsrfValidationException()
+    {
+        $result = $this->testableObject->createCsrfValidationException($this->requestInterface);
+    }
+
+    public function testValidateForCsrf()
+    {
+        $result = $this->testableObject->validateForCsrf($this->requestInterface);
+    }
+
     protected function setUp(): void
     {
         $context = $this->createMock(Context::class);
@@ -172,47 +215,5 @@ class ConfirmedTest extends TestCase
             ->disableOriginalConstructor()
             ->addMethods([])
             ->getMockForAbstractClass();
-
-    }
-
-    /**
-     * Object for test
-     *
-     * @var object
-     */
-    private $testableObject;
-
-    public function testExecute(): void
-    {
-        $this->request->expects($this->any())->method('getContent')->willReturn('string');
-        $this->request->expects($this->any())->method('getHeaders')->willReturn($this->headers);
-        $this->headers->expects($this->any())->method('toArray')->willReturn(['X-Blnce-Signature'=>'balancesignature']);
-        $this->balancepayConfig->expects($this->any())->method('isActive')->willReturn(true);
-        $this->requestFactory->expects($this->any())->method('create')->willReturn($this->resultInterface);
-        $this->json->expects($this->any())->method('unserialize')->willReturn([]);
-        $this->json->expects($this->any())->method('serialize')->willReturn([]);
-        $this->balancepayConfig->expects($this->any())->method('getWebhookSecret')->willReturn('webhooksecretstring');
-        $this->resultJson->expects($this->any())->method('setHttpResponseCode')->willReturn($this->abstractResult);
-        $this->queueFactory->expects($this->any())->method('create')->willReturn($this->queue);
-        $this->queue->expects($this->any())->method('setData')->willReturn($this->queue);
-        $result = $this->testableObject->execute();
-    }
-
-    public function testExecuteNotActive(): void
-    {
-        $this->balancepayConfig->expects($this->any())->method('isActive')->willReturn(false);
-        $this->resultFactory->expects($this->any())->method('create')->willReturn($this->resultInterface);
-        $this->resultInterface->expects($this->any())->method('forward')->willReturnSelf();
-        $result = $this->testableObject->execute();
-    }
-
-    public function testCreateCsrfValidationException()
-    {
-        $result = $this->testableObject->createCsrfValidationException($this->requestInterface);
-    }
-
-    public function testValidateForCsrf()
-    {
-        $result = $this->testableObject->validateForCsrf($this->requestInterface);
     }
 }
