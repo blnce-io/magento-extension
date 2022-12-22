@@ -10,7 +10,7 @@ use Magento\Sales\Model\ConfigInterface;
 use Balancepay\Balancepay\Model\Config;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Sales\Api\InvoiceRepositoryInterface;
-use Balancepay\Balancepay\Model\ResourceModel\BalancepayCharge\Collection;
+use Balancepay\Balancepay\Helper\Data as BalanceHelper;
 
 /**
  * Adminhtml sales order view
@@ -65,7 +65,7 @@ class View extends \Magento\Sales\Block\Adminhtml\Order\View
         Config $balancepayConfig,
         InvoiceRepositoryInterface $invoiceRepository,
         SearchCriteriaBuilder $searchCriteriaBuilder,
-        Collection $collection,
+        BalanceHelper $balanceHelper,
         array $data = []
     ) {
         $this->_reorderHelper = $reorderHelper;
@@ -74,7 +74,7 @@ class View extends \Magento\Sales\Block\Adminhtml\Order\View
         $this->balancepayConfig = $balancepayConfig;
         $this->invoiceRepository = $invoiceRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-        $this->collection = $collection;
+        $this->balanceHelper = $balanceHelper;
         parent::__construct($context, $registry, $salesConfig, $reorderHelper, $data);
     }
 
@@ -163,26 +163,9 @@ class View extends \Magento\Sales\Block\Adminhtml\Order\View
                     ['label' => __('Offline Credit Memo'), 'onclick' => $onClick, 'class' => 'credit-memo']
                 );
             }
-            $invoiceRecordsCount = 0;
-            $anyChargePaid = false;
-            $searchCriteria = $this->searchCriteriaBuilder->addFilter('order_id', $order->getId())->create();
-            try {
-                $invoices = $this->invoiceRepository->getList($searchCriteria);
-                $invoiceRecords = $invoices->getItems();
-                $invoiceRecordsCount = count($invoiceRecords);
-                if ($order->getPayment()->getAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_AUTH_CHECKOUT)) {
-                    foreach ($invoiceRecords as $invoice) {
-                        if ($this->collection->getChargeAndStatus($invoice->getEntityId())) {
-                            $anyChargePaid = true;
-                            break;
-                        }
-                    }
-                }
-            } catch (\Exception $exception) {
 
-            }
-
-            if ($this->balancepayConfig->isActive() && $invoiceRecordsCount && $anyChargePaid) {
+            $isAnyChargePaid = $this->balanceHelper->isAnyChargePaid($order->getId());
+            if ($this->balancepayConfig->isActive() && $isAnyChargePaid) {
                 $onclickJsRefund = 'jQuery("#sales_order_view_tabs").tabs("option", "active", 1 );';
                 $this->addButton(
                     'order_creditmemo_refund',

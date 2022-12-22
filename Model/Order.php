@@ -14,6 +14,7 @@ use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Sales\Api\OrderItemRepositoryInterface;
 use Magento\Sales\Model\Order\ProductOption;
 use Balancepay\Balancepay\Model\Config;
+use Balancepay\Balancepay\Helper\Data as BalanceHelper;
 
 class Order extends \Magento\Sales\Model\Order
 {
@@ -45,6 +46,7 @@ class Order extends \Magento\Sales\Model\Order
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         Config $balancepayConfig,
+        BalanceHelper $balanceHelper,
         array $data = [],
         ResolverInterface $localeResolver = null,
         ProductOption $productOption = null,
@@ -55,6 +57,7 @@ class Order extends \Magento\Sales\Model\Order
         RegionResource $regionResource = null
     ) {
         $this->balancepayConfig = $balancepayConfig;
+        $this->balanceHelper = $balanceHelper;
         parent::__construct(
             $context,
             $registry,
@@ -148,8 +151,13 @@ class Order extends \Magento\Sales\Model\Order
     {
         $isFinanced = $this->getPayment()->getAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_FINANCED);
         $isAuth = $this->getPayment()->getAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_AUTH_CHECKOUT);
+        $isAnyChargePaid = $this->balanceHelper->isAnyChargePaid($this->getEntityId());
 
         if (!$isAuth && !$isFinanced) {
+            return false;
+        }
+
+        if ($isAuth && $isAnyChargePaid) {
             return false;
         }
 
