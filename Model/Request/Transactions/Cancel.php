@@ -51,7 +51,9 @@ class Cancel extends AbstractRequest
     }
 
     /**
-     * @param $transactionId
+     * SetTransactionId
+     *
+     * @param int|string|null|mixed $transactionId
      * @return $this
      */
     public function setTransactionId($transactionId)
@@ -61,6 +63,8 @@ class Cancel extends AbstractRequest
     }
 
     /**
+     * GetTransactionId
+     *
      * @return mixed
      */
     public function getTransactionId()

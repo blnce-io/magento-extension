@@ -151,7 +151,6 @@ class QualifyTest extends TestCase
         $this->context->expects($this->any())->method('getResultFactory')
             ->willReturn($this->resultFactory);
 
-
         $objectManager = new ObjectManager($this);
         $this->testableObject = $objectManager->getObject(Qualify::class, [
             'context' => $this->context,
@@ -183,12 +182,3 @@ class QualifyTest extends TestCase
         $result = $this->testableObject->execute();
     }
 }
-
-
-
-
-
-
-
-
-

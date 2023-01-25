@@ -12,16 +12,16 @@ class Cancel extends AbstractResponse
 {
 
     /**
+     * Process
+     *
      * @return array|Cancel
      * @throws \Magento\Framework\Exception\PaymentException
      */
     public function process()
     {
         parent::process();
-
         return $this->getBody();
     }
-
 
     /**
      * Determine if request succeed or failed.

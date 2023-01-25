@@ -110,7 +110,7 @@ class SubmitAllAfter implements ObserverInterface
                     $order
                 );
                 $transactionType = Transaction::TYPE_AUTH;
-            } else if ($transactionId && !$isAuth) {
+            } elseif ($transactionId && !$isAuth) {
                 $message = $this->captureCommand->execute(
                     $orderPayment,
                     $order->getBaseGrandTotal(),

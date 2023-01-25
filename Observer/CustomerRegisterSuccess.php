@@ -1,4 +1,5 @@
 <?php
+
 namespace Balancepay\Balancepay\Observer;
 
 use Magento\Framework\Event\Observer;
@@ -25,6 +26,13 @@ class CustomerRegisterSuccess implements ObserverInterface
      */
     protected $balancepayConfig;
 
+    /**
+     * CustomerRegisterSuccess constructor.
+     *
+     * @param SessionManagerInterface $coreSession
+     * @param BalanceBuyer $balanceBuyer
+     * @param Config $balancepayConfig
+     */
     public function __construct(
         SessionManagerInterface $coreSession,
         BalanceBuyer $balanceBuyer,
@@ -35,6 +43,12 @@ class CustomerRegisterSuccess implements ObserverInterface
         $this->balancepayConfig = $balancepayConfig;
     }
 
+    /**
+     * Execute
+     *
+     * @param Observer $observer
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
     public function execute(Observer $observer)
     {
         try {

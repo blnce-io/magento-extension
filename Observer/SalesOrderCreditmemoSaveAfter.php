@@ -74,11 +74,13 @@ class SalesOrderCreditmemoSaveAfter implements ObserverInterface
             $reason = $comment->getComment();
             break;
         }
-        $message = "We cannot automatically initiate a refund on Balance as this is a offline refund request. Please initiate a refund directly from the Balance dashboard.";
+        $message = "We cannot automatically initiate a refund on Balance as this is a offline refund request.
+        Please initiate a refund directly from the Balance dashboard.";
         if ($invoiceId) {
             $chargeId = $this->collection->addFieldToFilter('invoice_id', ['eq' => $invoiceId])
                 ->getFirstItem()->getChargeId();
-            $message = "We cannot automatically initiate a refund for this invoice.  Please initiate a refund directly from the Balance dashboard.";
+            $message = "We cannot automatically initiate a refund for this invoice.
+            Please initiate a refund directly from the Balance dashboard.";
             if ($chargeId) {
                 $response = $this->requestFactory
                     ->create(RequestFactory::REFUND_REQUEST_METHOD)

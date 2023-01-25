@@ -18,7 +18,7 @@ use Magento\Payment\Model\CcConfig;
 use Magento\Payment\Model\CcGenericConfigProvider;
 use Magento\Payment\Model\MethodInterface;
 
-class   ConfigProviderTest extends TestCase
+class ConfigProviderTest extends TestCase
 {
     /**
      * @var object

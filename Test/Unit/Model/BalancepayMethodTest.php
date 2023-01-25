@@ -197,14 +197,17 @@ class BalancepayMethodTest extends TestCase
 
     public function testOrder()
     {
-        $this->infoInterface->expects($this->any())->method('setAdditionalInformation')->willReturn($this->infoInterface);
-        $this->infoInterface->expects($this->any())->method('setIsTransactionPending')->willReturn($this->infoInterface);
+        $this->infoInterface->expects($this->any())->method('setAdditionalInformation')
+            ->willReturn($this->infoInterface);
+        $this->infoInterface->expects($this->any())->method('setIsTransactionPending')
+            ->willReturn($this->infoInterface);
         $result = $this->testableObject->order($this->infoInterface, 4);
     }
 
     public function testAuthorize()
     {
-        $this->infoInterface->expects($this->any())->method('setAdditionalInformation')->willReturn($this->infoInterface);
+        $this->infoInterface->expects($this->any())->method('setAdditionalInformation')
+            ->willReturn($this->infoInterface);
         $result = $this->testableObject->authorize($this->infoInterface, 4);
     }
 

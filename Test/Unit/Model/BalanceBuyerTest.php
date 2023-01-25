@@ -101,7 +101,8 @@ class BalanceBuyerTest extends TestCase
     {
         $this->session->expects($this->any())->method('getCustomer')->willReturn($this->customer);
         $this->customer->expects($this->any())->method('getId')->willReturn(5);
-        $this->customerRepositoryInterface->expects($this->any())->method('getById')->willReturn($this->customerInterface);
+        $this->customerRepositoryInterface->expects($this->any())->method('getById')
+            ->willReturn($this->customerInterface);
         $this->customerInterface->expects($this->any())->method('__toArray')->willReturn([
             'custom_attributes' => [
                 'buyer_id' => [
@@ -121,16 +122,3 @@ class BalanceBuyerTest extends TestCase
         $this->assertNull($result);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

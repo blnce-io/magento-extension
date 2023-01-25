@@ -1,4 +1,5 @@
 <?php
+
 namespace Balancepay\Balancepay\Plugin\Sales\Model;
 
 use Magento\Sales\Model\Order;
@@ -12,6 +13,12 @@ class OrderPlugin
      */
     private $collection;
 
+    /**
+     * OrderPlugin constructor.
+     *
+     * @param Collection $collection
+     * @param RequestInterface $request
+     */
     public function __construct(
         Collection $collection,
         RequestInterface $request
@@ -19,12 +26,20 @@ class OrderPlugin
         $this->collection = $collection;
         $this->request = $request;
     }
+
+    /**
+     * AfterCanCreditmemo
+     *
+     * @param Order $subject
+     * @param mixed|array|string|null $result
+     * @return bool
+     */
     public function afterCanCreditmemo(
         Order $subject,
         $result
     ) {
         $invoiceId = $this->request->getParam('invoice_id');
-        if(!$invoiceId) {
+        if (!$invoiceId) {
             return true;
         }
         $chargeFlag = $this->collection->getChargeAndStatus($invoiceId);

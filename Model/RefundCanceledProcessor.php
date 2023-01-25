@@ -48,6 +48,8 @@ class RefundCanceledProcessor
      * @param Config $balancepayConfig
      * @param BalancepayChargeFactory $balancepayChargeFactory
      * @param Collection $collection
+     * @param Creditmemo $creditmemo
+     * @param CreditmemoRepositoryInterface $creditmemoRepository
      */
     public function __construct(
         BalancepayConfig $balancepayConfig,
@@ -55,8 +57,7 @@ class RefundCanceledProcessor
         Collection $collection,
         Creditmemo $creditmemo,
         CreditmemoRepositoryInterface $creditmemoRepository
-    )
-    {
+    ) {
         $this->balancepayConfig = $balancepayConfig;
         $this->collection = $collection;
         $this->balancepayChargeFactory = $balancepayChargeFactory;
@@ -65,15 +66,17 @@ class RefundCanceledProcessor
     }
 
     /**
-     * @param $params
-     * @param $jobName
+     * ProcessCanceledWebhook
+     *
+     * @param string|mixed|array $params
+     * @param string|mixed|array $jobName
      */
     public function processCanceledWebhook($params, $jobName)
     {
         $data = $params[0];
         $json = !empty($data) ? json_decode($data, true) : [];
         $refundId = isset($json['refundId']) ? $json['refundId'] : '';
-        if(!$refundId){
+        if (!$refundId) {
             throw new LocalizedException(new Phrase("Refund ID Not Present!"));
         }
         $memoId = $this->collection->addFieldToFilter('refund_id', ['eq' => $refundId])

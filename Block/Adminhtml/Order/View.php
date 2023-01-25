@@ -21,40 +21,35 @@ use Balancepay\Balancepay\Helper\Data as BalanceHelper;
 class View extends \Magento\Sales\Block\Adminhtml\Order\View
 {
     /**
-     * Block group
-     *
      * @var string
      */
     protected $_blockGroup = 'Magento_Sales';
 
     /**
-     * Core registry
-     *
-     * @var \Magento\Framework\Registry
+     * @var \Magento\Framework\Registry|null
      */
     protected $_coreRegistry = null;
 
     /**
-     * Sales config
-     *
-     * @var \Magento\Sales\Model\Config
+     * @var ConfigInterface
      */
     protected $_salesConfig;
 
     /**
-     * Reorder helper
-     *
      * @var \Magento\Sales\Helper\Reorder
      */
     protected $_reorderHelper;
 
-
-
     /**
+     * View constructor.
      * @param \Magento\Backend\Block\Widget\Context $context
      * @param \Magento\Framework\Registry $registry
      * @param ConfigInterface $salesConfig
      * @param \Magento\Sales\Helper\Reorder $reorderHelper
+     * @param Config $balancepayConfig
+     * @param InvoiceRepositoryInterface $invoiceRepository
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param BalanceHelper $balanceHelper
      * @param array $data
      */
     public function __construct(
@@ -256,9 +251,8 @@ class View extends \Magento\Sales\Block\Adminhtml\Order\View
             );
         }
 
-        if ($this->_isAllowedAction(
-                'Magento_Sales::ship'
-            ) && $order->canShip() && !$order->getForcedShipmentWithInvoice()
+        if ($this->_isAllowedAction('Magento_Sales::ship') &&
+            $order->canShip() && !$order->getForcedShipmentWithInvoice()
         ) {
             $this->addButton(
                 'order_ship',
@@ -270,11 +264,9 @@ class View extends \Magento\Sales\Block\Adminhtml\Order\View
             );
         }
 
-        if ($this->_isAllowedAction(
-                'Magento_Sales::reorder'
-            ) && $this->_reorderHelper->isAllowed(
-                $order->getStore()
-            ) && $order->canReorderIgnoreSalable()
+        if ($this->_isAllowedAction('Magento_Sales::reorder') &&
+            $this->_reorderHelper->isAllowed($order->getStore()) &&
+            $order->canReorderIgnoreSalable()
         ) {
             $this->addButton(
                 'order_reorder',

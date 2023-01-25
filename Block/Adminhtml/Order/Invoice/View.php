@@ -16,33 +16,14 @@ class View extends \Magento\Sales\Block\Adminhtml\Order\Invoice\View
     protected $_session;
 
     /**
-     * Core registry
-     *
-     * @var \Magento\Framework\Registry
+     * @var null
      */
     protected $_coreRegistry = null;
 
     /**
-     * Backend session
-     *
-     * @var \Magento\Backend\Model\Auth\Session
+     * @var backendSession
      */
     protected $_backendSession;
-
-    /**
-     * @param \Magento\Backend\Block\Widget\Context $context
-     * @param \Magento\Backend\Model\Auth\Session $backendSession
-     * @param \Magento\Framework\Registry $registry
-     * @param array $data
-     */
-    public function __construct(
-        \Magento\Backend\Block\Widget\Context $context,
-        \Magento\Backend\Model\Auth\Session $backendSession,
-        \Magento\Framework\Registry $registry,
-        array $data = []
-    ) {
-        parent::__construct($context, $backendSession, $registry, $data);
-    }
 
     /**
      * Constructor
