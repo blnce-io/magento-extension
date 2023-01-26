@@ -154,7 +154,7 @@ define(
                         isAuth: self.getBalanceIsAuth(),
                         hideDueDate: false,
                         allowedPaymentMethods: null,
-                        skipSuccessPage: true,
+                        skipSuccessPage: false,
                         // The token that returned from the server API
                         checkoutToken,
                         url: self.getBalanceIframeUrl(),
@@ -162,6 +162,7 @@ define(
                         hideBackOnFirstScreen: false,
                         logoURL: self.getBalancelogoImageUrl(),
                         onSuccess: () => {
+                            console.log('Balancepay onSuccess');
                             self.getPlaceOrderDeferredObject()
                                 .fail(
                                     function() {
@@ -181,7 +182,14 @@ define(
                             console.log('Balancepay callback message: ', msg);
                             console.error('Balancepay callback error: ', err);
                         },
+                        onError: (err) => {
+                            console.error('Balancepay onError: ', err);
+                        },
+                        onCancel: () => {
+                            console.error('Balancepay onCancel');
+                        },
                         onClose: () => {
+                            console.log('Balancepay onClose');
                             window.balanceSDK.checkout.destroy();
                             $('body').trigger('processStop');
                             self.isPlaceOrderActionAllowed(true);

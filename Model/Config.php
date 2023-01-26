@@ -28,8 +28,8 @@ class Config
 {
     public const MODULE_NAME = 'Balancepay_Balancepay';
 
-    public const BALANCEPAY_SDK_SANDBOX_URL = 'https://checkout-v2.sandbox.getbalance.com/sdk.js'; //Sandbox
-    public const BALANCEPAY_SDK_LIVE_URL = 'https://checkout-v2.getbalance.com/sdk.js'; //Production
+    public const BALANCEPAY_SDK_SANDBOX_URL = 'https://checkout-v2.sandbox.getbalance.com/sdk-latest.js'; //Sandbox
+    public const BALANCEPAY_SDK_LIVE_URL = 'https://checkout-v2.getbalance.com/sdk-latest.js'; //Production
     public const BALANCEPAY_API_SANDBOX_URL = 'https://sandbox.app.blnce.io/api/v1/'; //Sandbox
     public const BALANCEPAY_API_LIVE_URL = 'https://app.blnce.io/api/v1/'; //Production
     public const BALANCEPAY_IFRAME_SANDBOX_URL = 'https://checkout-v2.sandbox.getbalance.com/checkout.html'; //Sandbox
