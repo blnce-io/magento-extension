@@ -1,0 +1,16 @@
+#!/bin/bash
+LOCAL_DIR=$(dirname -- "$0")
+CLONE_DIR="${LOCAL_DIR}/magento-coding-standard"
+CS_GIT_REPO="https://github.com/magento/magento-coding-standard.git"
+
+if [ ! -d "$CLONE_DIR" ]; then
+    echo "Cloning ${CS_GIT_REPO}"
+    git clone $CS_GIT_REPO $CLONE_DIR
+fi
+
+cd "$CLONE_DIR" || exit
+echo "Pulling ${CS_GIT_REPO}"
+git pull
+
+echo "Running composer install"
+composer install
