@@ -2,4 +2,4 @@
 LOCAL_DIR=$(dirname -- "$0")
 CLONE_DIR="${LOCAL_DIR}/magento-coding-standard"
 
-$CLONE_DIR/vendor/bin/phpcs --standard=Magento2 ../
+"$CLONE_DIR"/vendor/bin/phpcs -v --standard=Magento2 --ignore="$LOCAL_DIR/*" "$LOCAL_DIR/.."
