@@ -45,7 +45,6 @@ class AllowedPaymentMethods implements OptionSourceInterface
     {
         return [
             'creditCard' => __('Credit Card'),
-            'bank' => __('Bank'),
             'payWithTerms' => __('Pay With Terms'),
             'invoice' => __('Invoice'),
             'achDebit' => __('ACH Debit'),
