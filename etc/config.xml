@@ -17,8 +17,8 @@
                 <title>Balance Payments</title>
                 <mode>live</mode>
                 <is_auth>0</is_auth>
-                <allowed_payment_methods>creditCard,bank,payWithTerms,invoice</allowed_payment_methods>
-                <net_terms_allowed_payment_methods>creditCard,bank,invoice</net_terms_allowed_payment_methods>
+                <allowed_payment_methods>creditCard,payWithTerms,invoice,achDebit,achCredit</allowed_payment_methods>
+                <net_terms_allowed_payment_methods>creditCard,invoice,check,achDebit,achCredit</net_terms_allowed_payment_methods>
                 <allowed_customer_groups>1,2,3</allowed_customer_groups>
                 <debug>0</debug>
                 <payment_action>Magento\Payment\Model\MethodInterface::ACTION_ORDER</payment_action>
