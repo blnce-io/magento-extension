@@ -41,6 +41,7 @@ class Config
     public const CONFIG_KEY_DEV_SDK_URL = 'dev_sdk_url';
     public const CONFIG_KEY_DEV_API_URL = 'dev_api_url';
     public const CONFIG_KEY_DEV_IFRAME_URL = 'dev_iframe_url';
+    public const CONFIG_KEY_BALANCE_WEBHOOKS_BASE_URL = 'balance_webhooks_base_url';
 
     /**
      * Scope config object.
@@ -436,8 +437,6 @@ class Config
     }
 
     /**
-     * GetBalanceIframeUrl
-     *
      * @param string $scope
      * @param int $storeId
      * @return string
@@ -449,6 +448,17 @@ class Config
             self::BALANCEPAY_IFRAME_SANDBOX_URL,
             $this->getConfigValue(self::CONFIG_KEY_DEV_IFRAME_URL)
         );
+    }
+
+    /**
+     * Get balance webhooks base URL for development
+     *
+     * @return string
+     */
+    public function getBalanceWebhooksBaseUrl()
+    {
+        $webhooksUrl = $this->getConfigValue(self::CONFIG_KEY_BALANCE_WEBHOOKS_BASE_URL);
+        return !empty($webhooksUrl) ? $webhooksUrl : $this->getCurrentStore()->getBaseUrl();
     }
 
     /**

@@ -105,7 +105,7 @@ class Webhooks extends AbstractRequest
             parent::getParams(),
             [
               'topic' => $this->_topic,
-              'address' => $this->_balancepayConfig->getCurrentStore()->getBaseUrl() .
+              'address' => $this->_balancepayConfig->getBalanceWebhooksBaseUrl() .
                   'balancepay/webhook_' . $this->webookAddress,
             ]
         );
