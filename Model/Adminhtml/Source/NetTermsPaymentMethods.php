@@ -46,7 +46,10 @@ class NetTermsPaymentMethods implements OptionSourceInterface
         return [
             'creditCard' => __('Credit Card'),
             'bank' => __('Bank'),
-            'invoice' => __('Invoice')
+            'invoice' => __('Invoice'),
+            'check' => __('Check'),
+            'achDebit' => __('ACH Debit'),
+            'achCredit' => __('ACH Credit')
         ];
     }
 }
