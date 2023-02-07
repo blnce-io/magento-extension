@@ -62,16 +62,18 @@ The order can be canceled from the Balance dashboard.')); ?></div>
                     <div class="shipping-description-content">
                         <?= $block->escapeHtml(__('Total Shipping Charges')) ?>:
 
-                        <?php if ($this->helper(\Magento\Tax\Helper\Data::class)->displayShippingPriceIncludingTax()) : ?>
+                        <?php if ($this->helper(\Magento\Tax\Helper\Data::class)
+                                ->displayShippingPriceIncludingTax()): ?>
                             <?php $_excl = $block->displayShippingPriceInclTax($_order); ?>
-                        <?php else : ?>
+                        <?php else: ?>
                             <?php $_excl = $block->displayPriceAttribute('shipping_amount', false, ' '); ?>
                         <?php endif; ?>
                         <?php $_incl = $block->displayShippingPriceInclTax($_order); ?>
 
                         <?= /* @noEscape */
                         $_excl ?>
-                        <?php if ($this->helper(\Magento\Tax\Helper\Data::class)->displayShippingBothPrices() && $_incl != $_excl) : ?>
+                        <?php if ($this->helper(\Magento\Tax\Helper\Data::class)
+                                ->displayShippingBothPrices() && $_incl != $_excl): ?>
                             (<?= $block->escapeHtml(__('Incl. Tax')) ?> <?= /* @noEscape */
                             $_incl ?>)
                         <?php endif; ?>
