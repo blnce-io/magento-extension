@@ -62,24 +62,24 @@ The order can be canceled from the Balance dashboard.')); ?></div>
                     <div class="shipping-description-content">
                         <?= $block->escapeHtml(__('Total Shipping Charges')) ?>:
 
-                <?php if ($block->helper(\Magento\Tax\Helper\Data::class)->displayShippingPriceIncludingTax()): ?>
-                    <?php $_excl = $block->displayShippingPriceInclTax($_order); ?>
-                <?php else: ?>
-                    <?php $_excl = $block->displayPriceAttribute('shipping_amount', false, ' '); ?>
-                <?php endif; ?>
-                <?php $_incl = $block->displayShippingPriceInclTax($_order); ?>
+                        <?php if ($this->helper(\Magento\Tax\Helper\Data::class)->displayShippingPriceIncludingTax()) : ?>
+                            <?php $_excl = $block->displayShippingPriceInclTax($_order); ?>
+                        <?php else : ?>
+                            <?php $_excl = $block->displayPriceAttribute('shipping_amount', false, ' '); ?>
+                        <?php endif; ?>
+                        <?php $_incl = $block->displayShippingPriceInclTax($_order); ?>
 
-                <?= /* @noEscape */ $_excl ?>
-                <?php if ($block->helper(\Magento\Tax\Helper\Data::class)->displayShippingBothPrices() &&
-                    $_incl != $_excl): ?>
-                    (<?= $block->escapeHtml(__('Incl. Tax')) ?>
-                    <?= /* @noEscape */ $_incl ?>)
-                <?php endif; ?>
-                <div><?= $block->getChildHtml('shipment_tracking') ?></div>
-                            </div>
-                        </div>
+                        <?= /* @noEscape */
+                        $_excl ?>
+                        <?php if ($this->helper(\Magento\Tax\Helper\Data::class)->displayShippingBothPrices() && $_incl != $_excl) : ?>
+                            (<?= $block->escapeHtml(__('Incl. Tax')) ?> <?= /* @noEscape */
+                            $_incl ?>)
+                        <?php endif; ?>
+                        <div><?= $block->getChildHtml('shipment_tracking') ?></div>
                     </div>
-                <?php endif; ?>
+                </div>
+            </div>
+        <?php endif; ?>
 
     </div>
 </section>
