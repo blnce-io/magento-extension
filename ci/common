@@ -1,0 +1,4 @@
+#!/bin/bash
+LOCAL_DIR=$(dirname -- "$0")
+CLONE_DIR="${LOCAL_DIR}/magento-coding-standard"
+CS_GIT_REPO="https://github.com/magento/magento-coding-standard.git"
