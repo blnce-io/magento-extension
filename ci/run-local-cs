@@ -1,5 +1,4 @@
 #!/bin/bash
-LOCAL_DIR=$(dirname -- "$0")
-CLONE_DIR="${LOCAL_DIR}/magento-coding-standard"
+source "$(dirname -- "$0")/common"
 
 "$CLONE_DIR"/vendor/bin/phpcs -v --standard=Magento2 --ignore="$LOCAL_DIR/*" "$LOCAL_DIR/.."
