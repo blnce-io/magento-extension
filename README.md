@@ -19,6 +19,8 @@ php bin/magento cache:flush
 Download & place the contents of this repository under {YOUR-MAGENTO2-ROOT-DIR}/app/code/Balancepay/Balancepay  
 Then, run the following commands under your Magento 2 root dir:
 ```
+composer config repositories.Balancepay '{"type": "path", "url": "app/code/Balancepay/Balancepay"}'
+composer require "getbalance/magento2-module-balancepay @dev"
 php bin/magento maintenance:enable
 php bin/magento setup:upgrade
 php bin/magento setup:di:compile
