@@ -202,15 +202,15 @@ class BalancepayMethod extends AbstractMethod
         PaymentDataHelper $paymentData,
         ScopeConfigInterface $scopeConfig,
         PaymentMethodLogger $logger,
-        AbstractResource $resource = null,
-        AbstractDb $resourceCollection = null,
-        DirectoryHelper $directory = null,
         CheckoutSession $checkoutSession,
         BalancepayConfig $balancepayConfig,
         RequestFactory $requestFactory,
         RequestInterface $request,
         HelperData $helper,
         Session $customerSession,
+        AbstractResource $resource = null,
+        AbstractDb $resourceCollection = null,
+        DirectoryHelper $directory = null,
         array $data = []
     ) {
         parent::__construct(
