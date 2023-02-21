@@ -2,26 +2,43 @@
 
 namespace Balancepay\Balancepay\Model;
 
-use Balancepay\Balancepay\Model\BalancepayMethod;
 use Balancepay\Balancepay\Model\Config as BalancepayConfig;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Phrase;
+use Psr\Log\LoggerInterface;
 
 class ConfirmedProcessor
 {
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
     /**
      * @var Config
      */
     private $balancepayConfig;
 
     /**
+     * @var BalancepayChargeFactory
+     */
+    private $balancepayChargeFactory;
+
+    /**
      * ConfirmedProcessor constructor.
      *
      * @param Config $balancepayConfig
+     * @param BalancepayChargeFactory $balancepayChargeFactory
      */
     public function __construct(
-        BalancepayConfig $balancepayConfig
+        BalancepayConfig $balancepayConfig,
+        BalancepayChargeFactory $balancepayChargeFactory,
+        LoggerInterface $logger
     ) {
         $this->balancepayConfig = $balancepayConfig;
+        $this->balancepayChargeFactory = $balancepayChargeFactory;
+        $this->logger = $logger;
     }
 
     /**
@@ -35,16 +52,41 @@ class ConfirmedProcessor
     public function processConfirmedWebhook($params, $order)
     {
         $isFinanced = $params['isFinanced'] ? 1 : 0;
-        $selectedPaymentMethod = (float)$params['selectedPaymentMethod'];
+        $chargeIds = $params['chargeIds'];
         $orderPayment = $order->getPayment();
         $orderPayment
             ->setAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_FINANCED, $isFinanced);
-        $transactionType = $this->balancepayConfig->getIsAuth();
-        $orderPayment->setAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_AUTH_CHECKOUT, $transactionType);
-        $orderPayment
-            ->setAdditionalInformation(BalancepayMethod::BALANCEPAY_SELECTED_PAYMENT_METHOD, $selectedPaymentMethod);
-        $orderPayment->save();
-        $order->save();
+        $isAuth = $this->balancepayConfig->getIsAuth();
+        $orderPayment->setAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_AUTH_CHECKOUT, $isAuth);
+
+        if (!$isAuth) {
+            if (count($chargeIds) != 1) {
+                throw new LocalizedException(new Phrase("Exactly 1 charge is expected for a non-auth order"));
+            }
+
+            $orderPayment->setAdditionalInformation(
+                BalancepayMethod::BALANCEPAY_CHARGE_ID,
+                $chargeIds[0]
+            );
+
+            $orderPayment->capture(null);
+            $orderPayment->save();
+            $order->save();
+
+            $invoiceId = $orderPayment->getCreatedInvoice()->getId();
+            $balancepayChargeModel = $this->balancepayChargeFactory->create();
+            $balancepayChargeModel->setData([
+                'charge_id' => $chargeIds[0],
+                'invoice_id' => $invoiceId,
+                'status' => 'pending'
+            ]);
+
+            $balancepayChargeModel->save();
+        } else {
+            $orderPayment->save();
+            $order->save();
+        }
+
         return true;
     }
 }

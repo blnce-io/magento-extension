@@ -58,51 +58,48 @@ class ChargedProcessor
         $isBalancepayAuthCheckout = $orderPayment
             ->getAdditionalInformation(BalancepayMethod::BALANCEPAY_IS_AUTH_CHECKOUT);
 
-        if (\strpos($balancepayChargeId, $chargeId) === false) {
-            if (!$isBalancepayAuthCheckout
-                && round((float)$order->getBaseGrandTotal()) !== round($amount)) {
-                $orderPayment->setIsFraudDetected(true)->save();
-                $order->setStatus(Order::STATUS_FRAUD)->save();
-                throw new LocalizedException(new Phrase("The charged amount doesn't match the order total!"));
-            }
-
-            $orderPayment
-                ->setTransactionId($orderPayment
-                    ->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHECKOUT_TRANSACTION_ID))
-                ->setIsTransactionPending(false)
-                ->setIsTransactionClosed(true)
-                ->setAdditionalInformation(
-                    BalancepayMethod::BALANCEPAY_CHARGE_ID,
-                    $orderPayment->getAdditionalInformation(
-                        BalancepayMethod::BALANCEPAY_CHARGE_ID,
-                        $chargeId
-                    ) . " \n" . $chargeId
-                );
-
-            if (!$isBalancepayAuthCheckout) {
-                $orderPayment->capture(null);
-            }
-            $orderPayment->save();
-            $order->save();
-
-            if (!$isBalancepayAuthCheckout) {
-                $invoiceId = $orderPayment->getCreatedInvoice()->getId();
-                $balancepayChargeModel = $this->balancepayChargeFactory->create();
-                $balancepayChargeModel->setData([
-                    'charge_id' => $chargeId,
-                    'invoice_id' => $invoiceId,
-                    'status' => 'charged'
-                ]);
-                $balancepayChargeModel->save();
-            } else {
-                $connection  = $this->resource->getConnection();
-                $data = ['status'=>'charged'];
-                $where = ['charge_id = ?' => $chargeId];
-                $tableName = $connection->getTableName("balance_charges");
-                $connection->update($tableName, $data, $where);
-            }
-            return true;
+        if (!$isBalancepayAuthCheckout
+            && round((float)$order->getBaseGrandTotal()) !== round($amount)) {
+            $orderPayment->setIsFraudDetected(true)->save();
+            $order->setStatus(Order::STATUS_FRAUD)->save();
+            throw new LocalizedException(new Phrase("The charged amount doesn't match the order total!"));
         }
-        return false;
+
+        $orderPayment
+            ->setTransactionId($orderPayment
+                ->getAdditionalInformation(BalancepayMethod::BALANCEPAY_CHECKOUT_TRANSACTION_ID))
+            ->setIsTransactionPending(false)
+            ->setIsTransactionClosed(true);
+
+        if (\strpos($balancepayChargeId, $chargeId) === false) {
+            $orderPayment->setAdditionalInformation(
+                BalancepayMethod::BALANCEPAY_CHARGE_ID,
+                $orderPayment->getAdditionalInformation(
+                    BalancepayMethod::BALANCEPAY_CHARGE_ID,
+                    $chargeId
+                ) . " \n" . $chargeId
+            );
+        }
+
+        $orderPayment->save();
+        $order->save();
+
+        if (!$isBalancepayAuthCheckout) {
+            $invoiceId = $orderPayment->getCreatedInvoice()->getId();
+            $balancepayChargeModel = $this->balancepayChargeFactory->create();
+            $balancepayChargeModel->setData([
+                'charge_id' => $chargeId,
+                'invoice_id' => $invoiceId,
+                'status' => 'charged'
+            ]);
+            $balancepayChargeModel->save();
+        } else {
+            $connection = $this->resource->getConnection();
+            $data = ['status' => 'charged'];
+            $where = ['charge_id = ?' => $chargeId];
+            $tableName = $connection->getTableName("balance_charges");
+            $connection->update($tableName, $data, $where);
+        }
+        return true;
     }
 }

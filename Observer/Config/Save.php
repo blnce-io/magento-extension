@@ -11,6 +11,8 @@
 
 namespace Balancepay\Balancepay\Observer\Config;
 
+use Balancepay\Balancepay\Controller\Webhook\Transaction\Charged;
+use Balancepay\Balancepay\Controller\Webhook\Transaction\Confirmed;
 use Balancepay\Balancepay\Model\Config as BalancepayConfig;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
 use Magento\Framework\App\Area;
@@ -125,14 +127,20 @@ class Save implements ObserverInterface
 
                     $this->requestFactory
                         ->create(RequestFactory::WEBHOOKS_REQUEST_METHOD)
-                        ->setTopic('checkout/charged')
-                        ->setWebookAddress('checkout/charged')
+                        ->setTopic(Charged::WEBHOOK_CHARGED_NAME)
+                        ->setWebookAddress(Charged::WEBHOOK_CHARGED_NAME)
                         ->process();
 
                     $this->requestFactory
                         ->create(RequestFactory::WEBHOOKS_REQUEST_METHOD)
-                        ->setTopic('transaction/confirmed')
-                        ->setWebookAddress('transaction/confirmed')
+                        ->setTopic('transaction/processing')
+                        ->setWebookAddress('transaction/processing')
+                        ->process();
+
+                    $this->requestFactory
+                        ->create(RequestFactory::WEBHOOKS_REQUEST_METHOD)
+                        ->setTopic(Confirmed::WEBHOOK_CONFIRMED_NAME)
+                        ->setWebookAddress(Confirmed::WEBHOOK_CONFIRMED_NAME)
                         ->process();
 
                     $this->requestFactory

@@ -2,7 +2,7 @@
 
 namespace Balancepay\Balancepay\Model;
 
-use Balancepay\Balancepay\Controller\Webhook\Checkout\Charged;
+use Balancepay\Balancepay\Controller\Webhook\Transaction\Charged;
 use Balancepay\Balancepay\Controller\Webhook\Transaction\Confirmed;
 use Balancepay\Balancepay\Controller\Webhook\Transaction\RefundCanceled;
 use Balancepay\Balancepay\Controller\Webhook\Transaction\RefundFailed;
@@ -12,9 +12,6 @@ use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Phrase;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Sales\Model\OrderFactory;
-use Balancepay\Balancepay\Model\RefundCanceledProcessor;
-use Balancepay\Balancepay\Model\RefundSuccessfulProcessor;
-use Balancepay\Balancepay\Model\RefundFailedProcessor;
 
 class QueueProcessor
 {

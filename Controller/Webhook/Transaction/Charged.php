@@ -9,10 +9,11 @@
  * @author   Company: Girit-Interactive (https://www.girit-tech.com/)
  */
 
-namespace Balancepay\Balancepay\Controller\Webhook\Checkout;
+namespace Balancepay\Balancepay\Controller\Webhook\Transaction;
 
 use Balancepay\Balancepay\Model\Config as BalancepayConfig;
 use Balancepay\Balancepay\Model\Request\Factory as RequestFactory;
+use Balancepay\Balancepay\Model\WebhookRequestProcessor;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\CsrfAwareActionInterface;
@@ -21,16 +22,15 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
-use Balancepay\Balancepay\Model\WebhookRequestProcessor;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Sales\Model\OrderFactory;
 
 /**
- * Balancepay checkout/charged webhook.
+ * Balancepay transaction/charged webhook.
  */
 class Charged extends Action implements CsrfAwareActionInterface
 {
-    public const WEBHOOK_CHARGED_NAME = 'checkout/charged';
+    public const WEBHOOK_CHARGED_NAME = 'transaction/charged';
 
     /**
      * @var JsonFactory

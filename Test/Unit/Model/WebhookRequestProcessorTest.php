@@ -4,21 +4,23 @@ declare(strict_types=1);
 
 namespace Balancepay\Balancepay\Test\Unit\Model;
 
-use Magento\Framework\Controller\Result\JsonFactory;
-use Balancepay\Balancepay\Model\Config;
-use Magento\Framework\Serialize\Serializer\Json;
-use Magento\Sales\Model\OrderFactory;
-use Balancepay\Balancepay\Model\WebhookRequestProcessor;
-use Laminas\Crypt\Hmac;
+use Balancepay\Balancepay\Controller\Webhook\Transaction\Charged;
+use Balancepay\Balancepay\Controller\Webhook\Transaction\Confirmed;
 use Balancepay\Balancepay\Model\ChargedProcessor;
+use Balancepay\Balancepay\Model\Config;
 use Balancepay\Balancepay\Model\ConfirmedProcessor;
-use Balancepay\Balancepay\Model\QueueProcessor;
-use Magento\Framework\App\Request\Http;
-use Magento\Framework\Controller\Result\Json as ResultJson;
 use Balancepay\Balancepay\Model\Queue;
 use Balancepay\Balancepay\Model\QueueFactory;
+use Balancepay\Balancepay\Model\QueueProcessor;
+use Balancepay\Balancepay\Model\WebhookRequestProcessor;
+use Laminas\Crypt\Hmac;
+use Magento\Framework\App\Request\Http;
 use Magento\Framework\Controller\AbstractResult;
+use Magento\Framework\Controller\Result\Json as ResultJson;
+use Magento\Framework\Controller\Result\JsonFactory;
+use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
+use Magento\Sales\Model\OrderFactory;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -176,7 +178,7 @@ class WebhookRequestProcessorTest extends TestCase
         $headers = [
             'X-Blnce-Signature' => '7bd24c445433123c4ac69885dbded509657f4cda82f5c2401cf036e5e6aa7583'
         ];
-        $result = $this->testableObject->process('contentstring', $headers, 'transaction/confirmed');
+        $result = $this->testableObject->process('contentstring', $headers, Confirmed::WEBHOOK_CONFIRMED_NAME);
     }
 
     public function testProcessChargedWebhook()
@@ -195,7 +197,7 @@ class WebhookRequestProcessorTest extends TestCase
         $headers = [
             'X-Blnce-Signature' => '7bd24c445433123c4ac69885dbded509657f4cda82f5c2401cf036e5e6aa7583'
         ];
-        $result = $this->testableObject->process('contentstring', $headers, 'checkout/charged');
+        $result = $this->testableObject->process('contentstring', $headers, Charged::WEBHOOK_CHARGED_NAME);
     }
 
     public function testProcessRefundWebhookSuccess()

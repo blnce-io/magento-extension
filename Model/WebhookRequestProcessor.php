@@ -2,7 +2,7 @@
 
 namespace Balancepay\Balancepay\Model;
 
-use Balancepay\Balancepay\Controller\Webhook\Checkout\Charged;
+use Balancepay\Balancepay\Controller\Webhook\Transaction\Charged;
 use Balancepay\Balancepay\Controller\Webhook\Transaction\Confirmed;
 use Balancepay\Balancepay\Controller\Webhook\Transaction\RefundCanceled;
 use Balancepay\Balancepay\Controller\Webhook\Transaction\RefundFailed;
@@ -15,7 +15,7 @@ use Magento\Framework\Phrase;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\Webapi\Response;
 use Magento\Sales\Model\OrderFactory;
-use Balancepay\Balancepay\Model\QueueProcessor;
+use Psr\Log\LoggerInterface;
 
 class WebhookRequestProcessor
 {
@@ -53,6 +53,11 @@ class WebhookRequestProcessor
      * @var Hmac
      */
     protected $hmac;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
     /**
      * @var \Balancepay\Balancepay\Model\QueueProcessor
      */
@@ -69,6 +74,7 @@ class WebhookRequestProcessor
      * @param \Balancepay\Balancepay\Model\QueueProcessor $queueProcessor
      * @param Json $json
      * @param Hmac $hmac
+     * @param LoggerInterface $logger
      */
     public function __construct(
         OrderFactory $orderFactory,
@@ -78,7 +84,8 @@ class WebhookRequestProcessor
         ConfirmedProcessor $confirmedProcessor,
         QueueProcessor $queueProcessor,
         Json $json,
-        Hmac $hmac
+        Hmac $hmac,
+        LoggerInterface $logger
     ) {
         $this->orderFactory = $orderFactory;
         $this->balancepayConfig = $balancepayConfig;
@@ -88,6 +95,7 @@ class WebhookRequestProcessor
         $this->queueProcessor = $queueProcessor;
         $this->json = $json;
         $this->hmac = $hmac;
+        $this->logger = $logger;
     }
 
     /**
@@ -103,6 +111,8 @@ class WebhookRequestProcessor
     {
         try {
             $params = $this->validateSignature($content, $headers, $webhookName);
+            $this->logger->debug('Webhook received: ' . $webhookName . ' with params: ' . json_encode($params));
+
             $this->queueProcessor->addToQueue($params, $webhookName);
             return $this->jsonResultFactory->create()->setHttpResponseCode(Response::HTTP_OK);
         } catch (\Exception $e) {
@@ -131,7 +141,7 @@ class WebhookRequestProcessor
 
         if ($webhookName == Confirmed::WEBHOOK_CONFIRMED_NAME) {
             $requiredKeys = ['externalReferenceId', 'isFinanced', 'selectedPaymentMethod'];
-        } elseif ($webhookName == Charged::WEBHOOK_CHARGED_NAME) {
+        } elseif ($webhookName == Charged::WEBHOOK_CHARGED_NAME || $webhookName == 'transaction/processing') {
             $requiredKeys = ['externalReferenceId', 'chargeId', 'amount'];
         } elseif ($webhookName == RefundSuccessful::WEBHOOK_SUCCESSFUL_NAME
             || $webhookName == RefundCanceled::WEBHOOK_CANCELED_NAME
