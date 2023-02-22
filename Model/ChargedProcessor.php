@@ -81,25 +81,27 @@ class ChargedProcessor
             );
         }
 
+        $createdInvoice = $order->getInvoiceCollection()->getFirstItem();
+        if (!$isBalancepayAuthCheckout) {
+            $orderPayment->capture($createdInvoice);
+        }
+
         $orderPayment->save();
         $order->save();
 
+        $data = null;
         if (!$isBalancepayAuthCheckout) {
-            $invoiceId = $orderPayment->getCreatedInvoice()->getId();
-            $balancepayChargeModel = $this->balancepayChargeFactory->create();
-            $balancepayChargeModel->setData([
-                'charge_id' => $chargeId,
-                'invoice_id' => $invoiceId,
-                'status' => 'charged'
-            ]);
-            $balancepayChargeModel->save();
+            $invoiceId = $createdInvoice->getId();
+            $data = ['status' => 'charged', 'invoice_id' => $invoiceId];
         } else {
-            $connection = $this->resource->getConnection();
             $data = ['status' => 'charged'];
-            $where = ['charge_id = ?' => $chargeId];
-            $tableName = $connection->getTableName("balance_charges");
-            $connection->update($tableName, $data, $where);
         }
+
+        $connection = $this->resource->getConnection();
+        $where = ['charge_id = ?' => $chargeId];
+        $tableName = $connection->getTableName("balance_charges");
+        $connection->update($tableName, $data, $where);
+
         return true;
     }
 }

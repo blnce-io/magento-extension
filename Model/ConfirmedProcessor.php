@@ -69,11 +69,14 @@ class ConfirmedProcessor
                 $chargeIds[0]
             );
 
-            $orderPayment->capture(null);
+            $invoice = $orderPayment->getOrder()->prepareInvoice();
+            $invoice->register();
+            $orderPayment->getOrder()->addRelatedObject($invoice);
+
             $orderPayment->save();
             $order->save();
 
-            $invoiceId = $orderPayment->getCreatedInvoice()->getId();
+            $invoiceId = $order->getInvoiceCollection()->getFirstItem()->getId();
             $balancepayChargeModel = $this->balancepayChargeFactory->create();
             $balancepayChargeModel->setData([
                 'charge_id' => $chargeIds[0],
