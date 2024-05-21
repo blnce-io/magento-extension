@@ -10,4 +10,5 @@ class HttpConstants
 
     public const CONTENT_TYPE_APPLICATION_JSON = 'application/json';
     public const BALANCE_SOURCE_MAGENTO = 'magento';
+    public const HTTP_USER_AGENT = 'User-Agent';
 }
