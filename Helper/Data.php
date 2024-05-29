@@ -81,6 +81,11 @@ class Data extends AbstractHelper
     protected $searchCriteriaBuilder;
 
     /**
+     * @var Collection
+     */
+    protected $collection;
+
+    /**
      * Data constructor.
      * @param MpProductCollection $mpProductCollectionFactory
      * @param Context $appContext
