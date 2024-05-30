@@ -14,7 +14,7 @@ namespace Balancepay\Balancepay\Model;
 use Balancepay\Balancepay\Lib\Http\Client\Curl;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\PaymentException;
-use Zend\Uri\Uri;
+use Laminas\Uri\Uri;
 
 /**
  * Balancepay abstract response model.
@@ -52,7 +52,7 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
      *
      * @param Config $balancepayConfig
      * @param Curl $curl
-     * @param Uri $zendUri
+     * @param Uri $zendUri -> keeping the name but underlying library is now Laminas
      */
     public function __construct(
         Config $balancepayConfig,
