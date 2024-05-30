@@ -172,6 +172,7 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
             HttpConstants::HEADER_CONTENT_TYPE => HttpConstants::CONTENT_TYPE_APPLICATION_JSON,
             HttpConstants::HEADER_BALANCE_X_API_KEY => $this->_balancepayConfig->getApiKey(),
             HttpConstants::HEADER_BALANCE_SOURCE => HttpConstants::BALANCE_SOURCE_MAGENTO,
+            HttpConstants::HTTP_USER_AGENT => HttpConstants::HTTP_HARDCODED_USER_AGENT,
 
         ];
         $this->_curl->setHeaders($headers);
