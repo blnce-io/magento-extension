@@ -24,6 +24,8 @@ class CardList implements ArgumentInterface
      */
     protected $abstractBlock;
 
+    protected $template;
+
     /**
      * CardList constructor.
      *

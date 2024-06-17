@@ -15,6 +15,35 @@ use Balancepay\Balancepay\Model\HttpConstants;
 
 class Curl extends \Magento\Framework\HTTP\Client\Curl
 {
+
+    protected $_ch;
+
+    protected $_headerCount;
+
+    protected $_responseHeaders;
+
+    protected $_responseBody;
+
+    protected $_host;
+
+    protected $_port;
+
+    protected $_sock;
+
+    protected $_headers;
+
+    protected $_postFields;
+    
+    protected $_cookies;
+
+    protected $_responseStatus;
+
+    protected $_timeout;
+
+    protected $_redirectCount;
+
+    protected $_curlUserOptions;
+
     /**
      * Make request.
      *

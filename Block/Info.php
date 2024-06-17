@@ -23,6 +23,8 @@ class Info extends \Magento\Payment\Block\Info
      */
     protected $appState;
 
+    protected $collection;
+
     /**
      * Info constructor.
      * @param Context $context

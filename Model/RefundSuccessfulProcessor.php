@@ -21,6 +21,12 @@ class RefundSuccessfulProcessor
      */
     private $balancepayChargeFactory;
 
+    private $collection;
+
+    private $creditmemo;
+
+    private $creditmemoRepository;
+
     /**
      * RefundSuccessfulProcessor constructor.
      *

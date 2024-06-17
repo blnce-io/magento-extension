@@ -13,6 +13,8 @@ class OrderPlugin
      */
     private $collection;
 
+    private $request;
+
     /**
      * OrderPlugin constructor.
      *

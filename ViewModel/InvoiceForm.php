@@ -8,6 +8,10 @@ use Magento\Framework\View\Element\Block\ArgumentInterface;
 
 class InvoiceForm implements ArgumentInterface
 {
+    private $collection;
+
+    private $request;
+    
     /**
      * InvoiceForm constructor.
      *
