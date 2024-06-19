@@ -30,11 +30,11 @@ class Curl extends \Magento\Framework\HTTP\Client\Curl
 
     protected $_sock;
 
-    protected $_headers;
+    protected $_headers = [];
 
     protected $_postFields;
     
-    protected $_cookies;
+    protected $_cookies = [];
 
     protected $_responseStatus;
 
