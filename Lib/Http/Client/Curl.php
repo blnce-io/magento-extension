@@ -42,7 +42,7 @@ class Curl extends \Magento\Framework\HTTP\Client\Curl
 
     protected $_redirectCount;
 
-    protected $_curlUserOptions;
+    protected $_curlUserOptions = [];
 
     /**
      * Make request.
