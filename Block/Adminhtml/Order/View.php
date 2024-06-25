@@ -40,6 +40,21 @@ class View extends \Magento\Sales\Block\Adminhtml\Order\View
      */
     protected $_reorderHelper;
 
+    private $balancepayConfig;
+
+    private $invoiceRepository;
+
+    private $searchCriteriaBuilder;
+
+    private $balanceHelper;
+
+    private $_objectId;
+
+    private $_controller;
+
+    private $_mode;
+
+
     /**
      * View constructor.
      * @param \Magento\Backend\Block\Widget\Context $context

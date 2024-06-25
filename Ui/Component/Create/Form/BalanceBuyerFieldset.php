@@ -7,11 +7,14 @@ use \Magento\Ui\Component\Form\Fieldset;
 
 class BalanceBuyerFieldset extends Fieldset implements ComponentVisibilityInterface
 {
+    private $context;
+    
     /**
      * @param ContextInterface $context
      * @param array $components
      * @param array $data
      */
+
     public function __construct(
         ContextInterface $context,
         array $components = [],
