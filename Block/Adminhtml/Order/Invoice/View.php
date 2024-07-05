@@ -25,6 +25,12 @@ class View extends \Magento\Sales\Block\Adminhtml\Order\Invoice\View
      */
     protected $_backendSession;
 
+    protected $_objectId;
+
+    protected $_controller;
+
+    protected $_mode;
+
     /**
      * Constructor
      *

@@ -21,6 +21,8 @@ class ChargedProcessor
      */
     private $balancepayChargeFactory;
 
+    private $resource;
+
     /**
      * ChargedProcessor constructor.
      *

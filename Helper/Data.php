@@ -86,6 +86,11 @@ class Data extends AbstractHelper
     protected $collection;
 
     /**
+     * @var OrderRepositoryInterface
+     */
+    protected $orderRepositoryInterface;
+
+    /**
      * Data constructor.
      * @param MpProductCollection $mpProductCollectionFactory
      * @param Context $appContext

@@ -175,6 +175,8 @@ class BalancepayMethod extends AbstractMethod
      */
     protected $customerSession;
 
+    protected $registry;
+
     /**
      * @param Context $context
      * @param Registry $registry

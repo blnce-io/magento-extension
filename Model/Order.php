@@ -71,6 +71,11 @@ class Order extends \Magento\Sales\Model\Order
      * @param RegionFactory|null $regionFactory
      * @param RegionResource|null $regionResource
      */
+
+    private $balancepayConfig;
+
+    private $balanceHelper;
+
     public function __construct(
         Context $context,
         Registry $registry,

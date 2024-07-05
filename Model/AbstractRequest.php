@@ -44,6 +44,10 @@ abstract class AbstractRequest extends AbstractApi implements RequestInterface
      */
     protected $_fallbackEmail;
 
+    protected $accountManagement;
+
+    protected $region;
+
     /**
      * @param Config $balancepayConfig
      * @param Curl $curl

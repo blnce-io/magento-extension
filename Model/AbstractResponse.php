@@ -47,6 +47,8 @@ abstract class AbstractResponse extends AbstractApi implements ResponseInterface
      */
     protected $_body;
 
+    protected $zendUri;
+
     /**
      * AbstractResponse constructor.
      *

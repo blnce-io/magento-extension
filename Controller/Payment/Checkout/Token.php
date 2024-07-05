@@ -60,6 +60,10 @@ class Token extends Action
      * @var BalanceBuyer
      */
     private $balanceBuyer;
+    
+    private $context;
+
+    private $_coreSession;
 
     /**
      * Token constructor.
