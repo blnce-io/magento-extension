@@ -85,7 +85,7 @@ class Data extends AbstractHelper
      */
     protected $collection;
 
-        /**
+    /**
      * @var OrderRepositoryInterface
      */
     protected $orderRepositoryInterface;
