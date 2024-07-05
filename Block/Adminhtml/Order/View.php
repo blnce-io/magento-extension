@@ -48,11 +48,11 @@ class View extends \Magento\Sales\Block\Adminhtml\Order\View
 
     private $balanceHelper;
 
-    private $_objectId;
+    protected $_objectId;
 
-    private $_controller;
+    protected $_controller;
 
-    private $_mode;
+    protected $_mode;
 
 
     /**

@@ -23,7 +23,7 @@ class AssignVendor extends AbstractModifier
      */
     private $balancepayConfig;
 
-    private $_mpProductCollectionFactory;
+    protected $_mpProductCollectionFactory;
 
     private $requestFactory;
 
